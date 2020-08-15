@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=KMailQuick
+Comment=KMailQuick Kirigami Application
+Version=1.0
+Exec=kmailquick
+MimeType=application/x-kmailquick;
+Icon=applications-development
+Type=Application
+Terminal=false
+Categories=Qt;KDE;
