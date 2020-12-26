@@ -57,17 +57,14 @@ Kirigami.ApplicationWindow {
 
             ListView {
                 id: folders
-                model:KItemModels.KDescendantsProxyModel {
-                     model: QuickMail.entityTreeModel
-                     //expandsByDefault: true
-                }
+                model: QuickMail.descendantsProxyModel
                 delegate: Kirigami.BasicListItem {
                     text: display
                     leftPadding: Kirigami.Units.gridUnit * model.kDescendantLevel
                     onClicked: {
-                        folders.model.toggleChild(model.index)
+                        //folders.model.toggleChild(model.index)
                         // doesn't work
-                        //QuickMail.loadMailCollection(model.index)
+                        QuickMail.loadMailCollection(model.index)
                     }
                 }
             }

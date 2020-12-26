@@ -4,6 +4,7 @@
 #include <QUrl>
 #include <KLocalizedContext>
 #include <CollectionFilterProxyModel>
+#include <KDescendantsProxyModel>
 
 #include "quickmail.h"
 
@@ -18,8 +19,9 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
 
     QuickMail quickmail;
-    
-    qRegisterMetaType<Akonadi::CollectionFilterProxyModel*>("Akonadi::CollectionFilterProxyModel*");   
+
+    qRegisterMetaType<Akonadi::CollectionFilterProxyModel*>("Akonadi::CollectionFilterProxyModel*");
+    qRegisterMetaType<KDescendantsProxyModel*>("KDescendantsProxyModel*");
     qmlRegisterSingletonInstance("org.kde.quickmail.private", 1, 0, "QuickMail", &quickmail);
 
     engine.rootContext()->setContextObject(new KLocalizedContext(&engine));

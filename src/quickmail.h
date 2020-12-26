@@ -28,6 +28,8 @@ namespace Akonadi {
     class CollectionFilterProxyModel;
 }
 
+class KDescendantsProxyModel;
+
 /**
  * Main class of the project and used as Singleton to communicate with
  * QML.
@@ -40,6 +42,8 @@ class QuickMail : public QObject
     
     Q_PROPERTY(Akonadi::CollectionFilterProxyModel *entityTreeModel READ entityTreeModel NOTIFY entityTreeModelChanged)
 
+    Q_PROPERTY(KDescendantsProxyModel *descendantsProxyModel READ descendantsProxyModel NOTIFY descendantsProxyModelChanged)
+
 public:
     /**
      * Default constructor
@@ -49,8 +53,10 @@ public:
     
     bool loading() const;
     Akonadi::CollectionFilterProxyModel *entityTreeModel() const;
+
+    KDescendantsProxyModel *descendantsProxyModel() const;
     
-    Q_INVOKABLE void loadMailCollection(const QModelIndex &index);
+    Q_INVOKABLE void loadMailCollection(const int &index);
     
 private Q_SLOTS:
     void delayedInit();
@@ -58,8 +64,10 @@ private Q_SLOTS:
 Q_SIGNALS:
     void loadingChanged();
     void entityTreeModelChanged();
+    void descendantsProxyModelChanged();
     
 private:
     bool m_loading;
     Akonadi::CollectionFilterProxyModel *m_entityTreeModel;
+    KDescendantsProxyModel *m_descendantsProxyModel;
 };

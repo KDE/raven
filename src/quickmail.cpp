@@ -31,6 +31,8 @@
 #include <EntityTreeModel>
 #include <QApplication>
 
+#include <KItemModels/KDescendantsProxyModel>
+
 QuickMail::QuickMail(QObject *parent)
     : QObject(parent)
     , m_loading(true)
@@ -57,19 +59,26 @@ void QuickMail::delayedInit()
     m_entityTreeModel = new Akonadi::CollectionFilterProxyModel();
     m_entityTreeModel->setSourceModel(treeModel);
     m_entityTreeModel->addMimeTypeFilter(QLatin1String("message/rfc822"));
+
+    m_descendantsProxyModel = new KDescendantsProxyModel(this);
+    m_descendantsProxyModel->setSourceModel(m_entityTreeModel);
     
     m_loading = false;
     Q_EMIT entityTreeModelChanged();
+    Q_EMIT descendantsProxyModelChanged();
     Q_EMIT loadingChanged();
 }
 
-void QuickMail::loadMailCollection(const QModelIndex &index)
+void QuickMail::loadMailCollection(const int &index)
 {
-    if (!index.isValid()) {
+    QModelIndex flatIndex = m_descendantsProxyModel->index(index, 0);
+    QModelIndex modelIndex = m_descendantsProxyModel->mapToSource(flatIndex);
+
+    if (!modelIndex.isValid()) {
         return;
     }
-    const Akonadi::Collection collection = index.model()->data(index, Akonadi::EntityTreeModel::CollectionRole).value<Akonadi::Collection>();
-    
+    const Akonadi::Collection collection = modelIndex.model()->data(modelIndex, Akonadi::EntityTreeModel::CollectionRole).value<Akonadi::Collection>();
+
     if (!collection.isValid()) {
         return;
     }
@@ -84,6 +93,11 @@ bool QuickMail::loading() const
 Akonadi::CollectionFilterProxyModel *QuickMail::entityTreeModel() const
 {
     return m_entityTreeModel;
+}
+
+KDescendantsProxyModel *QuickMail::descendantsProxyModel() const
+{
+    return m_descendantsProxyModel;
 }
 
 
