@@ -28,8 +28,12 @@
 #include <CollectionFilterProxyModel>
 #include <MessageModel>
 #include <Monitor>
+#include <KDescendantsProxyModel>
+#include <EntityMimeTypeFilterModel>
 #include <EntityTreeModel>
+#include <SelectionProxyModel>
 #include <QApplication>
+#include <QtCore/QItemSelectionModel>
 
 #include <KItemModels/KDescendantsProxyModel>
 
@@ -54,7 +58,13 @@ void QuickMail::delayedInit()
     monitor->fetchCollection(true);
     monitor->setAllMonitored(true);
 
+//    Akonadi::mBrowserModel = new AkonadiBrowserModel(mBrowserMonitor, this);
+//    mBrowserModel->setItemPopulationStrategy(EntityTreeModel::LazyPopulation);
+//    mBrowserModel->setShowSystemEntities(true);
+//    mBrowserModel->setListFilter(CollectionFetchScope::Display);
+
     Akonadi::EntityTreeModel *treeModel = new Akonadi::EntityTreeModel(monitor);
+    treeModel->setItemPopulationStrategy(Akonadi::EntityTreeModel::LazyPopulation);
 
     m_entityTreeModel = new Akonadi::CollectionFilterProxyModel();
     m_entityTreeModel->setSourceModel(treeModel);
@@ -62,11 +72,62 @@ void QuickMail::delayedInit()
 
     m_descendantsProxyModel = new KDescendantsProxyModel(this);
     m_descendantsProxyModel->setSourceModel(m_entityTreeModel);
+
+
+    using namespace Akonadi;
+    //                         itemView
+    //                             ^
+    //                             |
+    //                         itemModel
+    //                             |
+    //                         flatModel
+    //                             |
+    //   collectionView --> selectionModel
+    //           ^                 ^
+    //           |                 |
+    //  collectionFilter           |
+    //            \______________model
+
+    // setup collection model
+//    EntityMimeTypeFilterModel *collectionFilter = new EntityMimeTypeFilterModel( this );
+//    collectionFilter->setSourceModel( treeModel );
+//    collectionFilter->addMimeTypeInclusionFilter( Collection::mimeType() );
+//    collectionFilter->setHeaderGroup( EntityTreeModel::CollectionTreeHeaders );
+//    // setup collection view
+//    EntityTreeView *collectionView = new EntityTreeView( this );
+//    collectionView->setModel( collectionFilter );
+
+    // fake selectionModel
+    m_collectionSelectionModel = new QItemSelectionModel(m_entityTreeModel);
+    // setup selection model
+    SelectionProxyModel *selectionModel = new SelectionProxyModel( m_collectionSelectionModel, this );
+    selectionModel->setSourceModel( treeModel );
+    selectionModel->setFilterBehavior(KSelectionProxyModel::ChildrenOfExactSelection);
+    qDebug() << selectionModel->filterBehavior();
+
+    // setup item model
+    KDescendantsProxyModel *descendedList = new KDescendantsProxyModel( this );
+    descendedList->setSourceModel( selectionModel );
+
+    m_folderModel = new EntityMimeTypeFilterModel( this );
+    m_folderModel->setSourceModel( descendedList );
+    m_folderModel->setHeaderGroup( EntityTreeModel::ItemListHeaders );
+    m_folderModel->addMimeTypeExclusionFilter( Collection::mimeType() );
+
+    //connect(treeModel, &Akonadi::EntityTreeModel::columnsChanged, selectionModel, &Akonadi::SelectionProxyModel::invalidate);
+
+    connect(m_folderModel, &Akonadi::EntityMimeTypeFilterModel::rowsInserted, [](){qDebug() << "rowAdded";});
     
     m_loading = false;
     Q_EMIT entityTreeModelChanged();
     Q_EMIT descendantsProxyModelChanged();
+    Q_EMIT folderModelChanged();
     Q_EMIT loadingChanged();
+}
+
+Akonadi::EntityMimeTypeFilterModel *QuickMail::folderModel() const
+{
+    return m_folderModel;
 }
 
 void QuickMail::loadMailCollection(const int &index)
@@ -77,7 +138,13 @@ void QuickMail::loadMailCollection(const int &index)
     if (!modelIndex.isValid()) {
         return;
     }
+
+    m_collectionSelectionModel->select(modelIndex, QItemSelectionModel::ClearAndSelect);
+
+    qDebug() << modelIndex << m_collectionSelectionModel->selectedIndexes() << m_folderModel->rowCount();
+
     const Akonadi::Collection collection = modelIndex.model()->data(modelIndex, Akonadi::EntityTreeModel::CollectionRole).value<Akonadi::Collection>();
+    qDebug() << collection.displayName() << collection.enabled();
 
     if (!collection.isValid()) {
         return;

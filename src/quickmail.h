@@ -26,9 +26,11 @@
 
 namespace Akonadi {
     class CollectionFilterProxyModel;
+    class EntityMimeTypeFilterModel;
 }
 
 class KDescendantsProxyModel;
+class QItemSelectionModel;
 
 /**
  * Main class of the project and used as Singleton to communicate with
@@ -41,6 +43,7 @@ class QuickMail : public QObject
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged)
     
     Q_PROPERTY(Akonadi::CollectionFilterProxyModel *entityTreeModel READ entityTreeModel NOTIFY entityTreeModelChanged)
+    Q_PROPERTY(Akonadi::EntityMimeTypeFilterModel *folderModel READ folderModel NOTIFY folderModelChanged)
 
     Q_PROPERTY(KDescendantsProxyModel *descendantsProxyModel READ descendantsProxyModel NOTIFY descendantsProxyModelChanged)
 
@@ -58,6 +61,8 @@ public:
     
     Q_INVOKABLE void loadMailCollection(const int &index);
     
+    Akonadi::EntityMimeTypeFilterModel *folderModel() const;
+
 private Q_SLOTS:
     void delayedInit();
     
@@ -65,9 +70,14 @@ Q_SIGNALS:
     void loadingChanged();
     void entityTreeModelChanged();
     void descendantsProxyModelChanged();
+    void folderModelChanged();
     
 private:
     bool m_loading;
     Akonadi::CollectionFilterProxyModel *m_entityTreeModel;
     KDescendantsProxyModel *m_descendantsProxyModel;
+
+    //folders
+    QItemSelectionModel *m_collectionSelectionModel;
+    Akonadi::EntityMimeTypeFilterModel *m_folderModel;
 };

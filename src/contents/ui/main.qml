@@ -62,10 +62,25 @@ Kirigami.ApplicationWindow {
                     text: display
                     leftPadding: Kirigami.Units.gridUnit * model.kDescendantLevel
                     onClicked: {
-                        //folders.model.toggleChild(model.index)
-                        // doesn't work
                         QuickMail.loadMailCollection(model.index)
+                        root.pageStack.push(folderPageComponent)
                     }
+                }
+            }
+        }
+    }
+    Component {
+        id: folderPageComponent
+
+        Kirigami.ScrollablePage {
+            title: "Folder"
+            ListView {
+                id: mails
+                model: QuickMail.folderModel
+                delegate: Kirigami.BasicListItem {
+                    backgroundColor: "green"
+                    text: display
+                    leftPadding: Kirigami.Units.gridUnit * model.kDescendantLevel
                 }
             }
         }
