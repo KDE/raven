@@ -26,6 +26,7 @@
 // Akonadi
 #include <control.h>
 #include <CollectionFilterProxyModel>
+#include <ItemFetchScope>
 #include <MessageModel>
 #include <Monitor>
 #include <KDescendantsProxyModel>
@@ -57,6 +58,7 @@ void QuickMail::delayedInit()
     monitor->setObjectName(QStringLiteral("CollectionWidgetMonitor"));
     monitor->fetchCollection(true);
     monitor->setAllMonitored(true);
+    monitor->itemFetchScope().fetchFullPayload(true);
 
 //    Akonadi::mBrowserModel = new AkonadiBrowserModel(mBrowserMonitor, this);
 //    mBrowserModel->setItemPopulationStrategy(EntityTreeModel::LazyPopulation);
