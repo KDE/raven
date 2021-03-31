@@ -3,6 +3,7 @@ qt5_add_resources(kmailquick_SRCS resources.qrc)
 add_executable(kmailquick
     main.cpp
     quickmail.cpp
+    mailmodel.cpp
     ${kmailquick_SRCS}
 )
     

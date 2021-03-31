@@ -32,6 +32,8 @@ namespace Akonadi {
 class KDescendantsProxyModel;
 class QItemSelectionModel;
 
+class MailModel;
+
 /**
  * Main class of the project and used as Singleton to communicate with
  * QML.
@@ -43,7 +45,7 @@ class QuickMail : public QObject
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged)
     
     Q_PROPERTY(Akonadi::CollectionFilterProxyModel *entityTreeModel READ entityTreeModel NOTIFY entityTreeModelChanged)
-    Q_PROPERTY(Akonadi::EntityMimeTypeFilterModel *folderModel READ folderModel NOTIFY folderModelChanged)
+    Q_PROPERTY(MailModel *folderModel READ folderModel NOTIFY folderModelChanged)
 
     Q_PROPERTY(KDescendantsProxyModel *descendantsProxyModel READ descendantsProxyModel NOTIFY descendantsProxyModelChanged)
 
@@ -61,7 +63,7 @@ public:
     
     Q_INVOKABLE void loadMailCollection(const int &index);
     
-    Akonadi::EntityMimeTypeFilterModel *folderModel() const;
+    MailModel *folderModel() const;
 
 private Q_SLOTS:
     void delayedInit();
@@ -79,5 +81,5 @@ private:
 
     //folders
     QItemSelectionModel *m_collectionSelectionModel;
-    Akonadi::EntityMimeTypeFilterModel *m_folderModel;
+    MailModel *m_folderModel;
 };

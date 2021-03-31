@@ -21,6 +21,8 @@
 
 #include "quickmail.h"
 
+#include "mailmodel.h"
+
 #include <QTimer>
 
 // Akonadi
@@ -111,14 +113,17 @@ void QuickMail::delayedInit()
     KDescendantsProxyModel *descendedList = new KDescendantsProxyModel( this );
     descendedList->setSourceModel( selectionModel );
 
-    m_folderModel = new EntityMimeTypeFilterModel( this );
-    m_folderModel->setSourceModel( descendedList );
-    m_folderModel->setHeaderGroup( EntityTreeModel::ItemListHeaders );
-    m_folderModel->addMimeTypeExclusionFilter( Collection::mimeType() );
+    Akonadi::EntityMimeTypeFilterModel *folderFilterModel = new EntityMimeTypeFilterModel( this );
+    folderFilterModel->setSourceModel( descendedList );
+    folderFilterModel->setHeaderGroup( EntityTreeModel::ItemListHeaders );
+    folderFilterModel->addMimeTypeExclusionFilter( Collection::mimeType() );
+
+    m_folderModel = new MailModel( this );
+    m_folderModel->setSourceModel(folderFilterModel);
 
     //connect(treeModel, &Akonadi::EntityTreeModel::columnsChanged, selectionModel, &Akonadi::SelectionProxyModel::invalidate);
 
-    connect(m_folderModel, &Akonadi::EntityMimeTypeFilterModel::rowsInserted, [](){qDebug() << "rowAdded";});
+    connect(m_folderModel, &MailModel::rowsInserted, [](){qDebug() << "rowAdded";});
     
     m_loading = false;
     Q_EMIT entityTreeModelChanged();
@@ -127,7 +132,7 @@ void QuickMail::delayedInit()
     Q_EMIT loadingChanged();
 }
 
-Akonadi::EntityMimeTypeFilterModel *QuickMail::folderModel() const
+MailModel *QuickMail::folderModel() const
 {
     return m_folderModel;
 }

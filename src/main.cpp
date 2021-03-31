@@ -6,7 +6,7 @@
 #include <CollectionFilterProxyModel>
 #include <EntityMimeTypeFilterModel>
 #include <KDescendantsProxyModel>
-
+#include "mailmodel.h"
 #include "quickmail.h"
 
 Q_DECL_EXPORT int main(int argc, char *argv[])
@@ -23,6 +23,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     qRegisterMetaType<Akonadi::CollectionFilterProxyModel*>("Akonadi::CollectionFilterProxyModel*");
     qRegisterMetaType<Akonadi::EntityMimeTypeFilterModel*>("Akonadi::EntityMimeTypeFilterModel*");
+    qRegisterMetaType<MailModel*>("MailModel*");
     qRegisterMetaType<KDescendantsProxyModel*>("KDescendantsProxyModel*");
     qmlRegisterSingletonInstance("org.kde.quickmail.private", 1, 0, "QuickMail", &quickmail);
 

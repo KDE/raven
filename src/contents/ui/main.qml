@@ -79,8 +79,8 @@ Kirigami.ApplicationWindow {
                 model: QuickMail.folderModel
                 delegate: Kirigami.BasicListItem {
                     backgroundColor: "green"
-                    text: display
-                    leftPadding: Kirigami.Units.gridUnit * model.kDescendantLevel
+                    text: sender+": "+model.title+"\n   "+plainText
+
                 }
             }
         }
