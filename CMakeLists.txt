@@ -34,6 +34,8 @@ find_package(KF5Libkdepim ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
 find_package(KF5AkonadiMime ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
 find_package(KF5Mime ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
 
+set(CMAKE_CXX_STANDARD 17)
+
 ################# build and install #################
 add_subdirectory(src)
 
