@@ -1,12 +1,10 @@
-qt5_add_resources(kmailquick_SRCS resources.qrc)
-
 add_executable(kmailquick
     main.cpp
     quickmail.cpp
     mailmodel.cpp
-    ${kmailquick_SRCS}
+    messagewrapper.cpp
+    resources.qrc
 )
-    
 target_link_libraries(kmailquick
     Qt5::Core
     Qt5::Gui

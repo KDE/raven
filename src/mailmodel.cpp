@@ -3,6 +3,8 @@
 
 #include "mailmodel.h"
 
+#include "messagewrapper.h"
+
 #include <EntityTreeModel>
 #include <KMime/Message>
 
@@ -16,7 +18,7 @@ QHash<int, QByteArray> MailModel::roleNames() const
     return {
         {TitleRole, QByteArrayLiteral("title")},
         {SenderRole, QByteArrayLiteral("sender")},
-        {PlainTextRole, QByteArrayLiteral("plainText")}
+        {MailRole, QByteArrayLiteral("mail")}
     };
 }
 
@@ -51,8 +53,8 @@ QVariant MailModel::data(const QModelIndex &index, int role) const
         } else {
             return QString();
         }
-    case PlainTextRole:
-        return mail->body();
+    case MailRole:
+        return QVariant::fromValue(new MessageWrapper(mail)); // TODO does this leaks or is the ownership transfered to the QML engine?
     }
 
     return QVariant();

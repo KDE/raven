@@ -1,6 +1,7 @@
-import QtQuick 2.1
-import org.kde.kirigami 2.4 as Kirigami
-import QtQuick.Controls 2.0 as Controls
+import QtQuick 2.15
+import QtQuick.Layouts 1.15
+import org.kde.kirigami 2.14 as Kirigami
+import QtQuick.Controls 2.15 as Controls
 import org.kde.kitemmodels 1.0 as KItemModels
 import org.kde.quickmail.private 1.0
 
@@ -41,11 +42,14 @@ Kirigami.ApplicationWindow {
     }
 
     pageStack.initialPage: QuickMail.loading ? loadingPage : mainPageComponent
-    
+
     Component {
         id: loadingPage
         Kirigami.Page {
-            Text { text: "loadin" }
+            Kirigami.PlaceholderMessage {
+                anchors.centerIn: parent
+                text: i18n("Loading, please wait...")
+            }
         }
     }
 
@@ -59,11 +63,13 @@ Kirigami.ApplicationWindow {
                 id: folders
                 model: QuickMail.descendantsProxyModel
                 delegate: Kirigami.BasicListItem {
-                    text: display
+                    text: model.display
                     leftPadding: Kirigami.Units.gridUnit * model.kDescendantLevel
                     onClicked: {
                         QuickMail.loadMailCollection(model.index)
-                        root.pageStack.push(folderPageComponent)
+                        root.pageStack.push(folderPageComponent, {
+                            title: model.display
+                        })
                     }
                 }
             }
@@ -73,14 +79,57 @@ Kirigami.ApplicationWindow {
         id: folderPageComponent
 
         Kirigami.ScrollablePage {
-            title: "Folder"
             ListView {
                 id: mails
                 model: QuickMail.folderModel
                 delegate: Kirigami.BasicListItem {
-                    backgroundColor: "green"
-                    text: sender+": "+model.title+"\n   "+plainText
+                    label: model.title
+                    subtitle: sender
+                    onClicked: {
+                        root.pageStack.push(mailComponent, {
+                            'mail': model.mail
+                        });
+                    }
+                }
+            }
+        }
+    }
 
+    Component {
+        id: mailComponent
+
+        Kirigami.ScrollablePage {
+            required property var mail
+            title: mail.subject
+            ColumnLayout {
+                Kirigami.FormLayout {
+                    Layout.fillWidth: true
+                    Controls.Label {
+                        Kirigami.FormData.label: i18n("From:")
+                        text: mail.from
+                    }
+                    Controls.Label {
+                        Kirigami.FormData.label: i18n("To:")
+                        text: mail.to.join(', ')
+                    }
+                    Controls.Label {
+                        visible: mail.sender !== mail.from
+                        Kirigami.FormData.label: i18n("Sender:")
+                        text: mail.sender
+                    }
+                    Controls.Label {
+                        Kirigami.FormData.label: i18n("Date:")
+                        text: mail.date.toLocaleDateString()
+                    }
+                }
+                Kirigami.Separator {
+                    Layout.fillWidth: true
+                }
+                Controls.Label {
+                    Layout.fillWidth: true
+                    text: mail.plainContent
+                    wrapMode: Text.Wrap
+                    textFormat: Text.PlainText
                 }
             }
         }

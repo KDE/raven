@@ -14,7 +14,7 @@ public:
         TitleRole = Qt::UserRole + 1,
         SenderRole,
         DateRole,
-        PlainTextRole,
+        MailRole,
     };
 
     explicit MailModel(QObject *parent = nullptr);
