@@ -10,33 +10,6 @@ Kirigami.ApplicationWindow {
 
     title: i18n("KMailQuick")
 
-    globalDrawer: Kirigami.GlobalDrawer {
-        title: i18n("KMailQuick")
-        titleIcon: "applications-graphics"
-        actions: [
-            Kirigami.Action {
-                text: i18n("View")
-                iconName: "view-list-icons"
-                Kirigami.Action {
-                    text: i18n("View Action 1")
-                    onTriggered: showPassiveNotification(i18n("View Action 1 clicked"))
-                }
-                Kirigami.Action {
-                    text: i18n("View Action 2")
-                    onTriggered: showPassiveNotification(i18n("View Action 2 clicked"))
-                }
-            },
-            Kirigami.Action {
-                text: i18n("Action 1")
-                onTriggered: showPassiveNotification(i18n("Action 1 clicked"))
-            },
-            Kirigami.Action {
-                text: i18n("Action 2")
-                onTriggered: showPassiveNotification(i18n("Action 2 clicked"))
-            }
-        ]
-    }
-
     contextDrawer: Kirigami.ContextDrawer {
         id: contextDrawer
     }
@@ -129,7 +102,6 @@ Kirigami.ApplicationWindow {
                     Layout.fillWidth: true
                     text: mail.plainContent
                     wrapMode: Text.Wrap
-                    textFormat: Text.PlainText
                 }
             }
         }
