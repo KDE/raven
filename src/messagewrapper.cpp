@@ -96,9 +96,9 @@ QString MessageWrapper::plainContent() const
 {
     const auto plain = m_mail->mainBodyPart("text/plain");
     if (plain) {
-        return plain->body();
+        return plain->decodedText();
     }
-    return m_mail->textContent()->body();
+    return m_mail->textContent()->decodedText();
 }
 
 Akonadi::ItemFetchJob *MessageWrapper::createFetchJob(const Akonadi::Item &item)

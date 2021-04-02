@@ -44,6 +44,7 @@ Kirigami.ApplicationWindow {
                         if (folderListView.mailListPage) {
                             folderListView.mailListPage.title = model.display
                             folderListView.mailListPage.forceActiveFocus();
+                            //applicationWindow().pageStack.currentIndex = folderListView.mailListPage;
                         } else {
                             folderListView.mailListPage = root.pageStack.push(folderPageComponent, {
                                 title: model.display
@@ -73,7 +74,7 @@ Kirigami.ApplicationWindow {
                             });
                         } else {
                             folderView.mailViewer.mail = model.mail;
-                            console.log(model.mail.plainContent)
+                            //applicationWindow().pageStack.currentItem = folderView.mailViewer;
                         }
                     }
                 }
@@ -87,6 +88,25 @@ Kirigami.ApplicationWindow {
         Kirigami.ScrollablePage {
             required property var mail
             title: mail.subject
+
+            Kirigami.OverlaySheet {
+                id: linkOpenDialog
+                property string link
+                header: Kirigami.Heading {
+                    text: i18n("Open Link")
+                }
+                contentItem: Controls.Label {
+                    text: i18n("Do you really want to open '%1'?", linkOpenDialog.link)
+                    wrapMode: Text.Wrap
+                }
+                footer: Controls.DialogButtonBox {
+                    standardButtons: Controls.Dialog.Ok | Controls.Dialog.Cancel
+                    onAccepted: {
+                        console.log("rejo");
+                    }
+                }
+            }
+
             ColumnLayout {
                 Kirigami.FormLayout {
                     Layout.fillWidth: true
@@ -99,7 +119,7 @@ Kirigami.ApplicationWindow {
                         text: mail.to.join(', ')
                     }
                     Controls.Label {
-                        visible: mail.sender !== mail.from
+                        visible: mail.sender !== mail.from && mail.sender.length > 0
                         Kirigami.FormData.label: i18n("Sender:")
                         text: mail.sender
                     }
@@ -111,10 +131,21 @@ Kirigami.ApplicationWindow {
                 Kirigami.Separator {
                     Layout.fillWidth: true
                 }
-                Controls.Label {
+                Controls.TextArea {
+                    background: Item {}
+                    textFormat: TextEdit.RichText
                     Layout.fillWidth: true
+                    readOnly: true
+                    selectByMouse: true
                     text: mail.plainContent
                     wrapMode: Text.Wrap
+                    Controls.ToolTip.text: hoveredLink.length
+                    Controls.ToolTip.visible: hoveredLink.trim().length > 0
+                    Controls.ToolTip.delay: Kirigami.Units.shortDuration
+                    onLinkActivated: {
+                        linkOpenDialog.link = link
+                        linkOpenDialog.open();
+                    }
                 }
             }
         }
