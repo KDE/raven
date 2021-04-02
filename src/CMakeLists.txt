@@ -15,6 +15,8 @@ target_link_libraries(kmailquick
     KF5::I18n
     KF5::ItemModels
     KF5::Mime
+    KF5::KIOCore
+    KF5::MailCommon
     KF5::AkonadiMime
     KF5::AkonadiCore
     KF5::AkonadiAgentBase

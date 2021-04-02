@@ -31,6 +31,10 @@
 #include <ItemFetchScope>
 #include <MessageModel>
 #include <Monitor>
+#include <AkonadiCore/Session>
+#include <ChangeRecorder>
+#include <MailCommon/FolderCollectionMonitor>
+#include <KMime/Message>
 #include <KDescendantsProxyModel>
 #include <EntityMimeTypeFilterModel>
 #include <EntityTreeModel>
@@ -70,41 +74,46 @@ void QuickMail::delayedInit()
     //  collectionFilter           |
     //            \______________model
 
-    Akonadi::Monitor *monitor = new Akonadi::Monitor();
-    monitor->setObjectName(QStringLiteral("CollectionWidgetMonitor"));
-    monitor->fetchCollection(true);
-    monitor->setAllMonitored(true);
-    monitor->itemFetchScope().fetchFullPayload(true);
+    //Monitor *monitor = new Monitor( this );
+    //monitor->fetchCollection(true);
+    //monitor->setCollectionMonitored(Collection::root());
+    //monitor->setMimeTypeMonitored(KMime::Message::mimeType());
+    auto session = new Session(QByteArrayLiteral("KQuickMail Kernel ETM"), this);
+    auto folderCollectionMonitor = new MailCommon::FolderCollectionMonitor(session, this);
+
+    //Akonadi::Monitor *monitor = new Akonadi::Monitor();
+    //monitor->setObjectName(QStringLiteral("CollectionWidgetMonitor"));
+    //monitor->fetchCollection(true);
+    //monitor->setAllMonitored(true);
+    //monitor->itemFetchScope().fetchFullPayload(true);
 
     // setup collection model
-    auto treeModel = new Akonadi::EntityTreeModel(monitor);
+    auto treeModel = new Akonadi::EntityTreeModel(folderCollectionMonitor->monitor(), this);
     treeModel->setItemPopulationStrategy(Akonadi::EntityTreeModel::LazyPopulation);
 
     m_entityTreeModel = new Akonadi::CollectionFilterProxyModel();
     m_entityTreeModel->setSourceModel(treeModel);
-    m_entityTreeModel->addMimeTypeFilter(QLatin1String("message/rfc822"));
+    m_entityTreeModel->addMimeTypeFilter(KMime::Message::mimeType());
 
     m_descendantsProxyModel = new KDescendantsProxyModel(this);
     m_descendantsProxyModel->setSourceModel(m_entityTreeModel);
 
-    // fake selectionModel
-    m_collectionSelectionModel = new QItemSelectionModel(m_entityTreeModel);
     // setup selection model
+    m_collectionSelectionModel = new QItemSelectionModel(m_entityTreeModel);
     auto selectionModel = new SelectionProxyModel(m_collectionSelectionModel, this);
     selectionModel->setSourceModel(treeModel);
     selectionModel->setFilterBehavior(KSelectionProxyModel::ChildrenOfExactSelection);
     qDebug() << selectionModel->filterBehavior();
 
-    // setup item model
-    KDescendantsProxyModel *descendedList = new KDescendantsProxyModel(this);
-    descendedList->setSourceModel(selectionModel);
-
+    // Setup mail model
     auto folderFilterModel = new EntityMimeTypeFilterModel(this);
-    folderFilterModel->setSourceModel(descendedList);
+    folderFilterModel->setSourceModel(selectionModel);
     folderFilterModel->setHeaderGroup(EntityTreeModel::ItemListHeaders);
+    folderFilterModel->addMimeTypeInclusionFilter(QStringLiteral("message/rfc822"));
     folderFilterModel->addMimeTypeExclusionFilter(Collection::mimeType());
 
-    m_folderModel = new MailModel( this );
+    // Proxy for QML roles
+    m_folderModel = new MailModel(this);
     m_folderModel->setSourceModel(folderFilterModel);
 
     m_loading = false;
@@ -129,6 +138,8 @@ void QuickMail::loadMailCollection(const int &index)
     }
 
     m_collectionSelectionModel->select(modelIndex, QItemSelectionModel::ClearAndSelect);
+    const Akonadi::Collection collection = modelIndex.model()->data(modelIndex, Akonadi::EntityTreeModel::CollectionRole).value<Akonadi::Collection>();
+    qDebug() << "loaded";
 }
 
 bool QuickMail::loading() const

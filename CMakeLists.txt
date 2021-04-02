@@ -4,7 +4,7 @@ project(kmailquick)
 
 set(QT_MIN_VERSION "5.14.0")
 set(KF5_MIN_VERSION "5.70.0")
-set(LIBKDEPIM_VERSION "5.11.0")
+set(LIBKDEPIM_VERSION "5.16.0")
 
 
 
@@ -26,13 +26,16 @@ include(KDEClangFormat)
 
 ################# Find dependencies #################
 find_package(Qt5 ${QT_MIN_VERSION} REQUIRED COMPONENTS Core Gui Qml QuickControls2 Svg Sql)
-find_package(KF5 ${KF5_MIN_VERSION} REQUIRED COMPONENTS Kirigami2 I18n CoreAddons Declarative ItemModels)
+find_package(KF5 ${KF5_MIN_VERSION} REQUIRED COMPONENTS Kirigami2 I18n CoreAddons Declarative ItemModels KIO)
 
 # Find KdepimLibs Package
 find_package(KF5Akonadi ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
 find_package(KF5Libkdepim ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
 find_package(KF5AkonadiMime ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
 find_package(KF5Mime ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
+find_package(KF5MailCommon ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
+find_package(KF5PimCommon ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
+find_package(KF5PimCommonAkonadi ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
 
 set(CMAKE_CXX_STANDARD 17)
 

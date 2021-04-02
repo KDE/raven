@@ -39,10 +39,10 @@ Kirigami.ApplicationWindow {
                     text: model.display
                     leftPadding: Kirigami.Units.gridUnit * model.kDescendantLevel
                     onClicked: {
-                        QuickMail.loadMailCollection(model.index)
+                        QuickMail.loadMailCollection(model.index);
                         root.pageStack.push(folderPageComponent, {
                             title: model.display
-                        })
+                        });
                     }
                 }
             }
