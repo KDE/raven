@@ -20,7 +20,7 @@ class MessageWrapper : public QObject
     Q_PROPERTY(QString sender READ sender NOTIFY loaded);
     Q_PROPERTY(QString subject READ subject NOTIFY loaded);
     Q_PROPERTY(QDateTime date READ date NOTIFY loaded);
-    Q_PROPERTY(QString plainContent READ plainContent NOTIFY loaded);
+    Q_PROPERTY(QString content READ content NOTIFY loaded);
 public:
     explicit MessageWrapper(const Akonadi::Item &item, QObject *parent = nullptr);
     ~MessageWrapper() = default;
@@ -31,7 +31,7 @@ public:
     QString sender() const;
     QString subject() const;
     QDateTime date() const;
-    QString plainContent() const;
+    QString content() const;
 
 Q_SIGNALS:
     void loaded();

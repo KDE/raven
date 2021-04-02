@@ -92,7 +92,7 @@ QDateTime MessageWrapper::date() const
     }
 }
 
-QString MessageWrapper::plainContent() const
+QString MessageWrapper::content() const
 {
     const auto plain = m_mail->mainBodyPart("text/plain");
     if (plain) {

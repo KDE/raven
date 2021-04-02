@@ -44,7 +44,7 @@ Kirigami.ApplicationWindow {
                         if (folderListView.mailListPage) {
                             folderListView.mailListPage.title = model.display
                             folderListView.mailListPage.forceActiveFocus();
-                            //applicationWindow().pageStack.currentIndex = folderListView.mailListPage;
+                            applicationWindow().pageStack.currentIndex = 1;
                         } else {
                             folderListView.mailListPage = root.pageStack.push(folderPageComponent, {
                                 title: model.display
@@ -74,7 +74,7 @@ Kirigami.ApplicationWindow {
                             });
                         } else {
                             folderView.mailViewer.mail = model.mail;
-                            //applicationWindow().pageStack.currentItem = folderView.mailViewer;
+                            applicationWindow().pageStack.currentIndex = applicationWindow().pageStack.depth - 1;
                         }
                     }
                 }
@@ -133,14 +133,15 @@ Kirigami.ApplicationWindow {
                 }
                 Controls.TextArea {
                     background: Item {}
-                    textFormat: TextEdit.RichText
+                    textFormat: TextEdit.AutoText
                     Layout.fillWidth: true
                     readOnly: true
                     selectByMouse: true
-                    text: mail.plainContent
+                    text: mail.content
                     wrapMode: Text.Wrap
-                    Controls.ToolTip.text: hoveredLink.length
-                    Controls.ToolTip.visible: hoveredLink.trim().length > 0
+                    Controls.ToolTip.text: hoveredLink
+                    // TODO FIXME sometimes the tooltip is visible even when the link is empty
+                    Controls.ToolTip.visible: hoveredLink && hoveredLink.trim().length > 0
                     Controls.ToolTip.delay: Kirigami.Units.shortDuration
                     onLinkActivated: {
                         linkOpenDialog.link = link
