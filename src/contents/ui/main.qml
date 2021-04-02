@@ -30,19 +30,25 @@ Kirigami.ApplicationWindow {
         id: mainPageComponent
 
         Kirigami.ScrollablePage {
+            id: folderListView
             title: i18n("KMailQuick")
+            property var mailListPage: null
 
             ListView {
-                id: folders
                 model: QuickMail.descendantsProxyModel
                 delegate: Kirigami.BasicListItem {
                     text: model.display
                     leftPadding: Kirigami.Units.gridUnit * model.kDescendantLevel
                     onClicked: {
                         QuickMail.loadMailCollection(model.index);
-                        root.pageStack.push(folderPageComponent, {
-                            title: model.display
-                        });
+                        if (folderListView.mailListPage) {
+                            folderListView.mailListPage.title = model.display
+                            folderListView.mailListPage.forceActiveFocus();
+                        } else {
+                            folderListView.mailListPage = root.pageStack.push(folderPageComponent, {
+                                title: model.display
+                            });
+                        }
                     }
                 }
             }
@@ -52,6 +58,8 @@ Kirigami.ApplicationWindow {
         id: folderPageComponent
 
         Kirigami.ScrollablePage {
+            id: folderView
+            property var mailViewer: null;
             ListView {
                 id: mails
                 model: QuickMail.folderModel
@@ -59,9 +67,14 @@ Kirigami.ApplicationWindow {
                     label: model.title
                     subtitle: sender
                     onClicked: {
-                        root.pageStack.push(mailComponent, {
-                            'mail': model.mail
-                        });
+                        if (!folderView.mailViewer) {
+                            folderView.mailViewer = root.pageStack.push(mailComponent, {
+                                'mail': model.mail
+                            });
+                        } else {
+                            folderView.mailViewer.mail = model.mail;
+                            console.log(model.mail.plainContent)
+                        }
                     }
                 }
             }

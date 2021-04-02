@@ -2,17 +2,44 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "messagewrapper.h"
+
+#include "quickmail.h"
+
 #include <KLocalizedString>
+#include <Akonadi/KMime/MessageParts>
+#include <Session>
+#include <MailTransportAkonadi/ErrorAttribute>
+#include <ItemFetchJob>
+#include <ItemFetchScope>
 #include <algorithm>
+#include <QDebug>
 
-MessageWrapper::MessageWrapper(KMime::Message::Ptr mail, QObject *parent)
+MessageWrapper::MessageWrapper(const Akonadi::Item &item, QObject *parent)
     : QObject(parent)
-    , m_mail(mail)
+    , m_item(item)
 {
-}
-
-MessageWrapper::~MessageWrapper()
-{
+    if (!item.isValid() || item.loadedPayloadParts().contains(Akonadi::MessagePart::Body)) {
+        m_mail = item.payload<KMime::Message::Ptr>();
+        Q_EMIT loaded();
+    } else {
+        m_mail = QSharedPointer<KMime::Message>::create();
+        Akonadi::ItemFetchJob *job = createFetchJob(item);
+        connect(job, &Akonadi::ItemFetchJob::result, [this](KJob *job) {
+            if (job->error()) {
+                // TODO
+            } else {
+                auto fetch = qobject_cast<Akonadi::ItemFetchJob *>(job);
+                Q_ASSERT(fetch);
+                if (fetch->items().isEmpty()) {
+                    // TODO display mssage not found error
+                } else {
+                    m_mail = fetch->items().constFirst().payload<KMime::Message::Ptr>();
+                    Q_EMIT loaded();
+                }
+            }
+            //d->itemFetchResult(job);
+        });
+    }
 }
 
 QString MessageWrapper::from() const
@@ -72,4 +99,15 @@ QString MessageWrapper::plainContent() const
         return plain->body();
     }
     return m_mail->textContent()->body();
+}
+
+Akonadi::ItemFetchJob *MessageWrapper::createFetchJob(const Akonadi::Item &item)
+{
+    auto job = new Akonadi::ItemFetchJob(item, QuickMail::instance().session());
+    job->fetchScope().fetchAllAttributes();
+    job->fetchScope().setAncestorRetrieval(Akonadi::ItemFetchScope::Parent);
+    job->fetchScope().fetchFullPayload(true);
+    job->fetchScope().setFetchRelations(true); // needed to know if we have notes or not
+    job->fetchScope().fetchAttribute<MailTransport::ErrorAttribute>();
+    return job;
 }

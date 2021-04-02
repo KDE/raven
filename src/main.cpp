@@ -20,14 +20,12 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
-    QuickMail quickmail;
-
     qRegisterMetaType<Akonadi::CollectionFilterProxyModel*>("Akonadi::CollectionFilterProxyModel*");
     qRegisterMetaType<Akonadi::EntityMimeTypeFilterModel*>("Akonadi::EntityMimeTypeFilterModel*");
     qRegisterMetaType<MailModel*>("MailModel*");
     qRegisterMetaType<KMime::Headers::From*>("KMime::Headers::From*");
     qRegisterMetaType<KDescendantsProxyModel*>("KDescendantsProxyModel*");
-    qmlRegisterSingletonInstance("org.kde.quickmail.private", 1, 0, "QuickMail", &quickmail);
+    qmlRegisterSingletonInstance("org.kde.quickmail.private", 1, 0, "QuickMail", &QuickMail::instance());
 
     engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
     engine.load(QUrl(QStringLiteral("qrc:///main.qml")));

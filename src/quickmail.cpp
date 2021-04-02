@@ -1,23 +1,5 @@
-/*
- * <one line to give the program's name and a brief idea of what it does.>
- * Copyright 2020  Carl Schwan <carl@carlschwan.eu>
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of
- * the License or (at your option) version 3 or any later version
- * accepted by the membership of KDE e.V. (or its successor approved
- * by the membership of KDE e.V.), which shall act as a proxy
- * defined in Section 14 of version 3 of the license.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+// SPDX-FileCopyrightText: 2020 Carl Schwan <carlschwan@kde.org>
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "quickmail.h"
 
@@ -78,8 +60,8 @@ void QuickMail::delayedInit()
     //monitor->fetchCollection(true);
     //monitor->setCollectionMonitored(Collection::root());
     //monitor->setMimeTypeMonitored(KMime::Message::mimeType());
-    auto session = new Session(QByteArrayLiteral("KQuickMail Kernel ETM"), this);
-    auto folderCollectionMonitor = new MailCommon::FolderCollectionMonitor(session, this);
+    m_session = new Session(QByteArrayLiteral("KQuickMail Kernel ETM"), this);
+    auto folderCollectionMonitor = new MailCommon::FolderCollectionMonitor(m_session, this);
 
     //Akonadi::Monitor *monitor = new Akonadi::Monitor();
     //monitor->setObjectName(QStringLiteral("CollectionWidgetMonitor"));
@@ -95,10 +77,11 @@ void QuickMail::delayedInit()
     m_entityTreeModel->setSourceModel(treeModel);
     m_entityTreeModel->addMimeTypeFilter(KMime::Message::mimeType());
 
+    // Proxy model for displaying the tree in a QML view.
     m_descendantsProxyModel = new KDescendantsProxyModel(this);
     m_descendantsProxyModel->setSourceModel(m_entityTreeModel);
 
-    // setup selection model
+    // Setup selection model
     m_collectionSelectionModel = new QItemSelectionModel(m_entityTreeModel);
     auto selectionModel = new SelectionProxyModel(m_collectionSelectionModel, this);
     selectionModel->setSourceModel(treeModel);
@@ -139,7 +122,6 @@ void QuickMail::loadMailCollection(const int &index)
 
     m_collectionSelectionModel->select(modelIndex, QItemSelectionModel::ClearAndSelect);
     const Akonadi::Collection collection = modelIndex.model()->data(modelIndex, Akonadi::EntityTreeModel::CollectionRole).value<Akonadi::Collection>();
-    qDebug() << "loaded";
 }
 
 bool QuickMail::loading() const
@@ -152,7 +134,18 @@ Akonadi::CollectionFilterProxyModel *QuickMail::entityTreeModel() const
     return m_entityTreeModel;
 }
 
+Akonadi::Session *QuickMail::session() const
+{
+    return m_session;
+}
+
 KDescendantsProxyModel *QuickMail::descendantsProxyModel() const
 {
     return m_descendantsProxyModel;
+}
+
+QuickMail &QuickMail::instance()
+{
+    static QuickMail _instance;
+    return _instance;
 }

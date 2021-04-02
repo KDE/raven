@@ -54,7 +54,7 @@ QVariant MailModel::data(const QModelIndex &index, int role) const
             return QString();
         }
     case MailRole:
-        return QVariant::fromValue(new MessageWrapper(mail)); // TODO does this leaks or is the ownership transfered to the QML engine?
+        return QVariant::fromValue(new MessageWrapper(item)); // TODO does this leaks or is the ownership transfered to the QML engine?
     }
 
     return QVariant();

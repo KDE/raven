@@ -4,21 +4,26 @@
 #pragma once
 
 #include <KMime/Message>
+#include <Item>
+
+namespace Akonadi {
+    class ItemFetchJob;
+}
 
 /// Simple wrapper arround a KMime::Message for QML consumption.
 class MessageWrapper : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString from READ from CONSTANT);
-    Q_PROPERTY(QStringList to READ to CONSTANT);
-    Q_PROPERTY(QStringList cc READ cc CONSTANT);
-    Q_PROPERTY(QString sender READ sender CONSTANT);
-    Q_PROPERTY(QString subject READ subject CONSTANT);
-    Q_PROPERTY(QDateTime date READ date CONSTANT);
-    Q_PROPERTY(QString plainContent READ plainContent CONSTANT);
+    Q_PROPERTY(QString from READ from NOTIFY loaded);
+    Q_PROPERTY(QStringList to READ to NOTIFY loaded);
+    Q_PROPERTY(QStringList cc READ cc NOTIFY loaded);
+    Q_PROPERTY(QString sender READ sender NOTIFY loaded);
+    Q_PROPERTY(QString subject READ subject NOTIFY loaded);
+    Q_PROPERTY(QDateTime date READ date NOTIFY loaded);
+    Q_PROPERTY(QString plainContent READ plainContent NOTIFY loaded);
 public:
-    explicit MessageWrapper(KMime::Message::Ptr mail, QObject *parent = nullptr);
-    ~MessageWrapper();
+    explicit MessageWrapper(const Akonadi::Item &item, QObject *parent = nullptr);
+    ~MessageWrapper() = default;
 
     QString from() const;
     QStringList to() const;
@@ -28,6 +33,11 @@ public:
     QDateTime date() const;
     QString plainContent() const;
 
+Q_SIGNALS:
+    void loaded();
+
 private:
+    Akonadi::ItemFetchJob *createFetchJob(const Akonadi::Item &item);
+    Akonadi::Item m_item;
     KMime::Message::Ptr m_mail;
 };
