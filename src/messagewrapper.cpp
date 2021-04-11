@@ -37,7 +37,6 @@ MessageWrapper::MessageWrapper(const Akonadi::Item &item, QObject *parent)
                     Q_EMIT loaded();
                 }
             }
-            //d->itemFetchResult(job);
         });
     }
 }
@@ -103,7 +102,7 @@ QString MessageWrapper::content() const
 
 Akonadi::ItemFetchJob *MessageWrapper::createFetchJob(const Akonadi::Item &item)
 {
-    auto job = new Akonadi::ItemFetchJob(item, QuickMail::instance().session());
+    auto job = new Akonadi::ItemFetchJob(item, quickMail);
     job->fetchScope().fetchAllAttributes();
     job->fetchScope().setAncestorRetrieval(Akonadi::ItemFetchScope::Parent);
     job->fetchScope().fetchFullPayload(true);

@@ -8,7 +8,6 @@
 #include <QTimer>
 
 // Akonadi
-#include <control.h>
 #include <CollectionFilterProxyModel>
 #include <ItemFetchScope>
 #include <MessageModel>
@@ -21,6 +20,7 @@
 #include <EntityMimeTypeFilterModel>
 #include <EntityTreeModel>
 #include <SelectionProxyModel>
+#include <ServerManager>
 #include <QApplication>
 #include <QtCore/QItemSelectionModel>
 
@@ -29,60 +29,40 @@
 QuickMail::QuickMail(QObject *parent)
     : QObject(parent)
     , m_loading(true)
-    , m_entityTreeModel(nullptr)
 {
     setObjectName("QuickMail");
-    QTimer::singleShot(0, this, &QuickMail::delayedInit);
-}
-
-void QuickMail::delayedInit()
-{
-    if (!Akonadi::Control::start() ) {
-        qApp->exit(-1);
-        return;
-    }
 
     using namespace Akonadi;
-    //                         itemView
-    //                             ^
-    //                             |
-    //                         itemModel
-    //                             |
-    //                         flatModel
-    //                             |
-    //   collectionView --> selectionModel
-    //           ^                 ^
-    //           |                 |
-    //  collectionFilter           |
-    //            \______________model
+    //                              mailModel
+    //                                  ^
+    //                                  |
+    //                              itemModel
+    //                                  |
+    //                              flatModel
+    //                                  |
+    //  descendantsProxyModel ------> selectionModel
+    //           ^                      ^
+    //           |                      |
+    //  collectionFilter                |
+    //            \__________________treemodel
 
-    //Monitor *monitor = new Monitor( this );
-    //monitor->fetchCollection(true);
-    //monitor->setCollectionMonitored(Collection::root());
-    //monitor->setMimeTypeMonitored(KMime::Message::mimeType());
     m_session = new Session(QByteArrayLiteral("KQuickMail Kernel ETM"), this);
     auto folderCollectionMonitor = new MailCommon::FolderCollectionMonitor(m_session, this);
-
-    //Akonadi::Monitor *monitor = new Akonadi::Monitor();
-    //monitor->setObjectName(QStringLiteral("CollectionWidgetMonitor"));
-    //monitor->fetchCollection(true);
-    //monitor->setAllMonitored(true);
-    //monitor->itemFetchScope().fetchFullPayload(true);
 
     // setup collection model
     auto treeModel = new Akonadi::EntityTreeModel(folderCollectionMonitor->monitor(), this);
     treeModel->setItemPopulationStrategy(Akonadi::EntityTreeModel::LazyPopulation);
 
-    m_entityTreeModel = new Akonadi::CollectionFilterProxyModel();
-    m_entityTreeModel->setSourceModel(treeModel);
-    m_entityTreeModel->addMimeTypeFilter(KMime::Message::mimeType());
+    auto entityTreeModel = new Akonadi::CollectionFilterProxyModel(this);
+    entityTreeModel->setSourceModel(treeModel);
+    entityTreeModel->addMimeTypeFilter(KMime::Message::mimeType());
 
     // Proxy model for displaying the tree in a QML view.
     m_descendantsProxyModel = new KDescendantsProxyModel(this);
-    m_descendantsProxyModel->setSourceModel(m_entityTreeModel);
+    m_descendantsProxyModel->setSourceModel(entityTreeModel);
 
     // Setup selection model
-    m_collectionSelectionModel = new QItemSelectionModel(m_entityTreeModel);
+    m_collectionSelectionModel = new QItemSelectionModel(entityTreeModel);
     auto selectionModel = new SelectionProxyModel(m_collectionSelectionModel, this);
     selectionModel->setSourceModel(treeModel);
     selectionModel->setFilterBehavior(KSelectionProxyModel::ChildrenOfExactSelection);
@@ -92,16 +72,31 @@ void QuickMail::delayedInit()
     auto folderFilterModel = new EntityMimeTypeFilterModel(this);
     folderFilterModel->setSourceModel(selectionModel);
     folderFilterModel->setHeaderGroup(EntityTreeModel::ItemListHeaders);
-    folderFilterModel->addMimeTypeInclusionFilter(QStringLiteral("message/rfc822"));
+    folderFilterModel->addMimeTypeInclusionFilter(KMime::Message::mimeType());
     folderFilterModel->addMimeTypeExclusionFilter(Collection::mimeType());
 
     // Proxy for QML roles
     m_folderModel = new MailModel(this);
     m_folderModel->setSourceModel(folderFilterModel);
 
-    m_loading = false;
-    Q_EMIT entityTreeModelChanged();
-    Q_EMIT descendantsProxyModelChanged();
+    if (Akonadi::ServerManager::isRunning()) {
+        m_loading = false;
+    } else {
+        connect(Akonadi::ServerManager::self(), &Akonadi::ServerManager::stateChanged,
+                this, [this](Akonadi::ServerManager::State state) {
+                    if (state == Akonadi::ServerManager::State::Broken) {
+                        qApp->exit(-1);
+                        return;
+                    }
+                    bool loading = state != Akonadi::ServerManager::State::Running;
+                    if (loading == m_loading) {
+                        return;
+                    }
+                    m_loading = loading;
+                    Q_EMIT loadingChanged();
+                    disconnect(Akonadi::ServerManager::self(), &Akonadi::ServerManager::stateChanged, this, nullptr);
+                });
+    }
     Q_EMIT folderModelChanged();
     Q_EMIT loadingChanged();
 }
@@ -121,7 +116,6 @@ void QuickMail::loadMailCollection(const int &index)
     }
 
     m_collectionSelectionModel->select(modelIndex, QItemSelectionModel::ClearAndSelect);
-    const Akonadi::Collection collection = modelIndex.model()->data(modelIndex, Akonadi::EntityTreeModel::CollectionRole).value<Akonadi::Collection>();
 }
 
 bool QuickMail::loading() const
@@ -129,23 +123,12 @@ bool QuickMail::loading() const
     return m_loading;
 }
 
-Akonadi::CollectionFilterProxyModel *QuickMail::entityTreeModel() const
-{
-    return m_entityTreeModel;
-}
-
-Akonadi::Session *QuickMail::session() const
-{
-    return m_session;
-}
-
 KDescendantsProxyModel *QuickMail::descendantsProxyModel() const
 {
     return m_descendantsProxyModel;
 }
 
-QuickMail &QuickMail::instance()
+Akonadi::Session *QuickMail::session() const
 {
-    static QuickMail _instance;
-    return _instance;
+    return m_session;
 }

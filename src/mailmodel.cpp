@@ -1,4 +1,5 @@
 // SPDX-FileCopyrightText: 2021 Simon Schmeisser <s.schmeisser@gmx.net>
+// SPDX-FileCopyrightText: 2021 Carl Schwan <carlschwan@kde.org>
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "mailmodel.h"
@@ -7,6 +8,7 @@
 
 #include <EntityTreeModel>
 #include <KMime/Message>
+#include <QQmlEngine>
 
 MailModel::MailModel(QObject *parent)
     : QIdentityProxyModel(parent)
@@ -54,7 +56,11 @@ QVariant MailModel::data(const QModelIndex &index, int role) const
             return QString();
         }
     case MailRole:
-        return QVariant::fromValue(new MessageWrapper(item)); // TODO does this leaks or is the ownership transfered to the QML engine?
+        {
+            auto wrapper = new MessageWrapper(item);
+            QQmlEngine::setObjectOwnership(wrapper, QQmlEngine::JavaScriptOwnership);
+            return QVariant::fromValue(wrapper);
+        }
     }
 
     return QVariant();

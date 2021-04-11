@@ -3,6 +3,8 @@ add_executable(kmailquick
     quickmail.cpp
     mailmodel.cpp
     messagewrapper.cpp
+    composerhelper.cpp
+    identitymodel.cpp
     resources.qrc
 )
 target_link_libraries(kmailquick

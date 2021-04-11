@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2021 Carl Schwan <carlschwan@kde.org>
+// SPDX-License-Identifier: LGPL-2.1-only OR LGPL-3.0-only OR LicenseRef-KDE-Accepted-LGPL
+
 import QtQuick 2.15
 import QtQuick.Layouts 1.15
 import org.kde.kirigami 2.14 as Kirigami
@@ -33,6 +36,11 @@ Kirigami.ApplicationWindow {
             id: folderListView
             title: i18n("KMailQuick")
             property var mailListPage: null
+            
+            actions.main: Kirigami.Action {
+                text: i18n("Write a New Mail")
+                onTriggered: applicationWindow().pageStack.layers.push("qrc:Composer.qml", {"title": i18n("Write a new Mail")})
+            }
 
             ListView {
                 model: QuickMail.descendantsProxyModel
@@ -101,9 +109,7 @@ Kirigami.ApplicationWindow {
                 }
                 footer: Controls.DialogButtonBox {
                     standardButtons: Controls.Dialog.Ok | Controls.Dialog.Cancel
-                    onAccepted: {
-                        console.log("rejo");
-                    }
+                    onAccepted: Qt.openUrlExternally(linkOpenDialog.link)
                 }
             }
 

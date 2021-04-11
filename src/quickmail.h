@@ -23,39 +23,27 @@ class MailModel;
 class QuickMail : public QObject
 {
     Q_OBJECT
-    
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged)
-    
-    Q_PROPERTY(Akonadi::CollectionFilterProxyModel *entityTreeModel READ entityTreeModel NOTIFY entityTreeModelChanged)
+    Q_PROPERTY(KDescendantsProxyModel *descendantsProxyModel READ descendantsProxyModel CONSTANT)
     Q_PROPERTY(MailModel *folderModel READ folderModel NOTIFY folderModelChanged)
 
-    Q_PROPERTY(KDescendantsProxyModel *descendantsProxyModel READ descendantsProxyModel NOTIFY descendantsProxyModelChanged)
-
 public:
-    static QuickMail &instance();
+    QuickMail(QObject *parent = nullptr);
+    ~QuickMail() override = default;
 
     bool loading() const;
-    Akonadi::CollectionFilterProxyModel *entityTreeModel() const;
     KDescendantsProxyModel *descendantsProxyModel() const;
     MailModel *folderModel() const;
     Akonadi::Session *session() const;
 
     Q_INVOKABLE void loadMailCollection(const int &index);
 
-private Q_SLOTS:
-    void delayedInit();
-
 Q_SIGNALS:
     void loadingChanged();
-    void entityTreeModelChanged();
-    void descendantsProxyModelChanged();
     void folderModelChanged();
-    
+
 private:
-    QuickMail(QObject *parent = nullptr);
-    ~QuickMail() override = default;
     bool m_loading;
-    Akonadi::CollectionFilterProxyModel *m_entityTreeModel;
     Akonadi::Session *m_session;
     KDescendantsProxyModel *m_descendantsProxyModel;
 
@@ -63,3 +51,5 @@ private:
     QItemSelectionModel *m_collectionSelectionModel;
     MailModel *m_folderModel;
 };
+
+Q_GLOBAL_STATIC(QuickMail, quickMail)
