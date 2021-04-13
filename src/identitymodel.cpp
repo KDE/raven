@@ -20,10 +20,8 @@ void IdentityModel::reloadUoidList()
     m_identitiesUoid.clear();
     qDebug() << m_identityManager;
     qDebug() << m_identityManager->identities();
-    IdentityManager::ConstIterator it;
-    IdentityManager::ConstIterator end(m_identityManager->end());
-    for (it = m_identityManager->begin(); it != m_identityManager->end(); ++it) {
-        m_identitiesUoid << it->uoid();
+    for (const auto &identity : *m_identityManager) {
+        m_identitiesUoid << identity.uoid();
     }
     endResetModel();
 }

@@ -8,6 +8,9 @@
 #include <MessageComposer/AttachmentModel>
 #include <MessageComposer/TextPart>
 #include <MessageComposer/InfoPart>
+#include <KIdentityManagement/IdentityManager>
+#include <KIdentityManagement/Identity>
+#include <QDebug>
 
 #include "composerhelper.h"
 #include "mailmodel.h"
@@ -38,6 +41,18 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
     engine.load(QUrl(QStringLiteral("qrc:///main.qml")));
+    
+    
+    KIdentityManagement::IdentityManager manager;
+    for (const auto &identity : manager) {
+        qDebug() << identity.uoid();
+    }
+    
+    auto identityManager = KIdentityManagement::IdentityManager::self();
+    qDebug() << identityManager->identities();
+    for (const auto &identity : *identityManager) {
+        qDebug() << identity.uoid();
+    }
 
     if (engine.rootObjects().isEmpty()) {
         return -1;
