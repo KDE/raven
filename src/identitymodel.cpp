@@ -3,11 +3,12 @@
 
 #include "identitymodel.h"
 #include <KIdentityManagement/Identity>
-#include <QDebug>
+#include <KLocalizedString>
+
 
 IdentityModel::IdentityModel(QObject *parent)
     : QAbstractListModel(parent)
-    , m_identityManager(new IdentityManager(false, this))
+    , m_identityManager(IdentityManager::self())
 {
     connect(m_identityManager, &KIdentityManagement::IdentityManager::needToReloadIdentitySettings, this, &IdentityModel::reloadUoidList);
     reloadUoidList();
@@ -18,8 +19,6 @@ void IdentityModel::reloadUoidList()
 {
     beginResetModel();
     m_identitiesUoid.clear();
-    qDebug() << m_identityManager;
-    qDebug() << m_identityManager->identities();
     for (const auto &identity : *m_identityManager) {
         m_identitiesUoid << identity.uoid();
     }
@@ -39,12 +38,11 @@ QVariant IdentityModel::data (const QModelIndex& index, int role) const
     const auto &identity = m_identityManager->modifyIdentityForUoid(m_identitiesUoid[index.row()]);
     switch (role) {
         case Qt::DisplayRole:
-            return identity.fullEmailAddr();
-        case NameRole:
-            return identity.identityName();
+            return QString(identity.identityName() + i18nc("Separator between identity name and email address", " - ") + identity.fullEmailAddr());
         case EmailRole:
             return identity.primaryEmailAddress();
-        
+        case UoidRole:
+            return identity.uoid();
     }
     
     return {};
@@ -55,13 +53,18 @@ int IdentityModel::rowCount(const QModelIndex& parent) const
     return m_identitiesUoid.count();
 }
 
+QString IdentityModel::email(uint uoid)
+{
+    return m_identityManager->identityForUoid(uoid).primaryEmailAddress();
+}
+
+
 
 QHash<int, QByteArray> IdentityModel::roleNames() const
 {
     return {
         {Qt::DisplayRole, QByteArrayLiteral("display")},
-        {UuidRole, QByteArrayLiteral("uoid")},
-        {EmailRole, QByteArrayLiteral("email")},
-        {NameRole, QByteArrayLiteral("name")}
+        {UoidRole, QByteArrayLiteral("uoid")},
+        {EmailRole, QByteArrayLiteral("email")}
     };
 }

@@ -14,9 +14,8 @@ class IdentityModel : public QAbstractListModel
 
 public:
     enum Roles {
-        NameRole = Qt::UserRole,
-        EmailRole,
-        UuidRole
+        EmailRole = Qt::UserRole,
+        UoidRole
     };
 
 public:
@@ -25,6 +24,8 @@ public:
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     int rowCount(const QModelIndex& parent) const override;
     QHash<int, QByteArray> roleNames() const override;
+    
+    Q_INVOKABLE QString email(uint uoid);
     
 private:
     void reloadUoidList();

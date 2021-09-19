@@ -60,6 +60,10 @@ Kirigami.Page {
             model: IdentityModel {}
             textRole: "display"
             valueRole: "uoid"
+            onCurrentIndexChanged: {
+                from.text = model.email(currentValue)
+            }
+            currentIndex: 0
         }
         
         Controls.Label {
@@ -71,6 +75,7 @@ Kirigami.Page {
             id: from
             Layout.fillWidth: true
             enabled: false
+            Component.onCompleted: from.text = identity.model.email(identity.currentValue)
         }
         ListModel {
             id: headerModel
@@ -84,8 +89,8 @@ Kirigami.Page {
             model: headerModel
             Controls.ComboBox {
                 id: control
-                Layout.row: index + 1
-                Layout.column: 0
+                Layout.row: index + 2
+                Lm_recipientsEditorm_recipientsEditorm_recipientsEditorm_recipientsEditorm_recipientsEditorayout.column: 0
                 property int modelWidth
                 textRole: "text"
                 valueRole: "value"
@@ -116,7 +121,7 @@ Kirigami.Page {
             model: headerModel
             Controls.TextField {
                 Layout.fillWidth: true
-                Layout.row: index + 1
+                Layout.row: index + 2
                 Layout.column: 1
                 onTextChanged: {
                     if (index != 0 && text.trim().length === 0) {

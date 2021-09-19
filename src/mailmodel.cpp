@@ -5,6 +5,7 @@
 #include "mailmodel.h"
 
 #include "messagewrapper.h"
+#include "messageviewer/viewer.h"
 
 #include <EntityTreeModel>
 #include <KMime/Message>
@@ -12,6 +13,7 @@
 
 MailModel::MailModel(QObject *parent)
     : QIdentityProxyModel(parent)
+    , m_viewerHelper(new ViewerHelper(this))
 {
 }
 
@@ -64,4 +66,30 @@ QVariant MailModel::data(const QModelIndex &index, int role) const
     }
 
     return QVariant();
+}
+
+void MailModel::loadItem(int row)
+{
+    if (!m_viewerHelper) {
+        return;
+    }
+    QVariant itemVariant = sourceModel()->data(mapToSource(index(row, 0)), Akonadi::EntityTreeModel::ItemRole);
+
+    Akonadi::Item item = itemVariant.value<Akonadi::Item>();
+
+    m_viewerHelper->setMessageItem(item);
+}
+
+void MailModel::setViewerHelper(ViewerHelper *viewerHelper)
+{
+    if (m_viewerHelper == viewerHelper) {
+        return;
+    }
+    m_viewerHelper = viewerHelper;
+    Q_EMIT viewerHelperChanged();
+}
+
+ViewerHelper *MailModel::viewerHelper() const
+{
+    return m_viewerHelper;
 }

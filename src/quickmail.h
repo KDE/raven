@@ -11,7 +11,7 @@ namespace Akonadi {
     class Session;
 }
 
-class KDescendantsProxyModel;
+class QAbstractListModel;
 class QItemSelectionModel;
 
 class MailModel;
@@ -24,7 +24,7 @@ class QuickMail : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged)
-    Q_PROPERTY(KDescendantsProxyModel *descendantsProxyModel READ descendantsProxyModel CONSTANT)
+    Q_PROPERTY(Akonadi::CollectionFilterProxyModel *foldersModel READ foldersModel CONSTANT)
     Q_PROPERTY(MailModel *folderModel READ folderModel NOTIFY folderModelChanged)
 
 public:
@@ -32,11 +32,11 @@ public:
     ~QuickMail() override = default;
 
     bool loading() const;
-    KDescendantsProxyModel *descendantsProxyModel() const;
+    Akonadi::CollectionFilterProxyModel *foldersModel() const;
     MailModel *folderModel() const;
     Akonadi::Session *session() const;
 
-    Q_INVOKABLE void loadMailCollection(const int &index);
+    Q_INVOKABLE void loadMailCollection(const QModelIndex &index);
 
 Q_SIGNALS:
     void loadingChanged();
@@ -45,7 +45,7 @@ Q_SIGNALS:
 private:
     bool m_loading;
     Akonadi::Session *m_session;
-    KDescendantsProxyModel *m_descendantsProxyModel;
+    Akonadi::CollectionFilterProxyModel *m_foldersModel;
 
     //folders
     QItemSelectionModel *m_collectionSelectionModel;

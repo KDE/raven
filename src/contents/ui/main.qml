@@ -17,7 +17,7 @@ Kirigami.ApplicationWindow {
         id: contextDrawer
     }
 
-    pageStack.initialPage: QuickMail.loading ? loadingPage : mainPageComponent
+    pageStack.initialPage: QuickMail.loading ? loadingPage : folderPageComponent
 
     Component {
         id: loadingPage
@@ -29,40 +29,25 @@ Kirigami.ApplicationWindow {
         }
     }
 
-    Component {
-        id: mainPageComponent
+    /*menuBar: Loader {
+        id: menuLoader
+        active: Kirigami.Settings.hasPlatformMenuBar != undefined ?
+                !Kirigami.Settings.hasPlatformMenuBar && !Kirigami.Settings.isMobile :
+                !Kirigami.Settings.isMobile
 
-        Kirigami.ScrollablePage {
-            id: folderListView
-            title: i18n("KMailQuick")
-            property var mailListPage: null
-            
-            actions.main: Kirigami.Action {
-                text: i18n("Write a New Mail")
-                onTriggered: applicationWindow().pageStack.layers.push("qrc:Composer.qml", {"title": i18n("Write a new Mail")})
-            }
-
-            ListView {
-                model: QuickMail.descendantsProxyModel
-                delegate: Kirigami.BasicListItem {
-                    text: model.display
-                    leftPadding: Kirigami.Units.gridUnit * model.kDescendantLevel
-                    onClicked: {
-                        QuickMail.loadMailCollection(model.index);
-                        if (folderListView.mailListPage) {
-                            folderListView.mailListPage.title = model.display
-                            folderListView.mailListPage.forceActiveFocus();
-                            applicationWindow().pageStack.currentIndex = 1;
-                        } else {
-                            folderListView.mailListPage = root.pageStack.push(folderPageComponent, {
-                                title: model.display
-                            });
-                        }
-                    }
-                }
-            }
+        sourceComponent: WindowMenu {
+            parentWindow: root
+            todoMode: pageStack.currentItem.objectName == "todoView"
+            Kirigami.Theme.colorSet: Kirigami.Theme.Header
         }
+    }*/
+
+
+    globalDrawer: Sidebar {
+        //bottomPadding: menuLoader.active ? menuLoader.height : 0
+        mailListPage: QuickMail.loading ? null : pageStack.get(0)
     }
+
     Component {
         id: folderPageComponent
 
@@ -78,12 +63,13 @@ Kirigami.ApplicationWindow {
                     onClicked: {
                         if (!folderView.mailViewer) {
                             folderView.mailViewer = root.pageStack.push(mailComponent, {
-                                'mail': model.mail
+                                viewerHelper: QuickMail.folderModel.viewerHelper
                             });
                         } else {
-                            folderView.mailViewer.mail = model.mail;
                             applicationWindow().pageStack.currentIndex = applicationWindow().pageStack.depth - 1;
                         }
+
+                        QuickMail.folderModel.loadItem(index);
                     }
                 }
             }
@@ -92,69 +78,6 @@ Kirigami.ApplicationWindow {
 
     Component {
         id: mailComponent
-
-        Kirigami.ScrollablePage {
-            required property var mail
-            title: mail.subject
-
-            Kirigami.OverlaySheet {
-                id: linkOpenDialog
-                property string link
-                header: Kirigami.Heading {
-                    text: i18n("Open Link")
-                }
-                contentItem: Controls.Label {
-                    text: i18n("Do you really want to open '%1'?", linkOpenDialog.link)
-                    wrapMode: Text.Wrap
-                }
-                footer: Controls.DialogButtonBox {
-                    standardButtons: Controls.Dialog.Ok | Controls.Dialog.Cancel
-                    onAccepted: Qt.openUrlExternally(linkOpenDialog.link)
-                }
-            }
-
-            ColumnLayout {
-                Kirigami.FormLayout {
-                    Layout.fillWidth: true
-                    Controls.Label {
-                        Kirigami.FormData.label: i18n("From:")
-                        text: mail.from
-                    }
-                    Controls.Label {
-                        Kirigami.FormData.label: i18n("To:")
-                        text: mail.to.join(', ')
-                    }
-                    Controls.Label {
-                        visible: mail.sender !== mail.from && mail.sender.length > 0
-                        Kirigami.FormData.label: i18n("Sender:")
-                        text: mail.sender
-                    }
-                    Controls.Label {
-                        Kirigami.FormData.label: i18n("Date:")
-                        text: mail.date.toLocaleDateString()
-                    }
-                }
-                Kirigami.Separator {
-                    Layout.fillWidth: true
-                }
-                Controls.TextArea {
-                    background: Item {}
-                    textFormat: TextEdit.AutoText
-                    Layout.fillWidth: true
-                    readOnly: true
-                    selectByMouse: true
-                    text: mail.content
-                    wrapMode: Text.Wrap
-                    Controls.ToolTip.text: hoveredLink
-                    // TODO FIXME sometimes the tooltip is visible even when the link is empty
-                    Controls.ToolTip.visible: hoveredLink && hoveredLink.trim().length > 0
-                    Controls.ToolTip.delay: Kirigami.Units.shortDuration
-                    onLinkActivated: {
-                        linkOpenDialog.link = link
-                        linkOpenDialog.open();
-                    }
-                }
-            }
-        }
+        MessageViewer {}
     }
 }

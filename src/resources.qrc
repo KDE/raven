@@ -2,5 +2,7 @@
     <qresource prefix="/">
         <file alias="main.qml">contents/ui/main.qml</file>
         <file alias="Composer.qml">contents/ui/Composer.qml</file>
+        <file alias="MessageViewer.qml">contents/ui/MessageViewer.qml</file>
+        <file alias="Sidebar.qml">contents/ui/Sidebar.qml</file>
     </qresource>
 </RCC>

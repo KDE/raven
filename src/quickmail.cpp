@@ -30,7 +30,6 @@ QuickMail::QuickMail(QObject *parent)
     : QObject(parent)
     , m_loading(true)
 {
-    setObjectName("QuickMail");
 
     using namespace Akonadi;
     //                              mailModel
@@ -53,20 +52,15 @@ QuickMail::QuickMail(QObject *parent)
     auto treeModel = new Akonadi::EntityTreeModel(folderCollectionMonitor->monitor(), this);
     treeModel->setItemPopulationStrategy(Akonadi::EntityTreeModel::LazyPopulation);
 
-    auto entityTreeModel = new Akonadi::CollectionFilterProxyModel(this);
-    entityTreeModel->setSourceModel(treeModel);
-    entityTreeModel->addMimeTypeFilter(KMime::Message::mimeType());
-
-    // Proxy model for displaying the tree in a QML view.
-    m_descendantsProxyModel = new KDescendantsProxyModel(this);
-    m_descendantsProxyModel->setSourceModel(entityTreeModel);
+    m_foldersModel = new Akonadi::CollectionFilterProxyModel(this);
+    m_foldersModel->setSourceModel(treeModel);
+    m_foldersModel->addMimeTypeFilter(KMime::Message::mimeType());
 
     // Setup selection model
-    m_collectionSelectionModel = new QItemSelectionModel(entityTreeModel);
+    m_collectionSelectionModel = new QItemSelectionModel(m_foldersModel);
     auto selectionModel = new SelectionProxyModel(m_collectionSelectionModel, this);
     selectionModel->setSourceModel(treeModel);
     selectionModel->setFilterBehavior(KSelectionProxyModel::ChildrenOfExactSelection);
-    qDebug() << selectionModel->filterBehavior();
 
     // Setup mail model
     auto folderFilterModel = new EntityMimeTypeFilterModel(this);
@@ -106,11 +100,8 @@ MailModel *QuickMail::folderModel() const
     return m_folderModel;
 }
 
-void QuickMail::loadMailCollection(const int &index)
+void QuickMail::loadMailCollection(const QModelIndex &modelIndex)
 {
-    QModelIndex flatIndex = m_descendantsProxyModel->index(index, 0);
-    QModelIndex modelIndex = m_descendantsProxyModel->mapToSource(flatIndex);
-
     if (!modelIndex.isValid()) {
         return;
     }
@@ -123,9 +114,9 @@ bool QuickMail::loading() const
     return m_loading;
 }
 
-KDescendantsProxyModel *QuickMail::descendantsProxyModel() const
+Akonadi::CollectionFilterProxyModel *QuickMail::foldersModel() const
 {
-    return m_descendantsProxyModel;
+    return m_foldersModel;
 }
 
 Akonadi::Session *QuickMail::session() const

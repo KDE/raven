@@ -5,6 +5,9 @@ add_executable(kmailquick
     messagewrapper.cpp
     composerhelper.cpp
     identitymodel.cpp
+
+    messageviewer/viewer.cpp
+
     resources.qrc
 )
 target_link_libraries(kmailquick
@@ -26,5 +29,8 @@ target_link_libraries(kmailquick
     KF5::AkonadiAgentBase
     KF5::AkonadiWidgets
     KF5::AkonadiXml
+    KF5::MessageViewer
+
+    KF5::MimeTreeParser
 )
 install(TARGETS kmailquick ${KF5_INSTALL_TARGETS_DEFAULT_ARGS})
