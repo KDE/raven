@@ -14,8 +14,6 @@
 
 #include <MailTransportAkonadi/ErrorAttribute>
 
-#include <MessageViewer/DKIMManager>
-
 #include <KLocalizedString>
 
 ViewerHelper::ViewerHelper(QObject *parent)
@@ -65,10 +63,6 @@ void ViewerHelper::setMessageItem(const Akonadi::Item &messageItem, MimeTreePars
             }
             return;
         }
-
-
-        // Check DKIM
-        MessageViewer::DKIMManager::self()->checkDKim(m_messageItem);
 
         setMessage(m_messageItem.payload<KMime::Message::Ptr>(), updateMode);
     } else {

@@ -20,8 +20,12 @@ public:
     enum AnimalRoles {
         TitleRole = Qt::UserRole + 1,
         SenderRole,
+        TextColorRole,
         DateRole,
+        BackgroundColorRole,
+        UnreadRole,
         MailRole,
+        FavoriteRole,
     };
 
     ViewerHelper *viewerHelper() const;

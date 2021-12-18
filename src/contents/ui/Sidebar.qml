@@ -152,7 +152,6 @@ Kirigami.OverlayDrawer {
                                         title: model.display
                                     });
                                 }
-                                calendarCheckChanged(collectionId, checked)
                             }
                         }
                     }

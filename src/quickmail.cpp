@@ -8,19 +8,19 @@
 #include <QTimer>
 
 // Akonadi
-#include <CollectionFilterProxyModel>
-#include <ItemFetchScope>
+#include <Akonadi/CollectionFilterProxyModel>
+#include <Akonadi/ItemFetchScope>
 #include <MessageModel>
-#include <Monitor>
-#include <AkonadiCore/Session>
-#include <ChangeRecorder>
+#include <Akonadi/Monitor>
+#include <Akonadi/Session>
+#include <Akonadi/ChangeRecorder>
 #include <MailCommon/FolderCollectionMonitor>
 #include <KMime/Message>
 #include <KDescendantsProxyModel>
-#include <EntityMimeTypeFilterModel>
-#include <EntityTreeModel>
-#include <SelectionProxyModel>
-#include <ServerManager>
+#include <Akonadi/EntityMimeTypeFilterModel>
+#include <Akonadi/EntityTreeModel>
+#include <Akonadi/SelectionProxyModel>
+#include <Akonadi/ServerManager>
 #include <QApplication>
 #include <QtCore/QItemSelectionModel>
 
@@ -103,6 +103,7 @@ MailModel *QuickMail::folderModel() const
 void QuickMail::loadMailCollection(const QModelIndex &modelIndex)
 {
     if (!modelIndex.isValid()) {
+        qDebug() << "hello";
         return;
     }
 

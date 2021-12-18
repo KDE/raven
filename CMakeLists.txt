@@ -38,16 +38,19 @@ find_package(KF5MailTransport ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
 find_package(KF5MailTransportAkonadi ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
 find_package(KF5PimCommon ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
 find_package(KF5PimCommonAkonadi ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
+find_package(KF5MessageList ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
 
 set(CMAKE_CXX_STANDARD 17)
 
 ################# build and install #################
-add_subdirectory(src)
 
 add_definitions(-DQT_NO_CAST_FROM_ASCII -DQT_NO_CAST_TO_ASCII -DQT_NO_URL_CAST_FROM_STRING)
 add_definitions(-DQT_USE_QSTRINGBUILDER)
 add_definitions(-DQT_NO_NARROWING_CONVERSIONS_IN_CONNECT)
 add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0x050d00)
+add_definitions( -DQT_STRICT_ITERATORS)
+
+add_subdirectory(src)
 
 install(PROGRAMS org.kde.kmailquick.desktop DESTINATION ${KDE_INSTALL_APPDIR})
 install(FILES org.kde.kmailquick.appdata.xml DESTINATION ${KDE_INSTALL_METAINFODIR})

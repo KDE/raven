@@ -4,7 +4,7 @@
 #pragma once
 
 #include <KMime/Message>
-#include <Item>
+#include <Akonadi/Item>
 
 namespace Akonadi {
     class ItemFetchJob;

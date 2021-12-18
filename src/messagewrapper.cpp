@@ -7,10 +7,11 @@
 
 #include <KLocalizedString>
 #include <Akonadi/KMime/MessageParts>
-#include <Session>
+#include <Akonadi/Session>
 #include <MailTransportAkonadi/ErrorAttribute>
-#include <ItemFetchJob>
-#include <ItemFetchScope>
+#include <Akonadi/Item>
+#include <Akonadi/ItemFetchJob>
+#include <Akonadi/ItemFetchScope>
 #include <algorithm>
 #include <QDebug>
 
