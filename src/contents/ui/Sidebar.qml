@@ -56,7 +56,7 @@ Kirigami.OverlayDrawer {
                 Kirigami.Heading {
                     Layout.fillWidth: true
                     Layout.leftMargin: Kirigami.Units.largeSpacing + Kirigami.Units.smallSpacing
-                    text: i18n("Pelinkan")
+                    text: i18n("Pelikan")
                 }
 
                 Kirigami.ActionToolBar {
