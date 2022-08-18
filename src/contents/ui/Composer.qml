@@ -3,10 +3,11 @@
 
 import QtQuick 2.15
 import QtQuick.Layouts 1.15
-import org.kde.kirigami 2.14 as Kirigami
 import QtQuick.Controls 2.15 as Controls
+
+import org.kde.kirigami 2.14 as Kirigami
 import org.kde.kitemmodels 1.0 as KItemModels
-import org.kde.quickmail.private 1.0
+import org.kde.raven.private 1.0
 
 Kirigami.Page {
     ComposerHelper {

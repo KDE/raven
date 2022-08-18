@@ -8,9 +8,9 @@
 #include <Akonadi/Session>
 #include <Akonadi/CollectionFetchJob>
 #include <Akonadi/CollectionFetchScope>
-#include <Akonadi/KMime/MessageParts>
 #include <Akonadi/ItemFetchJob>
 #include <Akonadi/ItemFetchScope>
+#include <akonadi/messageparts.h>
 
 #include <MailTransportAkonadi/ErrorAttribute>
 

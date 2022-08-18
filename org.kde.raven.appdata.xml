@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+- Copyright 2022 Devin Lin <devin@kde.org>
+- SPDX-License-Identifier: GPL-2.0-or-later
+-->
+<component type="desktop-application">
+  <id>org.kde.raven</id>
+  <name>Mail</name>
+  <summary>Send and receive email</summary>
+  <metadata_license>A permissive license for this metadata, e.g. "FSFAP"</metadata_license>
+  <project_license>The license of this software as SPDX string, e.g. "GPL-3+"</project_license>
+  <developer_name>KDE Community</developer_name>
+  <description>
+    <p>An email client for Plasma, based on Akonadi.</p>
+  </description>
+  <launchable type="desktop-id">org.kde.raven.desktop</launchable>
+  <recommends>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+  </recommends>
+  <requires>
+    <display_length compare="ge">360</display_length>
+  </requires>
+  <categories>
+    <category>Utility</category>
+    <category>Mail</category>
+    <category>KDE</category>
+  </categories>
+  <provides>
+    <binary>raven</binary>
+  </provides>
+  <url type="homepage">https://invent.kde.org/devinlin/raven</url>
+</component>

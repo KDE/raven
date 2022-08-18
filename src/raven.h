@@ -20,7 +20,7 @@ class MailModel;
  * Main class of the project and used as Singleton to communicate with
  * QML.
  */
-class QuickMail : public QObject
+class Raven : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged)
@@ -28,8 +28,8 @@ class QuickMail : public QObject
     Q_PROPERTY(MailModel *folderModel READ folderModel NOTIFY folderModelChanged)
 
 public:
-    QuickMail(QObject *parent = nullptr);
-    ~QuickMail() override = default;
+    Raven(QObject *parent = nullptr);
+    ~Raven() override = default;
 
     bool loading() const;
     Akonadi::CollectionFilterProxyModel *foldersModel() const;
@@ -52,4 +52,4 @@ private:
     MailModel *m_folderModel;
 };
 
-Q_GLOBAL_STATIC(QuickMail, quickMail)
+Q_GLOBAL_STATIC(Raven, raven)

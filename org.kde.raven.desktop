@@ -1,0 +1,13 @@
+# Copyright 2022 Devin Lin <devin@kde.org>
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+[Desktop Entry]
+Name=Raven
+Comment=Send and receive email
+Version=1.0
+Exec=raven
+Icon=raven
+Type=Application
+Terminal=false
+Categories=Qt;KDE;Utility;
+X-KDE-FormFactor=desktop;tablet;handset;

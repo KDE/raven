@@ -1,15 +1,21 @@
-add_executable(kmailquick
+# Copyright 2021 Carl Schwan <carl@carlschwan.eu>
+# Copyright 2022 Devin Lin <devin@kde.org>
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+set(raven_SRCS
     main.cpp
-    quickmail.cpp
+    raven.cpp
     mailmodel.cpp
     messagewrapper.cpp
     composerhelper.cpp
     identitymodel.cpp
     messageviewer/viewer.cpp
-
-    resources.qrc
 )
-target_link_libraries(kmailquick
+
+qt_add_resources(RESOURCES resources.qrc)
+
+add_executable(raven ${raven_SRCS} ${RESOURCES})
+target_link_libraries(raven
     Qt5::Core
     Qt5::Gui
     Qt5::Qml
@@ -33,4 +39,5 @@ target_link_libraries(kmailquick
 
     KF5::MimeTreeParser
 )
-install(TARGETS kmailquick ${KF5_INSTALL_TARGETS_DEFAULT_ARGS})
+target_include_directories(raven PRIVATE ${CMAKE_BINARY_DIR})
+install(TARGETS raven ${KF5_INSTALL_TARGETS_DEFAULT_ARGS})

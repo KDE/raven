@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2020 Carl Schwan <carlschwan@kde.org>
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "quickmail.h"
+#include "raven.h"
 
 #include "mailmodel.h"
 
@@ -10,7 +10,7 @@
 // Akonadi
 #include <Akonadi/CollectionFilterProxyModel>
 #include <Akonadi/ItemFetchScope>
-#include <MessageModel>
+// #include <MessageModel>
 #include <Akonadi/Monitor>
 #include <Akonadi/Session>
 #include <Akonadi/ChangeRecorder>
@@ -26,7 +26,7 @@
 
 #include <KItemModels/KDescendantsProxyModel>
 
-QuickMail::QuickMail(QObject *parent)
+Raven::Raven(QObject *parent)
     : QObject(parent)
     , m_loading(true)
 {
@@ -95,12 +95,12 @@ QuickMail::QuickMail(QObject *parent)
     Q_EMIT loadingChanged();
 }
 
-MailModel *QuickMail::folderModel() const
+MailModel *Raven::folderModel() const
 {
     return m_folderModel;
 }
 
-void QuickMail::loadMailCollection(const QModelIndex &modelIndex)
+void Raven::loadMailCollection(const QModelIndex &modelIndex)
 {
     if (!modelIndex.isValid()) {
         qDebug() << "hello";
@@ -110,17 +110,17 @@ void QuickMail::loadMailCollection(const QModelIndex &modelIndex)
     m_collectionSelectionModel->select(modelIndex, QItemSelectionModel::ClearAndSelect);
 }
 
-bool QuickMail::loading() const
+bool Raven::loading() const
 {
     return m_loading;
 }
 
-Akonadi::CollectionFilterProxyModel *QuickMail::foldersModel() const
+Akonadi::CollectionFilterProxyModel *Raven::foldersModel() const
 {
     return m_foldersModel;
 }
 
-Akonadi::Session *QuickMail::session() const
+Akonadi::Session *Raven::session() const
 {
     return m_session;
 }

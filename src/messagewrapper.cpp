@@ -3,10 +3,10 @@
 
 #include "messagewrapper.h"
 
-#include "quickmail.h"
+#include "raven.h"
 
 #include <KLocalizedString>
-#include <Akonadi/KMime/MessageParts>
+#include <akonadi/messageparts.h>
 #include <Akonadi/Session>
 #include <MailTransportAkonadi/ErrorAttribute>
 #include <Akonadi/Item>
@@ -103,7 +103,7 @@ QString MessageWrapper::content() const
 
 Akonadi::ItemFetchJob *MessageWrapper::createFetchJob(const Akonadi::Item &item)
 {
-    auto job = new Akonadi::ItemFetchJob(item, quickMail);
+    auto job = new Akonadi::ItemFetchJob(item, raven);
     job->fetchScope().fetchAllAttributes();
     job->fetchScope().setAncestorRetrieval(Akonadi::ItemFetchScope::Parent);
     job->fetchScope().fetchFullPayload(true);

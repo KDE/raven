@@ -4,9 +4,11 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15 as QQC2
 import QtQuick.Layouts 1.15
-import org.kde.kirigami 2.15 as Kirigami
-import org.kde.quickmail.private 1.0
+
 import Qt.labs.qmlmodels 1.0
+
+import org.kde.kirigami 2.15 as Kirigami
+import org.kde.raven.private 1.0
 import org.kde.kitemmodels 1.0
 
 Kirigami.OverlayDrawer {
@@ -56,7 +58,7 @@ Kirigami.OverlayDrawer {
                 Kirigami.Heading {
                     Layout.fillWidth: true
                     Layout.leftMargin: Kirigami.Units.largeSpacing + Kirigami.Units.smallSpacing
-                    text: i18n("Pelikan")
+                    text: i18n("Raven")
                 }
 
                 Kirigami.ActionToolBar {
@@ -91,7 +93,7 @@ Kirigami.OverlayDrawer {
 
                 model: KDescendantsProxyModel {
                     id: foldersModel
-                    model: QuickMail.foldersModel
+                    model: Raven.foldersModel
                 }
                 onModelChanged: currentIndex = -1
 
@@ -142,7 +144,7 @@ Kirigami.OverlayDrawer {
 
                             onClicked: {
                                 model.checkState = model.checkState === 0 ? 2 : 0
-                                QuickMail.loadMailCollection(foldersModel.mapToSource(foldersModel.index(model.index, 0)));
+                                Raven.loadMailCollection(foldersModel.mapToSource(foldersModel.index(model.index, 0)));
                                 if (sidebar.mailListPage) {
                                     sidebar.mailListPage.title = model.display
                                     sidebar.mailListPage.forceActiveFocus();

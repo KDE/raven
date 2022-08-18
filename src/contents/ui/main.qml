@@ -3,21 +3,22 @@
 
 import QtQuick 2.15
 import QtQuick.Layouts 1.15
-import org.kde.kirigami 2.14 as Kirigami
 import QtQuick.Controls 2.15 as Controls
+
+import org.kde.kirigami 2.14 as Kirigami
 import org.kde.kitemmodels 1.0 as KItemModels
-import org.kde.quickmail.private 1.0
+import org.kde.raven.private 1.0
 
 Kirigami.ApplicationWindow {
     id: root
 
-    title: i18n("KMailQuick")
+    title: i18n("Raven")
 
     contextDrawer: Kirigami.ContextDrawer {
         id: contextDrawer
     }
 
-    pageStack.initialPage: QuickMail.loading ? loadingPage : folderPageComponent
+    pageStack.initialPage: Raven.loading ? loadingPage : folderPageComponent
 
     Component {
         id: loadingPage
@@ -45,7 +46,7 @@ Kirigami.ApplicationWindow {
 
     globalDrawer: Sidebar {
         //bottomPadding: menuLoader.active ? menuLoader.height : 0
-        mailListPage: QuickMail.loading ? null : pageStack.get(0)
+        mailListPage: Raven.loading ? null : pageStack.get(0)
     }
 
     Component {
@@ -56,20 +57,20 @@ Kirigami.ApplicationWindow {
             property var mailViewer: null;
             ListView {
                 id: mails
-                model: QuickMail.folderModel
+                model: Raven.folderModel
                 delegate: Kirigami.BasicListItem {
                     label: model.title
                     subtitle: sender
                     onClicked: {
                         if (!folderView.mailViewer) {
                             folderView.mailViewer = root.pageStack.push(mailComponent, {
-                                viewerHelper: QuickMail.folderModel.viewerHelper
+                                viewerHelper: Raven.folderModel.viewerHelper
                             });
                         } else {
                             applicationWindow().pageStack.currentIndex = applicationWindow().pageStack.depth - 1;
                         }
 
-                        QuickMail.folderModel.loadItem(index);
+                        Raven.folderModel.loadItem(index);
                     }
                 }
             }

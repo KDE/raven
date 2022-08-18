@@ -1,10 +1,16 @@
+# Copyright 2021 Carl Schwan <carl@carlschwan.eu>
+# Copyright 2022 Devin Lin <devin@kde.org>
+# SPDX-License-Identifier: GPL-2.0-or-later
+
 cmake_minimum_required(VERSION 3.16)
 
-project(kmailquick)
+project(raven)
 
-set(QT_MIN_VERSION "5.14.0")
+set (CMAKE_CXX_STANDARD 17)
+set(PROJECT_VERSION "0.1")
+set(QT_MIN_VERSION "5.15.0")
 set(KF5_MIN_VERSION "5.70.0")
-set(LIBKDEPIM_VERSION "5.16.0")
+set(LIBKDEPIM_VERSION "5.19.0")
 
 
 
@@ -14,7 +20,10 @@ include(FeatureSummary)
 find_package(ECM ${KF5_MIN_VERSION} REQUIRED NO_MODULE)
 
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
+set(CMAKE_MODULE_PATH 
+    ${CMAKE_MODULE_PATH} 
+    ${ECM_MODULE_PATH} 
+)
 
 include(KDEInstallDirs)
 include(KDECMakeSettings)
@@ -24,21 +33,30 @@ include(ECMGenerateHeaders)
 include(ECMPoQmTools)
 include(KDEClangFormat)
 
+ecm_setup_version(${PROJECT_VERSION}
+    VARIABLE_PREFIX RAVEN
+    VERSION_HEADER ${CMAKE_CURRENT_BINARY_DIR}/version.h
+)
+
 ################# Find dependencies #################
-find_package(Qt5 ${QT_MIN_VERSION} REQUIRED COMPONENTS Core Gui Qml QuickControls2 Svg Sql)
+find_package(Qt5 ${QT_MIN_VERSION} REQUIRED COMPONENTS Core Gui Qml QuickControls2 Svg Sql WebEngineWidgets)
 find_package(KF5 ${KF5_MIN_VERSION} REQUIRED COMPONENTS Kirigami2 I18n CoreAddons Declarative ItemModels KIO)
 
 # Find KdepimLibs Package
-find_package(KF5Akonadi ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
-find_package(KF5Libkdepim ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
-find_package(KF5AkonadiMime ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
-find_package(KF5Mime ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
-find_package(KF5MailCommon ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
-find_package(KF5MailTransport ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
-find_package(KF5MailTransportAkonadi ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
-find_package(KF5PimCommon ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
-find_package(KF5PimCommonAkonadi ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
-find_package(KF5MessageList ${LIBKDEPIM_VERSION} CONFIG REQUIRED)
+find_package(KF5 ${LIBKDEPIM_VERSION} REQUIRED COMPONENTS 
+    Akonadi 
+    AkonadiContact 
+    MailCommon 
+    PimCommonAkonadi 
+    Libkdepim
+    AkonadiMime
+    Mime
+    MailTransport
+    MailTransportAkonadi
+    PimCommon
+    PimCommonAkonadi
+    MessageList
+)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -48,12 +66,13 @@ add_definitions(-DQT_NO_CAST_FROM_ASCII -DQT_NO_CAST_TO_ASCII -DQT_NO_URL_CAST_F
 add_definitions(-DQT_USE_QSTRINGBUILDER)
 add_definitions(-DQT_NO_NARROWING_CONVERSIONS_IN_CONNECT)
 add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0x050d00)
-add_definitions( -DQT_STRICT_ITERATORS)
+add_definitions(-DQT_STRICT_ITERATORS)
 
 add_subdirectory(src)
 
-install(PROGRAMS org.kde.kmailquick.desktop DESTINATION ${KDE_INSTALL_APPDIR})
-install(FILES org.kde.kmailquick.appdata.xml DESTINATION ${KDE_INSTALL_METAINFODIR})
+install(PROGRAMS org.kde.raven.desktop DESTINATION ${KDE_INSTALL_APPDIR})
+install(FILES org.kde.raven.appdata.xml DESTINATION ${KDE_INSTALL_METAINFODIR})
+install(FILES raven.svg DESTINATION ${KDE_INSTALL_FULL_ICONDIR}/hicolor/scalable/apps/)
 
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
 

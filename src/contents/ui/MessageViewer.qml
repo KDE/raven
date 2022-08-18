@@ -3,10 +3,11 @@
 
 import QtQuick 2.15
 import QtQuick.Layouts 1.15
-import org.kde.kirigami 2.14 as Kirigami
 import QtQuick.Controls 2.15 as Controls
+
+import org.kde.kirigami 2.14 as Kirigami
 import org.kde.kitemmodels 1.0 as KItemModels
-import org.kde.quickmail.private 1.0
+import org.kde.raven.private 1.0
 
 Kirigami.ScrollablePage {
 
@@ -84,33 +85,33 @@ Kirigami.ScrollablePage {
                     }
                 }
             }
-            Kirigami.InlineMessage {
-                DKIMMailStatus {
-                    id: dkimMailStatus
-                    currentItemId: viewerHelper.itemId
-                }
-                visible: DKIMCheckSignatureJob.DKIMStatus.Valid !== dkimMailStatus.status
-                function escapeHtml(unsafe) {
-                    return unsafe
-                         .replace(/&/g, "&amp;")
-                         .replace(/</g, "&lt;")
-                         .replace(/>/g, "&gt;")
-                         .replace(/"/g, "&quot;")
-                         .replace(/'/g, "&#039;");
-                }
-                text: dkimMailStatus.text + '<br />' + escapeHtml(dkimMailStatus.tooltip)
-                type: {
-                    console.log(dkimMailStatus.status, DKIMCheckSignatureJob.DKIMStatus.Valid)
-                    switch (dkimMailStatus.status) {
-                    case DKIMCheckSignatureJob.DKIMStatus.Invalid:
-                        return Kirigami.MessageType.Error;
-                    case DKIMCheckSignatureJob.DKIMStatus.EmailNotSigned:
-                    case DKIMCheckSignatureJob.DKIMStatus.NeedToBeSigned:
-                        return Kirigami.MessageType.Error;
-                    }
-                    return Kirigami.MessageType.Information;
-                }
-            }
+            //Kirigami.InlineMessage {
+                //DKIMMailStatus {
+                    //id: dkimMailStatus
+                    //currentItemId: viewerHelper.itemId
+                //}
+                //visible: DKIMCheckSignatureJob.DKIMStatus.Valid !== dkimMailStatus.status
+                //function escapeHtml(unsafe) {
+                    //return unsafe
+                         //.replace(/&/g, "&amp;")
+                         //.replace(/</g, "&lt;")
+                         //.replace(/>/g, "&gt;")
+                         //.replace(/"/g, "&quot;")
+                         //.replace(/'/g, "&#039;");
+                //}
+                //text: dkimMailStatus.text + '<br />' + escapeHtml(dkimMailStatus.tooltip)
+                //type: {
+                    //console.log(dkimMailStatus.status, DKIMCheckSignatureJob.DKIMStatus.Valid)
+                    //switch (dkimMailStatus.status) {
+                    //case DKIMCheckSignatureJob.DKIMStatus.Invalid:
+                        //return Kirigami.MessageType.Error;
+                    //case DKIMCheckSignatureJob.DKIMStatus.EmailNotSigned:
+                    //case DKIMCheckSignatureJob.DKIMStatus.NeedToBeSigned:
+                        //return Kirigami.MessageType.Error;
+                    //}
+                    //return Kirigami.MessageType.Information;
+                //}
+            //}
         }
     }
 
