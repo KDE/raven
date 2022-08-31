@@ -32,6 +32,7 @@ include(ECMSetupVersion)
 include(ECMGenerateHeaders)
 include(ECMPoQmTools)
 include(KDEClangFormat)
+include(ECMQmlModule)
 
 ecm_setup_version(${PROJECT_VERSION}
     VARIABLE_PREFIX RAVEN
@@ -56,6 +57,7 @@ find_package(KF5 ${LIBKDEPIM_VERSION} REQUIRED COMPONENTS
     PimCommon
     PimCommonAkonadi
     MessageList
+    I18n
 )
 
 set(CMAKE_CXX_STANDARD 17)

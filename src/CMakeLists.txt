@@ -14,6 +14,8 @@ set(raven_SRCS
 
 qt_add_resources(RESOURCES resources.qrc)
 
+add_subdirectory(mail)
+
 add_executable(raven ${raven_SRCS} ${RESOURCES})
 target_link_libraries(raven
     Qt5::Core
