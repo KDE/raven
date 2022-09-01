@@ -10,45 +10,46 @@
 #include <MessageComposer/InfoPart>
 #include <QDebug>
 
-#include "composerhelper.h"
-#include "mailmodel.h"
 #include "raven.h"
-#include "identitymodel.h"
-#include "messageviewer/viewer.h"
-// #include <messageviewer/dkimmailstatus.h>
-#include <messageviewer/dkimchecksignaturejob.h>
+#include "mailmanager.h"
+#include "mailmodel.h"
+#include "mime/htmlutils.h"
+#include "mime/messageparser.h"
+
 #include <Akonadi/Item>
 #include <Akonadi/CollectionFilterProxyModel>
 
 Q_DECL_EXPORT int main(int argc, char *argv[])
 {
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QGuiApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
     QApplication app(argc, argv);
     QCoreApplication::setOrganizationName(QStringLiteral("KDE"));
     QCoreApplication::setOrganizationDomain(QStringLiteral("kde.org"));
-    QCoreApplication::setApplicationName(QStringLiteral("KMailQuick"));
+    QCoreApplication::setApplicationName(QStringLiteral("Raven"));
 
     QQmlApplicationEngine engine;
+    
+    qmlRegisterSingletonType<MailManager>("org.kde.raven", 1, 0, "MailManager", [](QQmlEngine *engine, QJSEngine *scriptEngine) {
+        Q_UNUSED(engine)
+        Q_UNUSED(scriptEngine)
+        return new MailManager;
+    });
 
-    qRegisterMetaType<MailModel*>("MailModel*");
-    qRegisterMetaType<ViewerHelper*>("ViewerHelper*");
-    qRegisterMetaType<MessageComposer::Composer *>("Composer *");
-    qRegisterMetaType<MessageComposer::InfoPart *>("InfoPart *");
-    qRegisterMetaType<MessageComposer::TextPart *>("TextPart *");
+    qmlRegisterSingletonType<HtmlUtils::HtmlUtils>("org.kde.raven", 1, 0, "HtmlUtils", [](QQmlEngine *engine, QJSEngine *scriptEngine) {
+        Q_UNUSED(engine)
+        Q_UNUSED(scriptEngine)
+        return new HtmlUtils::HtmlUtils;
+    });
+
+    qmlRegisterType<MessageParser>("org.kde.raven", 1, 0, "MessageParser");
+
+    qRegisterMetaType<MailModel *>("MailModel*");
     qRegisterMetaType<Akonadi::CollectionFilterProxyModel *>("Akonadi::CollectionFilterProxyModel *");
-    qRegisterMetaType<MessageComposer::AttachmentModel *>("AttachmentModel *");
-//     qRegisterMetaType<MessageViewer::DKIMCheckSignatureJob::DKIMStatus>("DKIMCheckSignatureJob::DKIMStatus");
-    qRegisterMetaType<MessageViewer::DKIMCheckSignatureJob::DKIMError>("DKIMCheckSignatureJob::DKIMError");
     qRegisterMetaType<Akonadi::Item::Id>("Akonadi::Item::Id");
     qRegisterMetaType<KDescendantsProxyModel*>("KDescendantsProxyModel*");
     
-    qmlRegisterType<ComposerHelper>("org.kde.raven.private", 1, 0, "ComposerHelper");
-    qmlRegisterType<ComposerHelper>("org.kde.raven.private", 1, 0, "ViewerHelper");
-//     qmlRegisterType<MessageViewer::DKIMMailStatus>("org.kde.raven.private", 1, 0, "DKIMMailStatus");
-    qmlRegisterType<MessageViewer::DKIMCheckSignatureJob>("org.kde.raven.private", 1, 0, "DKIMCheckSignatureJob");
-    qmlRegisterSingletonInstance<Raven>("org.kde.raven.private", 1, 0, "Raven", raven);
-    
-    qmlRegisterType<IdentityModel>("org.kde.raven.private", 1, 0, "IdentityModel");
+    qmlRegisterSingletonInstance<Raven>("org.kde.raven", 1, 0, "Raven", raven);
 
     engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
     engine.load(QUrl(QStringLiteral("qrc:///main.qml")));

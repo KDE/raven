@@ -4,42 +4,48 @@
 
 #pragma once
 
-#include <QObject>
-#include <QIdentityProxyModel>
+#include <Akonadi/Item>
 #include <QItemSelectionModel>
+#include <QObject>
+#include <QSortFilterProxyModel>
 
-class ViewerHelper;
+#include "messagestatus.h"
 
-class MailModel : public QIdentityProxyModel
+class MailModel : public QSortFilterProxyModel
 {
     Q_OBJECT
-
-    Q_PROPERTY(ViewerHelper *viewerHelper READ viewerHelper WRITE setViewerHelper NOTIFY viewerHelperChanged)
+    Q_PROPERTY(QString searchString READ searchString WRITE setSearchString NOTIFY searchStringChanged)
 
 public:
-    enum AnimalRoles {
+    enum ExtraRole {
         TitleRole = Qt::UserRole + 1,
         SenderRole,
+        FromRole,
+        ToRole,
         TextColorRole,
         DateRole,
+        DateTimeRole,
         BackgroundColorRole,
-        UnreadRole,
-        MailRole,
+        StatusRole,
         FavoriteRole,
+        ItemRole,
     };
-
-    ViewerHelper *viewerHelper() const;
-    void setViewerHelper(ViewerHelper *viewerHelper);
 
     explicit MailModel(QObject *parent = nullptr);
     QHash<int, QByteArray> roleNames() const override;
     virtual QVariant data(const QModelIndex &index, int role) const override;
+    bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
 
-    Q_INVOKABLE void loadItem(int row);
+    Q_INVOKABLE void updateMessageStatus(int row, MessageStatus messageStatus);
+    Q_INVOKABLE MessageStatus copyMessageStatus(MessageStatus messageStatus);
+
+    QString searchString() const;
+    void setSearchString(const QString &searchString);
 
 Q_SIGNALS:
-    void viewerHelperChanged();
+    void searchStringChanged();
 
 private:
-    ViewerHelper *m_viewerHelper = nullptr;
+    Akonadi::Item itemForRow(int row) const;
+    QString m_searchString;
 };

@@ -4,10 +4,12 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15 as QQC2
 import QtQuick.Layouts 1.15
-import org.kde.kirigami 2.15 as Kirigami
+
 import Qt.labs.qmlmodels 1.0
+
+import org.kde.kirigami 2.15 as Kirigami
 import org.kde.kitemmodels 1.0
-import org.kde.kalendar.mail 1.0
+import org.kde.raven 1.0
 
 QQC2.ScrollView {
     id: folderListView

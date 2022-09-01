@@ -7,7 +7,7 @@ import QtQuick.Controls 2.15 as Controls
 
 import org.kde.kirigami 2.14 as Kirigami
 import org.kde.kitemmodels 1.0 as KItemModels
-import org.kde.raven.private 1.0
+import org.kde.raven 1.0
 
 Kirigami.ApplicationWindow {
     id: root
@@ -18,67 +18,14 @@ Kirigami.ApplicationWindow {
         id: contextDrawer
     }
 
-    pageStack.initialPage: Raven.loading ? loadingPage : folderPageComponent
+    pageStack.initialPage: FolderView {}
 
-    Component {
-        id: loadingPage
-        Kirigami.Page {
-            Kirigami.PlaceholderMessage {
-                anchors.centerIn: parent
-                text: i18n("Loading, please wait...")
-            }
+    globalDrawer: Kirigami.GlobalDrawer {
+        title: "test"
+        
+        MailSidebar {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
         }
-    }
-
-    /*menuBar: Loader {
-        id: menuLoader
-        active: Kirigami.Settings.hasPlatformMenuBar != undefined ?
-                !Kirigami.Settings.hasPlatformMenuBar && !Kirigami.Settings.isMobile :
-                !Kirigami.Settings.isMobile
-
-        sourceComponent: WindowMenu {
-            parentWindow: root
-            todoMode: pageStack.currentItem.objectName == "todoView"
-            Kirigami.Theme.colorSet: Kirigami.Theme.Header
-        }
-    }*/
-
-
-    globalDrawer: Sidebar {
-        //bottomPadding: menuLoader.active ? menuLoader.height : 0
-        mailListPage: Raven.loading ? null : pageStack.get(0)
-    }
-
-    Component {
-        id: folderPageComponent
-
-        Kirigami.ScrollablePage {
-            id: folderView
-            property var mailViewer: null;
-            ListView {
-                id: mails
-                model: Raven.folderModel
-                delegate: Kirigami.BasicListItem {
-                    label: model.title
-                    subtitle: sender
-                    onClicked: {
-                        if (!folderView.mailViewer) {
-                            folderView.mailViewer = root.pageStack.push(mailComponent, {
-                                viewerHelper: Raven.folderModel.viewerHelper
-                            });
-                        } else {
-                            applicationWindow().pageStack.currentIndex = applicationWindow().pageStack.depth - 1;
-                        }
-
-                        Raven.folderModel.loadItem(index);
-                    }
-                }
-            }
-        }
-    }
-
-    Component {
-        id: mailComponent
-        MessageViewer {}
     }
 }
