@@ -15,7 +15,6 @@ Kirigami.ScrollablePage {
     id: root
 
     title: props.title
-    readonly property int mode: KalendarApplication.Mail
     property var item
     property var props
 

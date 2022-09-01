@@ -1,5 +1,8 @@
 <RCC>
     <qresource prefix="/">
+        <file alias="mailboxselector/MailBoxList.qml">contents/ui/mailboxselector/MailBoxList.qml</file>
+        <file alias="mailboxselector/MailBoxListPage.qml">contents/ui/mailboxselector/MailBoxListPage.qml</file>
+        <file alias="mailboxselector/MailBoxListSidebar.qml">contents/ui/mailboxselector/MailBoxListSidebar.qml</file>
         <file alias="mailpartview/ErrorPart.qml">contents/ui/mailpartview/ErrorPart.qml</file>
         <file alias="mailpartview/HtmlPart.qml">contents/ui/mailpartview/HtmlPart.qml</file>
         <file alias="mailpartview/ICalPart.qml">contents/ui/mailpartview/ICalPart.qml</file>
@@ -10,7 +13,6 @@
         <file alias="private/AttachmentDelegate.qml">contents/ui/private/AttachmentDelegate.qml</file>
         <file alias="ConversationViewer.qml">contents/ui/ConversationViewer.qml</file>
         <file alias="FolderView.qml">contents/ui/FolderView.qml</file>
-        <file alias="MailSidebar.qml">contents/ui/MailSidebar.qml</file>
         <file alias="MailViewer.qml">contents/ui/MailViewer.qml</file>
         <file alias="main.qml">contents/ui/main.qml</file>
     </qresource>
