@@ -21,6 +21,8 @@ ListView {
     }
     
     onModelChanged: currentIndex = -1
+    
+    signal folderChosen()
 
     delegate: DelegateChooser {
         role: 'kDescendantExpandable'
@@ -28,47 +30,88 @@ ListView {
         DelegateChoice {
             roleValue: true
 
-            Kirigami.BasicListItem {
-                label: display
-                labelItem.color: Kirigami.Theme.disabledTextColor
-                labelItem.font.weight: Font.DemiBold
-                topPadding: 2 * Kirigami.Units.largeSpacing
-                leftPadding: (Kirigami.Settings.isMobile ? Kirigami.Units.largeSpacing * 2 : Kirigami.Units.largeSpacing) + Kirigami.Units.gridUnit * (model.kDescendantLevel - 1)
-                hoverEnabled: false
-                background: Item {}
-
-                separatorVisible: false
-
-                icon: model.decoration
-                leadingPadding: Kirigami.Settings.isMobile ? Kirigami.Units.largeSpacing * 2 : Kirigami.Units.largeSpacing
-
-                trailing: Kirigami.Icon {
-                    implicitWidth: Kirigami.Units.iconSizes.small
-                    implicitHeight: Kirigami.Units.iconSizes.small
-                    source: model.kDescendantExpanded ? 'arrow-up' : 'arrow-down'
+            ColumnLayout {
+                spacing: 0
+                width: ListView.view.width
+                
+                Item {
+                    Layout.topMargin: Kirigami.Units.largeSpacing
+                    visible: (model.kDescendantLevel === 1) && (model.index !== 0)
                 }
+                
+                QQC2.ItemDelegate {
+                    id: categoryHeader
+                    Layout.fillWidth: true
+                    topPadding: Kirigami.Units.largeSpacing
+                    bottomPadding: Kirigami.Units.largeSpacing
+                    leftPadding: Kirigami.Units.largeSpacing * (model.kDescendantLevel)
 
-                onClicked: mailList.model.toggleChildren(index)
+                    property string displayText: model.display
+                    
+                    onClicked: mailList.model.toggleChildren(index)
+                    
+                    contentItem: RowLayout {
+                        Kirigami.Icon {
+                            Layout.alignment: Qt.AlignVCenter
+                            visible: model.kDescendantLevel > 1
+                            source: "folder-symbolic"
+                            Layout.preferredHeight: Kirigami.Units.iconSizes.small
+                            Layout.preferredWidth: Layout.preferredHeight
+                        }
+                        
+                        QQC2.Label {
+                            Layout.fillWidth: true
+                            
+                            color: Kirigami.Theme.disabledTextColor
+                            text: categoryHeader.displayText
+                            font.weight: Font.DemiBold
+                            elide: Text.ElideRight
+                        }
+                        
+                        Kirigami.Icon {
+                            implicitWidth: Kirigami.Units.iconSizes.small
+                            implicitHeight: Kirigami.Units.iconSizes.small
+                            source: model.kDescendantExpanded ? 'arrow-up' : 'arrow-down'
+                        }
+                    }
+                }
             }
         }
 
         DelegateChoice {
             roleValue: false
+            
             QQC2.ItemDelegate {
                 id: controlRoot
                 text: model.display
                 width: ListView.view.width
                 padding: Kirigami.Units.largeSpacing
-                leftPadding: (Kirigami.Settings.isMobile ? 3 : 2) * Kirigami.Units.largeSpacing * model.kDescendantLevel
+                leftPadding: Kirigami.Units.largeSpacing * model.kDescendantLevel
+                
+                property bool chosen: false
+                Connections {
+                    target: mailList
+                    
+                    function onFolderChosen() {
+                        if (controlRoot.chosen) {
+                            controlRoot.chosen = false;
+                            controlRoot.highlighted = true;
+                        } else {
+                            controlRoot.highlighted = false;
+                        }
+                    }
+                }
                 
                 contentItem: RowLayout {
                     spacing: Kirigami.Units.smallSpacing
+                    
                     Kirigami.Icon {
                         Layout.alignment: Qt.AlignVCenter
                         source: model.decoration
                         Layout.preferredHeight: Kirigami.Units.iconSizes.small
                         Layout.preferredWidth: Layout.preferredHeight
                     }
+                    
                     QQC2.Label {
                         leftPadding: controlRoot.mirrored ? (controlRoot.indicator ? controlRoot.indicator.width : 0) + controlRoot.spacing : 0
                         rightPadding: !controlRoot.mirrored ? (controlRoot.indicator ? controlRoot.indicator.width : 0) + controlRoot.spacing : 0
@@ -87,7 +130,10 @@ ListView {
 
                 onClicked: {
                     model.checkState = model.checkState === 0 ? 2 : 0
-                    MailManager.loadMailCollection(foldersModel.mapToSource(foldersModel.index(model.index, 0))); 
+                    MailManager.loadMailCollection(foldersModel.mapToSource(foldersModel.index(model.index, 0)));
+                    
+                    controlRoot.chosen = true;
+                    mailList.folderChosen();
                     
                     // push list page if in narrow mode
                     if (!applicationWindow().isWidescreen) {
