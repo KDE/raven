@@ -7,7 +7,7 @@ import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15 as QQC2
 
 import org.kde.raven 1.0
-import org.kde.kirigami 2.14 as Kirigami
+import org.kde.kirigami 2.19 as Kirigami
 import org.kde.kitemmodels 1.0 as KItemModels
 
 Kirigami.ScrollablePage {
@@ -38,7 +38,7 @@ Kirigami.ScrollablePage {
 
             QQC2.MenuItem {
                 icon.name: 'delete'
-                text: i18n('Move to Trash')
+                text: i18n('Move to trash')
             }
 
             QQC2.MenuItem {
@@ -71,10 +71,26 @@ Kirigami.ScrollablePage {
             }
         }
         
+        Kirigami.PlaceholderMessage {
+            id: mailboxSelected
+            anchors.centerIn: parent
+            visible: MailManager.selectedFolderName === ""
+            text: i18n("No mailbox selected")
+            explanation: i18n("Select a mailbox from the sidebar.")
+            icon.name: "mail-unread"
+        }
+        
+        Kirigami.PlaceholderMessage {
+            anchors.centerIn: parent
+            visible: mails.count === 0 && !mailboxSelected.visible
+            text: i18n("Mailbox is empty")
+            icon.name: "mail-folder-inbox"
+        }
+        
         delegate: MailDelegate {
             showSeparator: model.index !== folderView.count - 1
             
-            datetime: model.datetime.toLocaleTimeString(Qt.locale(), Locale.ShortFormat)
+            datetime: model.datetime.toLocaleTimeString(Qt.locale(), Locale.ShortFormat) // TODO this is not showing date !
             author: model.from
             title: model.title
             contentPreview: "This is a test of the message content........." // model.content
