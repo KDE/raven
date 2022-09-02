@@ -1,4 +1,5 @@
 // SPDX-FileCopyrightText: 2021 Carl Schwan <carlschwan@kde.org>
+// SPDX-FileCopyrightText: 2022 Devin Lin <devin@kde.org>
 // SPDX-License-Identifier: LGPL-2.1-only OR LGPL-3.0-only OR LicenseRef-KDE-Accepted-LGPL
 
 import QtQuick 2.15
@@ -15,6 +16,9 @@ Kirigami.ApplicationWindow {
     id: root
 
     title: i18n("Raven")
+    
+    width: 1200
+    height: 600
 
     contextDrawer: Kirigami.ContextDrawer {
         id: contextDrawer

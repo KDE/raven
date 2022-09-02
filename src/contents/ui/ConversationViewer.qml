@@ -14,11 +14,32 @@ import './mailpartview'
 Kirigami.ScrollablePage {
     id: root
 
-    title: props.title
     property var item
     property var props
+    
+    leftPadding: 0
+    rightPadding: 0
+    topPadding: 0
+    bottomPadding: 0
 
     ColumnLayout {
+        spacing: 0
+        
+        QQC2.Label {
+            Layout.leftMargin: Kirigami.Units.largeSpacing * 2
+            Layout.rightMargin: Kirigami.Units.largeSpacing * 2
+            Layout.topMargin: Kirigami.Units.gridUnit 
+            Layout.bottomMargin: Kirigami.Units.gridUnit
+            Layout.fillWidth: true
+            
+            text: props.title
+            maximumLineCount: 2
+            wrapMode: Text.Wrap
+            elide: Text.ElideRIght
+            
+            font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.2
+        }
+        
         // TODO use repeater to see the full conversation
         MailViewer {
             Layout.fillWidth: true

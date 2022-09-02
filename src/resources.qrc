@@ -13,6 +13,7 @@
         <file alias="private/AttachmentDelegate.qml">contents/ui/private/AttachmentDelegate.qml</file>
         <file alias="ConversationViewer.qml">contents/ui/ConversationViewer.qml</file>
         <file alias="FolderView.qml">contents/ui/FolderView.qml</file>
+        <file alias="MailDelegate.qml">contents/ui/MailDelegate.qml</file>
         <file alias="MailViewer.qml">contents/ui/MailViewer.qml</file>
         <file alias="main.qml">contents/ui/main.qml</file>
     </qresource>

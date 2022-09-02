@@ -1,4 +1,5 @@
 // SPDX-FileCopyrightText: 2021 Carl Schwan <carlschwan@kde.org>
+// SPDX-FileCopyrightText: 2022 Devin Lin <devin@kde.org>
 // SPDX-License-Identifier: LGPL-2.1-only OR LGPL-3.0-only OR LicenseRef-KDE-Accepted-LGPL
 
 import QtQuick 2.15
@@ -12,7 +13,7 @@ import org.kde.kitemmodels 1.0 as KItemModels
 Kirigami.ScrollablePage {
     id: folderView
     title: MailManager.selectedFolderName
-
+    
     Component {
         id: contextMenu
         QQC2.Menu {
@@ -60,52 +61,27 @@ Kirigami.ScrollablePage {
     ListView {
         id: mails
         model: MailManager.folderModel
-        section.delegate: Kirigami.ListSectionHeader {
-            required property string section
-            label: section
+        currentIndex: -1
+        
+        Connections {
+            target: MailManager
+            
+            function onFolderModelChanged() {
+                mails.currentIndex = -1;
+            }
         }
-        section.property: "date"
-        delegate: Kirigami.BasicListItem {
-            label: model.title
-            subtitle: model.from
-            labelItem.color: if (highlighted) {
-                return Kirigami.Theme.highlightedTextColor;
-            } else {
-                return !model.status || model.status.isRead ? Kirigami.Theme.textColor : Kirigami.Theme.linkColor;
-            }
-
-            TapHandler {
-                acceptedButtons: Qt.RightButton
-                onTapped: {
-                    const menu = contextMenu.createObject(folderView, {
-                        row: index,
-                        status: MailManager.folderModel.copyMessageStatus(model.status),
-                    });
-                    menu.popup();
-                }
-            }
-
-
-            trailing: RowLayout {
-                QQC2.Label {
-                    text: model.datetime.toLocaleTimeString(Qt.locale(), Locale.ShortFormat)
-                    QQC2.ToolTip {
-                        text:  model.datetime.toLocaleString()
-                    }
-                }
-                QQC2.ToolButton {
-                    icon.name: status.isImportant ? 'starred-symbolic' : 'non-starred-symbolic'
-                    implicitHeight: Kirigami.Units.gridUnit
-                    implicitWidth: Kirigami.Units.gridUnit
-                    onClicked: {
-                        const status = MailManager.folderModel.copyMessageStatus(model.status);
-                        status.isImportant = !status.isImportant;
-                        MailManager.folderModel.updateMessageStatus(index, status)
-                    }
-                }
-            }
-
-            onClicked: {
+        
+        delegate: MailDelegate {
+            showSeparator: model.index !== folderView.count - 1
+            
+            datetime: model.datetime.toLocaleTimeString(Qt.locale(), Locale.ShortFormat)
+            author: model.from
+            title: model.title
+            contentPreview: "This is a test of the message content........." // model.content
+            
+            isRead: !model.status || model.status.isRead
+            
+            onOpenMailRequested: {
                 applicationWindow().pageStack.push(Qt.resolvedUrl('ConversationViewer.qml'), {
                     item: model.item,
                     props: model,
@@ -116,6 +92,20 @@ Kirigami.ScrollablePage {
                     status.isRead = true;
                     MailManager.folderModel.updateMessageStatus(index, status)
                 }
+            }
+            
+            onStarMailRequested: {
+                const status = MailManager.folderModel.copyMessageStatus(model.status);
+                status.isImportant = !status.isImportant;
+                MailManager.folderModel.updateMessageStatus(index, status)
+            }
+            
+            onContextMenuRequested: {
+                const menu = contextMenu.createObject(folderView, {
+                    row: index,
+                    status: MailManager.folderModel.copyMessageStatus(model.status),
+                });
+                menu.popup();
             }
         }
     }
