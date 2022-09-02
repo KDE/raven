@@ -89,6 +89,7 @@ ListView {
                 leftPadding: Kirigami.Units.largeSpacing * model.kDescendantLevel
                 
                 property bool chosen: false
+                
                 Connections {
                     target: mailList
                     
@@ -99,6 +100,31 @@ ListView {
                         } else {
                             controlRoot.highlighted = false;
                         }
+                    }
+                }
+                
+                property bool showSelected: (controlRoot.pressed || (controlRoot.highlighted && applicationWindow().isWidescreen))
+    
+                background: Rectangle {
+                    color: Qt.rgba(Kirigami.Theme.highlightColor.r, Kirigami.Theme.highlightColor.g, Kirigami.Theme.highlightColor.b, controlRoot.showSelected ? 0.5 : hoverHandler.hovered ? 0.2 : 0)
+                    
+                    // indicator rectangle
+                    Rectangle {
+                        anchors.left: parent.left
+                        anchors.top: parent.top
+                        anchors.topMargin: 1
+                        anchors.bottom: parent.bottom
+                        anchors.bottomMargin: 1
+                        
+                        width: 4
+                        visible: controlRoot.highlighted
+                        color: Kirigami.Theme.highlightColor
+                    }
+                    
+                    HoverHandler {
+                        id: hoverHandler
+                        // disable hover input on mobile because touchscreens trigger hover feedback and do not "unhover" in Qt
+                        enabled: !Kirigami.Settings.isMobile
                     }
                 }
                 

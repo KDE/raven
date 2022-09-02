@@ -22,6 +22,14 @@ Kirigami.ScrollablePage {
     topPadding: 0
     bottomPadding: 0
 
+    contextualActions: [
+        Kirigami.Action {
+            text: i18n("Move to trash")
+            iconName: "albumfolder-user-trash"
+            // TODO implement move to trash
+        }
+    ]
+    
     ColumnLayout {
         spacing: 0
         

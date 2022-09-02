@@ -50,6 +50,8 @@ Kirigami.AbstractListItem {
         
         HoverHandler {
             id: hoverHandler
+            // disable hover input on mobile because touchscreens trigger hover feedback and do not "unhover" in Qt
+            enabled: !Kirigami.Settings.isMobile
         }
         
         Kirigami.Separator {
