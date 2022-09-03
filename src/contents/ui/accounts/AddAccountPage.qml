@@ -48,7 +48,10 @@ Kirigami.ScrollablePage {
 
                 position: Controls.DialogButtonBox.Footer
 
-                onAccepted: newAccount.addAccount()
+                onAccepted: {
+                    newAccount.addAccount();
+                    applicationWindow().pageStack.layers.pop();
+                }
                 onRejected: applicationWindow().pageStack.layers.pop()
             }
         }
