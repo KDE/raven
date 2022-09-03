@@ -32,14 +32,22 @@ Kirigami.GlobalDrawer {
             Layout.fillWidth: true
             implicitHeight: applicationWindow().pageStack.globalToolBar.preferredHeight
 
-            Item {
+            RowLayout {
                 anchors.fill: parent
+                
                 Kirigami.Heading {
                     level: 1
                     text: i18n("Mail")
-                    anchors.left: parent.left
-                    anchors.leftMargin: Kirigami.Units.largeSpacing + Kirigami.Units.smallSpacing
-                    anchors.verticalCenter: parent.verticalCenter
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.leftMargin: Kirigami.Units.largeSpacing + Kirigami.Units.smallSpacing
+                }
+                
+                QQC2.ToolButton {
+                    display: QQC2.ToolButton.IconOnly
+                    text: i18n("Settings")
+                    icon.name: "settings-configure"
+                    onClicked: applicationWindow().pageStack.layers.push(applicationWindow().getPage("SettingsPage"))
                 }
             }
         }

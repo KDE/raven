@@ -15,5 +15,13 @@ Kirigami.ScrollablePage {
     id: root
     title: i18n("Mailboxes")
     
+    contextualActions: [
+        Kirigami.Action {
+            text: i18n("Settings")
+            iconName: "settings-configure"
+            onTriggered: applicationWindow().pageStack.layers.push(applicationWindow().getPage("SettingsPage"))
+        }
+    ]
+    
     MailBoxList {}
 }

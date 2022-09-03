@@ -19,7 +19,7 @@ Kirigami.ScrollablePage {
     leftPadding: 0
     rightPadding: 0
     topPadding: Kirigami.Units.gridUnit
-    bottomPadding: 0
+    bottomPadding: Kirigami.Units.gridUnit
 
     ColumnLayout {
         spacing: 0
@@ -38,7 +38,7 @@ Kirigami.ScrollablePage {
                 MobileForm.FormButtonDelegate {
                     id: aboutDelegate
                     text: i18n("About")
-                    onClicked: applicationWindow().pageStack.push("qrc:/AboutPage.qml")
+                    onClicked: applicationWindow().pageStack.layers.push(applicationWindow().getPage("AboutPage"))
                 }
             }
         }
@@ -54,7 +54,59 @@ Kirigami.ScrollablePage {
                     title: i18n("Accounts")
                 }
                 
+                Repeater {
+                    model: MailAccounts.runningMailAgents
+                    delegate: MobileForm.FormButtonDelegate {
+                        onClicked: {
+                            // TODO implement account management page
+                        }
+                        
+                        contentItem: RowLayout {
+                            Kirigami.Icon {
+                                source: model.decoration
+                                Layout.rightMargin: Kirigami.Units.largeSpacing
+                                implicitWidth: Kirigami.Units.iconSizes.medium
+                                implicitHeight: Kirigami.Units.iconSizes.medium
+                            }
+                            
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: Kirigami.Units.smallSpacing
+                                
+                                Controls.Label {
+                                    Layout.fillWidth: true
+                                    text: model.display
+                                    elide: Text.ElideRight
+                                    wrapMode: Text.Wrap
+                                    maximumLineCount: 2
+                                    color: Kirigami.Theme.textColor
+                                }
+                                
+                                Controls.Label {
+                                    Layout.fillWidth: true
+                                    text: model.statusMessage
+                                    color: Kirigami.Theme.disabledTextColor
+                                    font: Kirigami.Theme.smallFont
+                                    elide: Text.ElideRight
+                                }
+                            }
+                            
+                            MobileForm.FormArrow {
+                                Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                                direction: MobileForm.FormArrow.Right
+                            }
+                        }
+                    }
+                }
                 
+                MobileForm.FormDelegateSeparator { below: addAccountDelegate }
+                
+                MobileForm.FormButtonDelegate {
+                    id: addAccountDelegate
+                    text: i18n("Add Account")
+                    icon.name: "list-add"
+                    onClicked: applicationWindow().pageStack.layers.push("qrc:/accounts/AddAccountPage.qml")
+                }
             }
         }
     }

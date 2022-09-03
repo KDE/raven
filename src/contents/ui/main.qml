@@ -63,6 +63,8 @@ Kirigami.ApplicationWindow {
         switch (name) {
             case "FolderView": return pagePool.loadPage("qrc:/FolderView.qml")
             case "MailBoxListPage": return pagePool.loadPage("qrc:/mailboxselector/MailBoxListPage.qml")
+            case "SettingsPage": return pagePool.loadPage("qrc:/SettingsPage.qml")
+            case "AboutPage": return pagePool.loadPage("qrc:/AboutPage.qml")
         }
     }
     
@@ -71,7 +73,7 @@ Kirigami.ApplicationWindow {
         changeSidebar(isWidescreen);
         
         if (isWidescreen) {
-            root.pageStack.push(getPage("FolderView"));
+            root.pageStack.push(c("FolderView"));
         }
     }
     

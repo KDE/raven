@@ -21,6 +21,8 @@
 #include "mailmodel.h"
 #include "mime/htmlutils.h"
 #include "mime/messageparser.h"
+#include "accounts/mailaccounts.h"
+#include "accounts/newaccount.h"
 
 #include <Akonadi/Item>
 #include <Akonadi/CollectionFilterProxyModel>
@@ -48,7 +50,10 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
         Q_UNUSED(scriptEngine)
         return new HtmlUtils::HtmlUtils;
     });
+    
+    qmlRegisterSingletonType<MailAccounts>("org.kde.raven", 1, 0, "MailAccounts", [](QQmlEngine *engine, QJSEngine *scriptEngine) { return new MailAccounts; });
 
+    qmlRegisterType<NewAccount>("org.kde.raven", 1, 0, "NewAccount");
     qmlRegisterType<MessageParser>("org.kde.raven", 1, 0, "MessageParser");
 
     qRegisterMetaType<MailModel *>("MailModel*");
