@@ -40,10 +40,26 @@ ecm_setup_version(${PROJECT_VERSION}
 )
 
 ################# Find dependencies #################
-find_package(Qt5 ${QT_MIN_VERSION} REQUIRED COMPONENTS Core Gui Qml QuickControls2 Svg Sql WebEngineWidgets)
-find_package(KF5 ${KF5_MIN_VERSION} REQUIRED COMPONENTS Kirigami2 I18n CoreAddons Declarative ItemModels KIO)
+find_package(Qt5 ${QT_MIN_VERSION} REQUIRED COMPONENTS 
+    Core 
+    Gui 
+    Qml 
+    QuickControls2 
+    Svg 
+    Sql 
+    WebEngineWidgets
+)
 
-# Find KdepimLibs Package
+find_package(KF5 ${KF5_MIN_VERSION} REQUIRED COMPONENTS 
+    Kirigami2 
+    I18n 
+    CoreAddons 
+    Declarative 
+    ItemModels
+    KCMUtils
+    KIO
+)
+
 find_package(KF5 ${LIBKDEPIM_VERSION} REQUIRED COMPONENTS 
     Akonadi 
     AkonadiContact 
@@ -51,6 +67,7 @@ find_package(KF5 ${LIBKDEPIM_VERSION} REQUIRED COMPONENTS
     PimCommonAkonadi 
     Libkdepim
     AkonadiMime
+    Ldap
     Mime
     MailTransport
     MailTransportAkonadi

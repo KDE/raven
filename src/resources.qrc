@@ -11,6 +11,7 @@
         <file alias="mailpartview/MailPartView.qml">contents/ui/mailpartview/MailPartView.qml</file>
         <file alias="mailpartview/TextPart.qml">contents/ui/mailpartview/TextPart.qml</file>
         <file alias="private/AttachmentDelegate.qml">contents/ui/private/AttachmentDelegate.qml</file>
+        <file alias="AboutPage.qml">contents/ui/AboutPage.qml</file>
         <file alias="ConversationViewer.qml">contents/ui/ConversationViewer.qml</file>
         <file alias="FolderView.qml">contents/ui/FolderView.qml</file>
         <file alias="MailDelegate.qml">contents/ui/MailDelegate.qml</file>

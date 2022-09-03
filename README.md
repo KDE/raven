@@ -5,7 +5,7 @@
 
 # Raven <img src="raven.svg" width="40" />
 
-An email client for Plasma Mobile, based on Akonadi.
+An email client for Plasma Mobile, based on Akonadi and certain KMail components.
 
 ## Links
 * Project page: https://invent.kde.org/devinlin/raven
@@ -16,6 +16,8 @@ An email client for Plasma Mobile, based on Akonadi.
 * Akonadi
 * [PIM MailCommon](https://invent.kde.org/pim/mailcommon)
 * Qt Quick + Controls
+* Kirigami
+* Kirigami Addons
 
 ## Compiling
 
@@ -23,5 +25,5 @@ An email client for Plasma Mobile, based on Akonadi.
 mkdir build
 cd build
 cmake .. # add -DCMAKE_BUILD_TYPE=Release to compile for release
-ninja
+make
 ```

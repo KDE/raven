@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2010 Omat Holding B.V. <info@omat.nl>
+// SPDX-FileCopyrightText: 2021 Carl Schwan <carlschwan@kde.org>
+// SPDX-FileCopyrightText: 2022 Devin Lin <devin@kde.org>
+// SPDX-License-Identifier: LGPL-2.0-or-later
+
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QtQml>
@@ -12,6 +17,7 @@
 
 #include "raven.h"
 #include "mailmanager.h"
+#include "abouttype.h"
 #include "mailmodel.h"
 #include "mime/htmlutils.h"
 #include "mime/messageparser.h"
@@ -30,6 +36,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
     
+    // configure types
     qmlRegisterSingletonType<MailManager>("org.kde.raven", 1, 0, "MailManager", [](QQmlEngine *engine, QJSEngine *scriptEngine) {
         Q_UNUSED(engine)
         Q_UNUSED(scriptEngine)
@@ -49,11 +56,15 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     qRegisterMetaType<Akonadi::Item::Id>("Akonadi::Item::Id");
     qRegisterMetaType<KDescendantsProxyModel*>("KDescendantsProxyModel*");
     
+    qmlRegisterSingletonInstance("org.kde.raven", 1, 0, "AboutType", &AboutType::instance());
     qmlRegisterSingletonInstance<Raven>("org.kde.raven", 1, 0, "Raven", raven);
 
     engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
     engine.load(QUrl(QStringLiteral("qrc:///main.qml")));
 
+    // start ispdb
+    
+    
     if (engine.rootObjects().isEmpty()) {
         return -1;
     }
