@@ -19,6 +19,7 @@
 #include "mailmanager.h"
 #include "abouttype.h"
 #include "mailmodel.h"
+#include "contactimageprovider.h"
 #include "mime/htmlutils.h"
 #include "mime/messageparser.h"
 #include "accounts/mailaccounts.h"
@@ -64,6 +65,8 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     qmlRegisterSingletonInstance("org.kde.raven", 1, 0, "AboutType", &AboutType::instance());
     qmlRegisterSingletonInstance<Raven>("org.kde.raven", 1, 0, "Raven", raven);
 
+    engine.addImageProvider(QLatin1String("contact"), new ContactImageProvider);
+    
     engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
     engine.load(QUrl(QStringLiteral("qrc:///main.qml")));
 

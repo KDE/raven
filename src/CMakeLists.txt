@@ -6,15 +6,11 @@ set(raven_SRCS
     main.cpp
     raven.cpp
     abouttype.cpp
-    
+
+    contactimageprovider.cpp
     mailmanager.cpp
-    mailmanager.h
     mailmodel.cpp
-    mailmodel.h
-
-    messagestatus.h
     messagestatus.cpp
-
     crypto.cpp
     
     accounts/ispdb/autoconfigkolabfreebusy.cpp
