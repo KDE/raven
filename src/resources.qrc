@@ -2,6 +2,7 @@
     <qresource prefix="/">
         <file alias="accounts/AddAccountPage.qml">contents/ui/accounts/AddAccountPage.qml</file>
         <file alias="accounts/FormTextInputDelegate.qml">contents/ui/accounts/FormTextInputDelegate.qml</file>
+        <file alias="accounts/FormPasswordInputDelegate.qml">contents/ui/accounts/FormPasswordInputDelegate.qml</file>
         <file alias="mailboxselector/MailBoxList.qml">contents/ui/mailboxselector/MailBoxList.qml</file>
         <file alias="mailboxselector/MailBoxListPage.qml">contents/ui/mailboxselector/MailBoxListPage.qml</file>
         <file alias="mailboxselector/MailBoxListSidebar.qml">contents/ui/mailboxselector/MailBoxListSidebar.qml</file>

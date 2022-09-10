@@ -100,7 +100,7 @@ Kirigami.ScrollablePage {
                 
                 MobileForm.FormDelegateSeparator { above: emailDelegate; below: passwordDelegate }
                 
-                FormTextInputDelegate {
+                FormPasswordInputDelegate {
                     id: passwordDelegate
                     text: i18n("Password")
                     textValue: newAccount.password
@@ -190,7 +190,7 @@ Kirigami.ScrollablePage {
                 
                 MobileForm.FormDelegateSeparator { above: receivingUsernameDelegate; below: receivingPasswordDelegate }
                 
-                FormTextInputDelegate {
+                FormPasswordInputDelegate {
                     id: receivingPasswordDelegate
                     text: i18n("Password")
                     textValue: newAccount.receivingMailProtocol === NewAccount.Imap ? newAccount.imapPassword : newAccount.pop3Password
@@ -237,7 +237,7 @@ Kirigami.ScrollablePage {
                 
                 MobileForm.FormDelegateSeparator { above: smtpUsernameDelegate; below: smtpPasswordDelegate }
                 
-                FormTextInputDelegate {
+                FormPasswordInputDelegate {
                     id: smtpPasswordDelegate
                     text: i18n("Password")
                     textValue: newAccount.smtpPassword
