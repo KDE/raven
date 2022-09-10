@@ -27,3 +27,7 @@ cd build
 cmake .. # add -DCMAKE_BUILD_TYPE=Release to compile for release
 make
 ```
+
+## TODO
+* Sending Mail
+* Share code with Kalendar

@@ -40,6 +40,7 @@ MobileForm.FormButtonDelegate {
         Controls.TextField {
             id: textField
             text: root.textValue
+            onAccepted: dialog.applied()
         }
     }
 }

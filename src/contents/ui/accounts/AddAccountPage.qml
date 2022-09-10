@@ -32,7 +32,7 @@ Kirigami.ScrollablePage {
         leftPadding: Kirigami.Units.smallSpacing
         rightPadding: Kirigami.Units.smallSpacing
         bottomPadding: Kirigami.Units.smallSpacing
-        topPadding: Kirigami.Units.smallSpacing + footerSeparator.implicitHeight
+        topPadding: Kirigami.Units.smallSpacing
 
         contentItem: RowLayout {
             spacing: parent.spacing
@@ -58,12 +58,12 @@ Kirigami.ScrollablePage {
 
         background: Rectangle {
             color: Kirigami.Theme.backgroundColor
+
             // separator above footer
             Kirigami.Separator {
-                id: footerSeparator
-                visible: root.contentItem.height < root.contentItem.flickableItem.contentHeight
-                width: parent.width
                 anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
             }
         }
     }

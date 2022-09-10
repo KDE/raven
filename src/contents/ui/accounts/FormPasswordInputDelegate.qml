@@ -40,6 +40,7 @@ MobileForm.FormButtonDelegate {
         Kirigami.PasswordField {
             id: textField
             text: root.textValue
+            onAccepted: dialog.applied()
         }
     }
 }
