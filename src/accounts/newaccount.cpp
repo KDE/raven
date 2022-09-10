@@ -347,7 +347,7 @@ void NewAccount::configureImap(QString host, int port, QString username, QString
     QObject *object = m_setupManager->createResource(QStringLiteral("akonadi_imap_resource"));
     auto *t = qobject_cast<Resource *>(object);
     
-    t->setName(QString()); // TODO
+    t->setName(username);
     t->setOption(QStringLiteral("ImapServer"), host);
     t->setOption(QStringLiteral("ImapPort"), port);
     t->setOption(QStringLiteral("UserName"), username);
@@ -395,7 +395,7 @@ void NewAccount::configurePop3(QString host, int port, QString username, QString
     QObject *object = m_setupManager->createResource(QStringLiteral("akonadi_pop3_resource"));
     auto *t = qobject_cast<Resource *>(object);
     
-    t->setName(QString()); // TODO
+    t->setName(username);
     t->setOption(QStringLiteral("Host"), host);
     t->setOption(QStringLiteral("Port"), port);
     t->setOption(QStringLiteral("Login"), username);
@@ -439,7 +439,7 @@ void NewAccount::configureSmtp(QString host, int port, QString username, QString
     QObject *object = m_setupManager->createTransport(QStringLiteral("smtp"));
     auto *t = qobject_cast<Transport *>(object);
 
-    t->setName(QString()); // TODO
+    t->setName(username);
     t->setHost(host);
     t->setPort(port);
     t->setUsername(username);

@@ -6,6 +6,7 @@
 
 #include <Akonadi/AgentInstanceModel>
 #include <Akonadi/AgentFilterProxyModel>
+#include <Akonadi/AgentConfigurationDialog>
 #include <KMime/Message>
 
 MailAccounts::MailAccounts(QObject *parent)
@@ -28,4 +29,25 @@ Akonadi::AgentFilterProxyModel *MailAccounts::runningMailAgents()
     m_runningMailAgents->excludeCapabilities(QStringLiteral("MailTransport"));
     m_runningMailAgents->excludeCapabilities(QStringLiteral("Notes"));
     return m_runningMailAgents;
+}
+
+void MailAccounts::remove(int index)
+{
+    Akonadi::AgentManager::self()->removeInstance(instanceFromIndex(index));
+}
+
+void MailAccounts::openConfigWindow(int index)
+{
+    auto agentInstance = instanceFromIndex(index);
+    
+    if (agentInstance.isValid()) {
+        Akonadi::AgentConfigurationDialog *dlg = new Akonadi::AgentConfigurationDialog(agentInstance);
+        dlg->exec();
+        delete dlg;
+    }
+}
+
+Akonadi::AgentInstance MailAccounts::instanceFromIndex(int index)
+{
+    return runningMailAgents()->data(runningMailAgents()->index(index, 0), Akonadi::AgentInstanceModel::InstanceRole).value<Akonadi::AgentInstance>();
 }

@@ -57,8 +57,38 @@ Kirigami.ScrollablePage {
                 Repeater {
                     model: MailAccounts.runningMailAgents
                     delegate: MobileForm.FormButtonDelegate {
+                        Loader {
+                            id: dialogLoader
+                            sourceComponent: Kirigami.PromptDialog {
+                                id: dialog
+                                title: i18n("Configure %1", model.display)
+                                subtitle: i18n("Modify or delete this account agent.")
+                                standardButtons: Kirigami.Dialog.NoButton
+                                
+                                customFooterActions: [
+                                    Kirigami.Action {
+                                        text: i18n("Modify")
+                                        iconName: "edit-entry"
+                                        onTriggered: {
+                                            MailAccounts.openConfigWindow(model.index);
+                                            dialog.close();
+                                        }
+                                    },
+                                    Kirigami.Action {
+                                        text: i18n("Delete")
+                                        iconName: "delete"
+                                        onTriggered: {
+                                            MailAccounts.remove(model.index);
+                                            dialog.close();
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                        
                         onClicked: {
-                            // TODO implement account management page
+                            dialogLoader.active = true;
+                            dialogLoader.item.open();
                         }
                         
                         contentItem: RowLayout {

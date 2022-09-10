@@ -19,11 +19,14 @@ public:
     
     Akonadi::AgentFilterProxyModel *runningMailAgents();
     
-//     Q_INVOKABLE void remove(int index);
+    Q_INVOKABLE void remove(int index);
+    Q_INVOKABLE void openConfigWindow(int index);
 
 Q_SIGNALS:
     void runningMailAgentsChanged();
     
 private:
+    Akonadi::AgentInstance instanceFromIndex(int index);
+    
     Akonadi::AgentFilterProxyModel *m_runningMailAgents = nullptr;
 };
