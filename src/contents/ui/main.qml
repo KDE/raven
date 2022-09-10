@@ -71,10 +71,6 @@ Kirigami.ApplicationWindow {
     Component.onCompleted: {
         // initial page and nav type
         changeSidebar(isWidescreen);
-        
-        if (isWidescreen) {
-            root.pageStack.push(c("FolderView"));
-        }
     }
     
     // switch between page and sidebar
