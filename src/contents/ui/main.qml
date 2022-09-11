@@ -28,8 +28,6 @@ Kirigami.ApplicationWindow {
     pageStack.globalToolBar.style: Kirigami.ApplicationHeaderStyle.ToolBar
     pageStack.globalToolBar.showNavigationButtons: Kirigami.ApplicationHeaderStyle.ShowBackButton;
     
-    pageStack.initialPage: FolderView {}
-
     // pop pages when not in use in mobile mode
     Connections {
         target: applicationWindow().pageStack
@@ -71,6 +69,10 @@ Kirigami.ApplicationWindow {
     Component.onCompleted: {
         // initial page and nav type
         changeSidebar(isWidescreen);
+        
+        if (isWidescreen) {
+            root.pageStack.push(getPage("FolderView"));
+        }
     }
     
     // switch between page and sidebar
