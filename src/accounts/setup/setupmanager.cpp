@@ -110,7 +110,11 @@ void SetupManager::execute()
     // ### FIXME this is a bad over-simplification and would need a real topological sort
     // but for current usage it is good enough
     std::stable_sort(m_objectToSetup.begin(), m_objectToSetup.end(), dependencyCompare);
-    setupNext();
+    
+    while (!m_objectToSetup.isEmpty()) {
+        m_currentSetupObject = m_objectToSetup.takeFirst();
+        m_currentSetupObject->create();
+    }
 }
 
 void SetupManager::setupSuccessSlot(const QString &msg)
@@ -171,8 +175,11 @@ void SetupManager::rollback()
 SetupObject *SetupManager::connectObject(SetupObject *obj)
 {
     connect(obj, &SetupObject::finished, this, &SetupManager::setupSuccessSlot);
+    connect(obj, &SetupObject::finished, this, [](const QString &msg) { qDebug() << msg; });
     connect(obj, &SetupObject::info, this, &SetupManager::setupInfo);
+    connect(obj, &SetupObject::info, this, [](const QString &msg) { qDebug() << msg; });
     connect(obj, &SetupObject::error, this, &SetupManager::setupFailedSlot);
+    connect(obj, &SetupObject::error, this, [](const QString &msg) { qDebug() << msg; });
     m_objectToSetup.append(obj);
     return obj;
 }

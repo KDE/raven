@@ -94,7 +94,7 @@ void Resource::create()
     }
 
     Q_EMIT info(i18n("Creating resource instance for '%1'...", type.name()));
-    auto *job = new AgentInstanceCreateJob(type, this);
+    auto *job = new AgentInstanceCreateJob(type);
     connect(job, &AgentInstanceCreateJob::result, this, &Resource::instanceCreateResult);
     job->start();
 }

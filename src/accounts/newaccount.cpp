@@ -499,6 +499,7 @@ void NewAccount::ispdbFinishedSearchingSlot()
         const Server s = m_ispdb->smtpServers().at(0);
         setSmtpHost(s.hostname);
         setSmtpPort(s.port);
+        setSmtpUsername(s.username);
         setSmtpPassword(m_password);
         setSmtpAuthenticationType(ispdbTypeToAuth(s.authentication));
         setSmtpSocketType(ispdbTypeToSocket(s.socketType));
@@ -509,6 +510,7 @@ void NewAccount::ispdbFinishedSearchingSlot()
         const Server s = m_ispdb->imapServers().at(0);
         setImapHost(s.hostname);
         setImapPort(s.port);
+        setImapUsername(s.username);
         setImapPassword(m_password);
         setImapAuthenticationType(ispdbTypeToAuth(s.authentication));
         setImapSocketType(ispdbTypeToSocket(s.socketType));
@@ -519,6 +521,7 @@ void NewAccount::ispdbFinishedSearchingSlot()
         const Server s = m_ispdb->pop3Servers().at(0);
         setPop3Host(s.hostname);
         setPop3Port(s.port);
+        setPop3Username(s.username);
         setPop3Password(m_password);
         setPop3AuthenticationType(ispdbTypeToAuth(s.authentication));
         setPop3SocketType(ispdbTypeToSocket(s.socketType));
