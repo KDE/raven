@@ -8,8 +8,8 @@
 An email client for Plasma Mobile, based on Akonadi and certain KMail components.
 
 ## Links
-* Project page: https://invent.kde.org/devinlin/raven
-* Issues: https://invent.kde.org/devinlin/raven/issues
+* Project page: https://invent.kde.org/plasma-mobile/raven
+* Issues: https://invent.kde.org/plasma-mobile/raven/issues
 * Development channel: https://matrix.to/#/#plasmamobile:matrix.org
 
 ## Dependencies
