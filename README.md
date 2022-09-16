@@ -3,9 +3,9 @@
 - SPDX-License-Identifier: CC0-1.0
 -->
 
-# Raven <img src="raven.svg" width="40" />
+# Raven <img src="logo.png" width="40" />
 
-An email client for Plasma Mobile, based on Akonadi and certain KMail components.
+An email client for Plasma Mobile, based on Akonadi.
 
 ## Links
 * Project page: https://invent.kde.org/plasma-mobile/raven
@@ -29,5 +29,7 @@ make
 ```
 
 ## TODO
-* Sending Mail
+* Draft and send mail
+* Improved content display (HTML and images on by default)
+* Welcome screen
 * Share code with Kalendar
