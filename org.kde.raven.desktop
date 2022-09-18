@@ -3,7 +3,15 @@
 
 [Desktop Entry]
 Name=Raven
+Name[es]=Raven
+Name[tr]=Raven
+Name[uk]=Ворон
+Name[x-test]=xxRavenxx
 Comment=Send and receive email
+Comment[es]=Enviar y recibir correo electrónico
+Comment[tr]=E-posta gönderin ve alın
+Comment[uk]=Надсилання та одержання пошти
+Comment[x-test]=xxSend and receive emailxx
 Version=1.0
 Exec=raven
 Icon=raven
