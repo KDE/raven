@@ -6,12 +6,28 @@
 <component type="desktop-application">
   <id>org.kde.raven</id>
   <name>Mail</name>
+  <name xml:lang="es">Correo</name>
+  <name xml:lang="tr">Posta</name>
+  <name xml:lang="uk">Пошта</name>
+  <name xml:lang="x-test">xxMailxx</name>
   <summary>Send and receive email</summary>
+  <summary xml:lang="es">Enviar y recibir correo electrónico</summary>
+  <summary xml:lang="tr">E-posta gönderin ve alın</summary>
+  <summary xml:lang="uk">Надсилання та одержання пошти</summary>
+  <summary xml:lang="x-test">xxSend and receive emailxx</summary>
   <metadata_license>A permissive license for this metadata, e.g. "FSFAP"</metadata_license>
   <project_license>The license of this software as SPDX string, e.g. "GPL-3+"</project_license>
   <developer_name>KDE Community</developer_name>
+  <developer_name xml:lang="es">La Comunidad KDE</developer_name>
+  <developer_name xml:lang="tr">KDE Topluluğu</developer_name>
+  <developer_name xml:lang="uk">Спільнота KDE</developer_name>
+  <developer_name xml:lang="x-test">xxKDE Communityxx</developer_name>
   <description>
     <p>An email client for Plasma, based on Akonadi.</p>
+    <p xml:lang="es">Un cliente de correo electrónico para Plasma basado en Akonadi.</p>
+    <p xml:lang="tr">Akonadi tabanlı, Plasma için bir e-posta istemcisi.</p>
+    <p xml:lang="uk">Клієнт електронної пошти для Плазми, засновано на Akonadi.</p>
+    <p xml:lang="x-test">xxAn email client for Plasma, based on Akonadi.xx</p>
   </description>
   <launchable type="desktop-id">org.kde.raven.desktop</launchable>
   <recommends>
