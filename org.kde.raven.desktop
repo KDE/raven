@@ -3,12 +3,24 @@
 
 [Desktop Entry]
 Name=Raven
+Name[ca]=Raven
+Name[ca@valencia]=Raven
+Name[en_GB]=Raven
 Name[es]=Raven
+Name[fr]=Raven
+Name[nl]=Raven
+Name[sl]=Raven
 Name[tr]=Raven
 Name[uk]=Ворон
 Name[x-test]=xxRavenxx
 Comment=Send and receive email
+Comment[ca]=Envia i rep correu electrònic
+Comment[ca@valencia]=Envia i rep correu electrònic
+Comment[en_GB]=Send and receive email
 Comment[es]=Enviar y recibir correo electrónico
+Comment[fr]=Envoyer et recevoir un courriel
+Comment[nl]=E-mail verzenden en ontvangen
+Comment[sl]=Pošiljaj in sprejemaj pošto
 Comment[tr]=E-posta gönderin ve alın
 Comment[uk]=Надсилання та одержання пошти
 Comment[x-test]=xxSend and receive emailxx
