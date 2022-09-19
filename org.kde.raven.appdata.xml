@@ -6,25 +6,45 @@
 <component type="desktop-application">
   <id>org.kde.raven</id>
   <name>Mail</name>
+  <name xml:lang="ca">Correu</name>
+  <name xml:lang="ca-valencia">Correu</name>
   <name xml:lang="es">Correo</name>
+  <name xml:lang="fr">Courriel</name>
+  <name xml:lang="nl">E-mail</name>
+  <name xml:lang="sl">Mail</name>
   <name xml:lang="tr">Posta</name>
   <name xml:lang="uk">Пошта</name>
   <name xml:lang="x-test">xxMailxx</name>
   <summary>Send and receive email</summary>
+  <summary xml:lang="ca">Envia i rep correu electrònic</summary>
+  <summary xml:lang="ca-valencia">Envia i rep correu electrònic</summary>
   <summary xml:lang="es">Enviar y recibir correo electrónico</summary>
+  <summary xml:lang="fr">Envoyer et recevoir un courriel</summary>
+  <summary xml:lang="nl">E-mail verzenden en ontvangen</summary>
+  <summary xml:lang="sl">Pošiljaj in sprejemaj pošto</summary>
   <summary xml:lang="tr">E-posta gönderin ve alın</summary>
   <summary xml:lang="uk">Надсилання та одержання пошти</summary>
   <summary xml:lang="x-test">xxSend and receive emailxx</summary>
   <metadata_license>A permissive license for this metadata, e.g. "FSFAP"</metadata_license>
   <project_license>The license of this software as SPDX string, e.g. "GPL-3+"</project_license>
   <developer_name>KDE Community</developer_name>
+  <developer_name xml:lang="ca">La comunitat KDE</developer_name>
+  <developer_name xml:lang="ca-valencia">La comunitat KDE</developer_name>
   <developer_name xml:lang="es">La Comunidad KDE</developer_name>
+  <developer_name xml:lang="fr">Communauté KDE</developer_name>
+  <developer_name xml:lang="nl">KDE-gemeenschap</developer_name>
+  <developer_name xml:lang="sl">Skupnost KDE</developer_name>
   <developer_name xml:lang="tr">KDE Topluluğu</developer_name>
   <developer_name xml:lang="uk">Спільнота KDE</developer_name>
   <developer_name xml:lang="x-test">xxKDE Communityxx</developer_name>
   <description>
     <p>An email client for Plasma, based on Akonadi.</p>
+    <p xml:lang="ca">Un client de correu electrònic per al Plasma, basat en l'Akonadi.</p>
+    <p xml:lang="ca-valencia">Un client de correu electrònic per a Plasma, basat en Akonadi.</p>
     <p xml:lang="es">Un cliente de correo electrónico para Plasma basado en Akonadi.</p>
+    <p xml:lang="fr">Un client de courriels pour Plasma, conçu à partir de Akonadi.</p>
+    <p xml:lang="nl">Een e-mailclient voor Plasma, gebaseerd op Akonadi.</p>
+    <p xml:lang="sl">Odjemalec e-pošte na osnovi Akonadi.</p>
     <p xml:lang="tr">Akonadi tabanlı, Plasma için bir e-posta istemcisi.</p>
     <p xml:lang="uk">Клієнт електронної пошти для Плазми, засновано на Akonadi.</p>
     <p xml:lang="x-test">xxAn email client for Plasma, based on Akonadi.xx</p>
