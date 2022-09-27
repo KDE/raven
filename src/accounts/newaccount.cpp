@@ -14,9 +14,12 @@ NewAccount::NewAccount(QObject* parent)
     , m_ispdb{nullptr}
     , m_setupManager{new SetupManager{this}}
     , m_receivingMailProtocol{ReceivingMailProtocol::Imap}
-    , m_imapPort{0}
-    , m_pop3Port{0}
-    , m_smtpPort{0}
+    , m_imapPort{993}
+    , m_imapAuthenticationType{AuthenticationType::Plain}
+    , m_pop3Port{995}
+    , m_pop3AuthenticationType{AuthenticationType::Plain}
+    , m_smtpPort{587}
+    , m_smtpAuthenticationType{AuthenticationType::Plain}
 {
     connect(m_setupManager, &SetupManager::setupSucceeded, this, [this](const QString &msg){ Q_EMIT setupSucceeded(msg); });
     connect(m_setupManager, &SetupManager::setupFailed, this, [this](const QString &msg){ Q_EMIT setupFailed(msg); });
