@@ -12,6 +12,7 @@
   <name xml:lang="eu">Posta</name>
   <name xml:lang="fr">Courriel</name>
   <name xml:lang="it">Posta</name>
+  <name xml:lang="ka">ფოსტა</name>
   <name xml:lang="nl">E-mail</name>
   <name xml:lang="pt">E-mail</name>
   <name xml:lang="sk">Pošta</name>
@@ -26,6 +27,7 @@
   <summary xml:lang="eu">E-posta bidaltzea eta jasotzea</summary>
   <summary xml:lang="fr">Envoyer et recevoir un courriel</summary>
   <summary xml:lang="it">Invia e ricevi messaggi di posta elettronica</summary>
+  <summary xml:lang="ka">ელფოსტის გაგზავნა და მიღება</summary>
   <summary xml:lang="nl">E-mail verzenden en ontvangen</summary>
   <summary xml:lang="pt">Enviar e receber e-mail</summary>
   <summary xml:lang="sk">Prijať a odoslať mail</summary>
@@ -42,6 +44,7 @@
   <developer_name xml:lang="eu">KDE komunitatea</developer_name>
   <developer_name xml:lang="fr">Communauté KDE</developer_name>
   <developer_name xml:lang="it">Comunità KDE</developer_name>
+  <developer_name xml:lang="ka">KDE-ის საზოგადოება</developer_name>
   <developer_name xml:lang="nl">KDE-gemeenschap</developer_name>
   <developer_name xml:lang="pt">Comunidade do KDE</developer_name>
   <developer_name xml:lang="sk">KDE komunita</developer_name>
@@ -57,6 +60,7 @@
     <p xml:lang="eu">Akonadin oinarritutako Plasmarako e-posta bezero bat.</p>
     <p xml:lang="fr">Un client de courriels pour Plasma, conçu à partir de Akonadi.</p>
     <p xml:lang="it">Un client di posta per Plasma, basato su Akonadi.</p>
+    <p xml:lang="ka">ელფოსტის კლიენტი Plasma-სთვის, დაფუძნებული Akonadi-ზე.</p>
     <p xml:lang="nl">Een e-mailclient voor Plasma, gebaseerd op Akonadi.</p>
     <p xml:lang="pt">Um cliente de e-mail para o Plasma, baseado no Akonadi.</p>
     <p xml:lang="sk">E-mailový klient pre Plasmu, založený na Akonadi.</p>
