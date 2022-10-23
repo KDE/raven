@@ -3,7 +3,7 @@
 - SPDX-License-Identifier: CC0-1.0
 -->
 
-# Raven <img src="logo.png" width="40" />
+# Raven Mail <img src="logo.png" width="40" />
 
 An email client for Plasma Mobile, based on Akonadi.
 

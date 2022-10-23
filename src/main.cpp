@@ -7,13 +7,15 @@
 #include <QQmlApplicationEngine>
 #include <QtQml>
 #include <QUrl>
+#include <QDebug>
+#include <QIcon>
+
 #include <KLocalizedContext>
 #include <KDescendantsProxyModel>
 #include <MessageComposer/Composer>
 #include <MessageComposer/AttachmentModel>
 #include <MessageComposer/TextPart>
 #include <MessageComposer/InfoPart>
-#include <QDebug>
 
 #include "raven.h"
 #include "mailmanager.h"
