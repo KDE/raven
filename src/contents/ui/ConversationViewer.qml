@@ -50,6 +50,7 @@ Kirigami.ScrollablePage {
         
         // TODO use repeater to see the full conversation
         MailViewer {
+            Layout.bottomMargin: Kirigami.Units.gridUnit * 2
             Layout.fillWidth: true
 
             item: root.item
