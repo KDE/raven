@@ -181,7 +181,7 @@ public:
     QHash<MimeTreeParser::MessagePart *, MimeTreeParser::MessagePart *> mParents;
     QMap<MimeTreeParser::MessagePart *, QVariant> mContents;
     std::shared_ptr<MimeTreeParser::ObjectTreeParser> mParser;
-    bool showHtml{false};
+    bool showHtml{true}; // show html by default
     bool containsHtmlAndPlain{false};
     bool trimMail{false};
     bool isTrimmed{false};
