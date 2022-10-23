@@ -39,6 +39,16 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain(QStringLiteral("kde.org"));
     QCoreApplication::setApplicationName(QStringLiteral("Raven"));
 
+    KAboutData aboutData(QStringLiteral("raven"),
+                         i18n("Raven"),
+                         QStringLiteral("0.1"),
+                         i18n("A mail client"),
+                         KAboutLicense::GPL,
+                         i18n("© 2022 Plasma Development Team"));
+    aboutData.setBugAddress("https://bugs.kde.org/describecomponents.cgi?product=kweather");
+    aboutData.addAuthor(i18n("Devin Lin"), QString(), QStringLiteral("devin@kde.org"), QStringLiteral("https://espi.dev"));
+    KAboutData::setApplicationData(aboutData);
+
     QQmlApplicationEngine engine;
     
     // configure types
