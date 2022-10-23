@@ -70,8 +70,8 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
     engine.load(QUrl(QStringLiteral("qrc:///main.qml")));
 
-    // start ispdb
-    
+    // required for X11
+    app.setWindowIcon(QIcon::fromTheme(QStringLiteral("org.kde.raven")));
     
     if (engine.rootObjects().isEmpty()) {
         return -1;
