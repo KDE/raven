@@ -142,23 +142,9 @@ Kirigami.ScrollablePage {
                 MobileForm.FormComboBoxDelegate {
                     id: receiveEmailProtocolDelegate
                     text: i18n("Protocol")
-                    currentValue: newAccount.receivingMailProtocol === NewAccount.Imap ? "IMAP" : "POP3"
+                    currentIndex: indexOfValue(newAccount.receivingMailProtocol === NewAccount.Imap ? "IMAP" : "POP3")
                     model: ["IMAP", "POP3"]
-                    dialogDelegate: Controls.RadioDelegate {
-                        implicitWidth: Kirigami.Units.gridUnit * 16
-                        topPadding: Kirigami.Units.smallSpacing * 2
-                        bottomPadding: Kirigami.Units.smallSpacing * 2
-                        
-                        text: modelData
-                        checked: receiveEmailProtocolDelegate.currentValue == modelData
-                        onCheckedChanged: {
-                            if (checked) {
-                                receiveEmailProtocolDelegate.currentValue = modelData;
-                                newAccount.receivingMailProtocol = modelData === "IMAP" ? NewAccount.Imap : NewAccount.Pop3;
-                            }
-                        }
-                    }
-
+                    onCurrentValueChanged: newAccount.receivingMailProtocol = modelData === "IMAP" ? NewAccount.Imap : NewAccount.Pop3
                 }
                 
                 MobileForm.FormDelegateSeparator { above: receiveEmailProtocolDelegate; below: receivingHostDelegate }
