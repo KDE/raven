@@ -144,7 +144,7 @@ Kirigami.ScrollablePage {
                     text: i18n("Protocol")
                     currentIndex: newAccount.receivingMailProtocol === NewAccount.Imap ? 0 : 1
                     model: ["IMAP", "POP3"]
-                    onCurrentValueChanged: newAccount.receivingMailProtocol = modelData === "IMAP" ? NewAccount.Imap : NewAccount.Pop3
+                    onCurrentValueChanged: newAccount.receivingMailProtocol = (receiveEmailProtocolDelegate.currentValue === "IMAP") ? NewAccount.Imap : NewAccount.Pop3
                 }
                 
                 MobileForm.FormDelegateSeparator { above: receiveEmailProtocolDelegate; below: receivingHostDelegate }
