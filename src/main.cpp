@@ -11,6 +11,7 @@
 #include <QIcon>
 
 #include <KLocalizedContext>
+#include <KLocalizedString>
 #include <KDescendantsProxyModel>
 #include <MessageComposer/Composer>
 #include <MessageComposer/AttachmentModel>
@@ -35,9 +36,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
     QApplication app(argc, argv);
-    QCoreApplication::setOrganizationName(QStringLiteral("KDE"));
-    QCoreApplication::setOrganizationDomain(QStringLiteral("kde.org"));
-    QCoreApplication::setApplicationName(QStringLiteral("Raven"));
+    KLocalizedString::setApplicationDomain("raven");
 
     KAboutData aboutData(QStringLiteral("raven"),
                          i18n("Raven"),
