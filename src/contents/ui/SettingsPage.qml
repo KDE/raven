@@ -56,7 +56,8 @@ Kirigami.ScrollablePage {
                 
                 Repeater {
                     model: MailAccounts.runningMailAgents
-                    delegate: MobileForm.FormButtonDelegate {
+                    delegate: MobileForm.AbstractFormDelegate {
+                        Layout.fillWidth: true
                         Loader {
                             id: dialogLoader
                             sourceComponent: Kirigami.PromptDialog {
