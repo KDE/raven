@@ -77,6 +77,8 @@ find_package(KF5 ${LIBKDEPIM_VERSION} REQUIRED COMPONENTS
     I18n
 )
 
+find_package(KF5KirigamiAddons 0.6 REQUIRED)
+
 set(CMAKE_CXX_STANDARD 17)
 
 ################# build and install #################
