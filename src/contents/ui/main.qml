@@ -27,28 +27,7 @@ Kirigami.ApplicationWindow {
     pageStack.globalToolBar.canContainHandles: true
     pageStack.globalToolBar.style: Kirigami.ApplicationHeaderStyle.ToolBar
     pageStack.globalToolBar.showNavigationButtons: Kirigami.ApplicationHeaderStyle.ShowBackButton;
-    
-    // pop pages when not in use in mobile mode
-    Connections {
-        target: applicationWindow().pageStack
-        function onCurrentIndexChanged() {
-            // wait for animation to finish before popping pages
-            popTimer.restart();
-        }
-    }
-    
-    Timer {
-        id: popTimer
-        interval: 300
-        onTriggered: {
-            if (!root.isWidescreen) {
-                let currentIndex = applicationWindow().pageStack.currentIndex;
-                while (applicationWindow().pageStack.depth > (currentIndex + 1) && currentIndex >= 0) {
-                    applicationWindow().pageStack.pop();
-                }
-            }
-        }
-    }
+    pageStack.popHiddenPages: !root.isWidescreen // pop pages when not in use in mobile mode
     
     property bool isWidescreen: root.width > 500
     onIsWidescreenChanged: changeSidebar(isWidescreen);
