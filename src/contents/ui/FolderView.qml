@@ -21,39 +21,39 @@ Kirigami.ScrollablePage {
             property var status
 
             QQC2.Menu {
-                title: i18nc('@action:menu', 'Mark Message')
+                title: i18nc("@action:menu", "Mark Message")
                 QQC2.MenuItem {
-                    text: i18n('Mark Message as Read')
+                    text: i18n("Mark Message as Read")
                 }
                 QQC2.MenuItem {
-                    text: i18n('Mark Message as Unread')
+                    text: i18n("Mark Message as Unread")
                 }
 
                 QQC2.MenuSeparator {}
 
                 QQC2.MenuItem {
-                    text: status.isImportant ? i18n("Don't Mark as Important") : i18n('Mark as Important')
+                    text: status.isImportant ? i18n("Don't Mark as Important") : i18n("Mark as Important")
                 }
             }
 
             QQC2.MenuItem {
                 icon.name: 'delete'
-                text: i18n('Move to trash')
+                text: i18n("Move to trash")
             }
 
             QQC2.MenuItem {
                 icon.name: 'edit-move'
-                text: i18n('Move Message to...')
+                text: i18n("Move Message to...")
             }
 
             QQC2.MenuItem {
                 icon.name: 'edit-copy'
-                text: i18n('Copy Message to...')
+                text: i18n("Copy Message to...")
             }
 
             QQC2.MenuItem {
                 icon.name: 'edit-copy'
-                text: i18n('Add Followup Reminder')
+                text: i18n("Add Followup Reminder")
             }
         }
     }
