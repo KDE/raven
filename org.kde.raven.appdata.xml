@@ -8,6 +8,7 @@
   <name>Mail</name>
   <name xml:lang="ca">Correu</name>
   <name xml:lang="ca-valencia">Correu</name>
+  <name xml:lang="en-GB">Mail</name>
   <name xml:lang="es">Correo</name>
   <name xml:lang="eu">Posta</name>
   <name xml:lang="fi">Sähköposti</name>
@@ -26,6 +27,7 @@
   <summary>Send and receive email</summary>
   <summary xml:lang="ca">Envia i rep correu electrònic</summary>
   <summary xml:lang="ca-valencia">Envia i rep correu electrònic</summary>
+  <summary xml:lang="en-GB">Send and receive email</summary>
   <summary xml:lang="es">Enviar y recibir correo electrónico</summary>
   <summary xml:lang="eu">E-posta bidaltzea eta jasotzea</summary>
   <summary xml:lang="fi">Lähetä ja vastaanota sähköpostia		</summary>
@@ -46,6 +48,7 @@
   <developer_name>KDE Community</developer_name>
   <developer_name xml:lang="ca">La comunitat KDE</developer_name>
   <developer_name xml:lang="ca-valencia">La comunitat KDE</developer_name>
+  <developer_name xml:lang="en-GB">KDE Community</developer_name>
   <developer_name xml:lang="es">La Comunidad KDE</developer_name>
   <developer_name xml:lang="eu">KDE komunitatea</developer_name>
   <developer_name xml:lang="fi">KDE-yhteisö</developer_name>
@@ -65,6 +68,7 @@
     <p>An email client for Plasma, based on Akonadi.</p>
     <p xml:lang="ca">Un client de correu electrònic per al Plasma, basat en l'Akonadi.</p>
     <p xml:lang="ca-valencia">Un client de correu electrònic per a Plasma, basat en Akonadi.</p>
+    <p xml:lang="en-GB">An email client for Plasma, based on Akonadi.</p>
     <p xml:lang="es">Un cliente de correo electrónico para Plasma basado en Akonadi.</p>
     <p xml:lang="eu">Akonadin oinarritutako Plasmarako e-posta bezero bat.</p>
     <p xml:lang="fi">Akonadiin perustuva sähköpostiohjelma Plasmaan.</p>
