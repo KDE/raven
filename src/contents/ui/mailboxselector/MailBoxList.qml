@@ -10,33 +10,31 @@ import Qt.labs.qmlmodels 1.0
 
 import org.kde.kirigami 2.15 as Kirigami
 import org.kde.kitemmodels 1.0
-import org.kde.raven 1.0
+import org.kde.raven 1.0 as Raven
 
 ListView {
     id: mailList
 
-    model: KDescendantsProxyModel {
-        id: foldersModel
-        model: MailManager.foldersModel
-    }
+    model: Raven.MailBoxModel
     
     onModelChanged: currentIndex = -1
     
     signal folderChosen()
 
     delegate: DelegateChooser {
-        role: 'kDescendantExpandable'
+        role: 'isCollapsible'
         
         DelegateChoice {
             roleValue: true
 
             ColumnLayout {
+                visible: !model.isCollapsed
                 spacing: 0
                 width: ListView.view.width
                 
                 Item {
                     Layout.topMargin: Kirigami.Units.largeSpacing
-                    visible: (model.kDescendantLevel === 1) && (model.index !== 0)
+                    visible: (model.level === 0) && (model.index !== 0)
                 }
                 
                 QQC2.ItemDelegate {
@@ -44,16 +42,16 @@ ListView {
                     Layout.fillWidth: true
                     topPadding: Kirigami.Units.largeSpacing
                     bottomPadding: Kirigami.Units.largeSpacing
-                    leftPadding: Kirigami.Units.largeSpacing * (model.kDescendantLevel)
+                    leftPadding: Kirigami.Units.largeSpacing * (model.level + 1)
 
-                    property string displayText: model.display
+                    property string displayText: model.name
                     
-                    onClicked: mailList.model.toggleChildren(index)
+                    onClicked: mailList.model.toggleCollapse(index)
                     
                     contentItem: RowLayout {
                         Kirigami.Icon {
                             Layout.alignment: Qt.AlignVCenter
-                            visible: model.kDescendantLevel > 1
+                            visible: model.level > 1
                             source: "folder-symbolic"
                             Layout.preferredHeight: Kirigami.Units.iconSizes.small
                             Layout.preferredWidth: Layout.preferredHeight
@@ -71,7 +69,7 @@ ListView {
                         Kirigami.Icon {
                             implicitWidth: Kirigami.Units.iconSizes.small
                             implicitHeight: Kirigami.Units.iconSizes.small
-                            source: model.kDescendantExpanded ? 'arrow-up' : 'arrow-down'
+                            source: !model.isCollapsed ? 'arrow-up' : 'arrow-down'
                         }
                     }
                 }
@@ -83,10 +81,11 @@ ListView {
             
             QQC2.ItemDelegate {
                 id: controlRoot
-                text: model.display
+                visible: !model.isCollapsed
+                text: model.name
                 width: ListView.view.width
                 padding: Kirigami.Units.largeSpacing
-                leftPadding: Kirigami.Units.largeSpacing * model.kDescendantLevel
+                leftPadding: Kirigami.Units.largeSpacing * (model.level + 1)
                 
                 property bool chosen: false
                 
@@ -133,7 +132,7 @@ ListView {
                     
                     Kirigami.Icon {
                         Layout.alignment: Qt.AlignVCenter
-                        source: model.decoration
+                        source: model.decoration // TODO
                         Layout.preferredHeight: Kirigami.Units.iconSizes.small
                         Layout.preferredWidth: Layout.preferredHeight
                     }
@@ -155,16 +154,17 @@ ListView {
                 }
 
                 onClicked: {
-                    model.checkState = model.checkState === 0 ? 2 : 0
-                    MailManager.loadMailCollection(foldersModel.mapToSource(foldersModel.index(model.index, 0)));
-                    
-                    controlRoot.chosen = true;
-                    mailList.folderChosen();
-                    
-                    // push list page if in narrow mode
-                    if (!applicationWindow().isWidescreen) {
-                        applicationWindow().pageStack.push(applicationWindow().getPage("FolderView"));
-                    }
+                    // TODO
+//                     model.checkState = model.checkState === 0 ? 2 : 0
+//                     MailManager.loadMailCollection(foldersModel.mapToSource(foldersModel.index(model.index, 0)));
+//
+//                     controlRoot.chosen = true;
+//                     mailList.folderChosen();
+//
+//                     // push list page if in narrow mode
+//                     if (!applicationWindow().isWidescreen) {
+//                         applicationWindow().pageStack.push(applicationWindow().getPage("FolderView"));
+//                     }
                 }
             }
         }

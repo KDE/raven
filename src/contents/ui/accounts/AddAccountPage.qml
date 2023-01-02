@@ -7,7 +7,7 @@ import QtQuick.Controls 2.15 as Controls
 
 import org.kde.kirigami 2.19 as Kirigami
 import org.kde.kirigamiaddons.labs.mobileform 0.1 as MobileForm
-import org.kde.raven 1.0
+import org.kde.raven 1.0 as Raven
 
 Kirigami.ScrollablePage {
     id: root
@@ -72,7 +72,7 @@ Kirigami.ScrollablePage {
         spacing: 0
         width: root.width
         
-        NewAccount {
+        Raven.NewAccountManager {
             id: newAccount
         }
         
@@ -139,21 +139,11 @@ Kirigami.ScrollablePage {
                     title: i18n("Receiving")
                 }
                 
-                MobileForm.FormComboBoxDelegate {
-                    id: receiveEmailProtocolDelegate
-                    text: i18n("Protocol")
-                    currentIndex: newAccount.receivingMailProtocol === NewAccount.Imap ? 0 : 1
-                    model: ["IMAP", "POP3"]
-                    onCurrentValueChanged: newAccount.receivingMailProtocol = (receiveEmailProtocolDelegate.currentValue === "IMAP") ? NewAccount.Imap : NewAccount.Pop3
-                }
-                
-                MobileForm.FormDelegateSeparator { above: receiveEmailProtocolDelegate; below: receivingHostDelegate }
-                
                 FormTextInputDelegate {
                     id: receivingHostDelegate
                     text: i18n("Host")
-                    textValue: newAccount.receivingMailProtocol === NewAccount.Imap ? newAccount.imapHost : newAccount.pop3Host
-                    onTextSaved: newAccount.receivingMailProtocol === NewAccount.Imap ? newAccount.imapHost = savedText : newAccount.pop3Host = savedText 
+                    textValue: newAccount.imapHost
+                    onTextSaved: newAccount.imapHost = savedText
                 }
                 
                 MobileForm.FormDelegateSeparator { above: receivingHostDelegate; below: receivingPortDelegate }
@@ -161,8 +151,8 @@ Kirigami.ScrollablePage {
                 FormTextInputDelegate {
                     id: receivingPortDelegate
                     text: i18n("Port")
-                    textValue: newAccount.receivingMailProtocol === NewAccount.Imap ? newAccount.imapPort : newAccount.pop3Port
-                    onTextSaved: newAccount.receivingMailProtocol === NewAccount.Imap ? newAccount.imapPort = savedText : newAccount.pop3Port = savedText 
+                    textValue: newAccount.imapPort
+                    onTextSaved: newAccount.imapPort = savedText
                 }
                 
                 MobileForm.FormDelegateSeparator { above: receivingPortDelegate; below: receivingUsernameDelegate }
@@ -170,8 +160,8 @@ Kirigami.ScrollablePage {
                 FormTextInputDelegate {
                     id: receivingUsernameDelegate
                     text: i18n("Username")
-                    textValue: newAccount.receivingMailProtocol === NewAccount.Imap ? newAccount.imapUsername : newAccount.pop3Username
-                    onTextSaved: newAccount.receivingMailProtocol === NewAccount.Imap ? newAccount.imapUsername = savedText : newAccount.pop3Username = savedText 
+                    textValue: newAccount.imapUsername
+                    onTextSaved: newAccount.imapUsername = savedText
                 }
                 
                 MobileForm.FormDelegateSeparator { above: receivingUsernameDelegate; below: receivingPasswordDelegate }
@@ -179,9 +169,11 @@ Kirigami.ScrollablePage {
                 FormPasswordInputDelegate {
                     id: receivingPasswordDelegate
                     text: i18n("Password")
-                    textValue: newAccount.receivingMailProtocol === NewAccount.Imap ? newAccount.imapPassword : newAccount.pop3Password
-                    onTextSaved: newAccount.receivingMailProtocol === NewAccount.Imap ? newAccount.imapPassword = savedText : newAccount.pop3Password = savedText 
+                    textValue: newAccount.imapPassword
+                    onTextSaved: newAccount.imapPassword = savedText
                 }
+
+                // TODO choose connection type and authentication
             }
         }
         

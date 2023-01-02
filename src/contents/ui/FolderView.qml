@@ -6,13 +6,13 @@ import QtQuick 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15 as QQC2
 
-import org.kde.raven 1.0
+import org.kde.raven 1.0 as Raven
 import org.kde.kirigami 2.19 as Kirigami
 import org.kde.kitemmodels 1.0 as KItemModels
 
 Kirigami.ScrollablePage {
     id: folderView
-    title: MailManager.selectedFolderName
+    title: "TODO" // TODO
     
     Component {
         id: contextMenu
@@ -60,21 +60,13 @@ Kirigami.ScrollablePage {
 
     ListView {
         id: mails
-        model: MailManager.folderModel
+        model: [] // TODO
         currentIndex: -1
-        
-        Connections {
-            target: MailManager
-            
-            function onFolderModelChanged() {
-                mails.currentIndex = -1;
-            }
-        }
         
         Kirigami.PlaceholderMessage {
             id: mailboxSelected
             anchors.centerIn: parent
-            visible: MailManager.selectedFolderName === ""
+            visible: Raven.Raven.selectedFolderName === ""
             text: i18n("No mailbox selected")
             explanation: i18n("Select a mailbox from the sidebar.")
             icon.name: "mail-unread"

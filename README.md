@@ -5,7 +5,9 @@
 
 # Raven Mail <img src="logo.png" width="40" />
 
-An email client for Plasma Mobile, based on Akonadi.
+An email client for Plasma Mobile, based on MailCore2.
+
+Inspired by [Mailspring-Sync](https://github.com/Foundry376/Mailspring-Sync).
 
 ## Links
 * Project page: https://invent.kde.org/plasma-mobile/raven
@@ -13,9 +15,10 @@ An email client for Plasma Mobile, based on Akonadi.
 * Development channel: https://matrix.to/#/#plasmamobile:matrix.org
 
 ## Dependencies
-* Akonadi
-* [PIM MailCommon](https://invent.kde.org/pim/mailcommon)
-* Qt Quick + Controls
+* ctemplate
+* tidy
+* libetpan
+* Qt Quick Controls
 * Kirigami
 * Kirigami Addons
 
@@ -28,8 +31,13 @@ cmake .. # add -DCMAKE_BUILD_TYPE=Release to compile for release
 make
 ```
 
+## Locations
+
+Data is stored to `~/.local/share/raven`.
+
+Configs are stored in `~/.config/raven`.
+
 ## TODO
-* Draft and send mail
-* Improved content display (HTML and images on by default)
-* Welcome screen
-* Share code with Kalendar
+* Use KWallet to store secrets
+* OAuth2 support
+* SMTP support

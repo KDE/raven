@@ -6,13 +6,13 @@ cmake_minimum_required(VERSION 3.16)
 
 project(raven)
 
-set (CMAKE_CXX_STANDARD 17)
+set (CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 set(PROJECT_VERSION "0.1")
 set(QT_MIN_VERSION "5.15.0")
-set(KF5_MIN_VERSION "5.70.0")
+set(KF5_MIN_VERSION "5.101.0")
 set(LIBKDEPIM_VERSION "5.19.0")
-
-
 
 include(FeatureSummary)
 
@@ -20,10 +20,7 @@ include(FeatureSummary)
 find_package(ECM ${KF5_MIN_VERSION} REQUIRED NO_MODULE)
 
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
-set(CMAKE_MODULE_PATH 
-    ${CMAKE_MODULE_PATH} 
-    ${ECM_MODULE_PATH} 
-)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
 
 include(KDEInstallDirs)
 include(KDECMakeSettings)
@@ -58,28 +55,33 @@ find_package(KF5 ${KF5_MIN_VERSION} REQUIRED COMPONENTS
     ItemModels
     KCMUtils
     KIO
+    Wallet
 )
 
-find_package(KF5 ${LIBKDEPIM_VERSION} REQUIRED COMPONENTS 
-    Akonadi 
-    AkonadiContact 
-    MailCommon 
-    PimCommonAkonadi 
-    Libkdepim
-    AkonadiMime
-    Ldap
+find_package(KF5 ${LIBKDEPIM_VERSION} REQUIRED COMPONENTS
     Mime
-    MailTransport
-    MailTransportAkonadi
-    PimCommon
-    PimCommonAkonadi
-    MessageList
-    I18n
 )
+
+find_package(QCoro${QT_MAJOR_VERSION} COMPONENTS Core DBus REQUIRED)
+qcoro_enable_coroutines()
 
 find_package(KF5KirigamiAddons 0.6 REQUIRED)
 
-set(CMAKE_CXX_STANDARD 17)
+# Dependencies of MailCore and co.
+find_package(OpenSSL REQUIRED)
+find_package(ICU COMPONENTS i18n uc REQUIRED)
+find_package(LibXml2 REQUIRED)
+find_package(LibLZMA REQUIRED)
+find_package(ZLIB REQUIRED)
+find_library(RESOLV_LIB resolv)
+find_library(CTEMPLATE_LIB ctemplate)
+find_library(ETPAN_LIB etpan)
+find_library(TIDY_LIB tidy)
+find_package(PkgConfig REQUIRED)
+pkg_search_module(UUID uuid REQUIRED IMPORTED_TARGET)
+pkg_search_module(GLIB glib-2.0 REQUIRED IMPORTED_TARGET)
+
+find_package(MailCore REQUIRED)
 
 ################# build and install #################
 

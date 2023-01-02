@@ -1,20 +1,38 @@
-// SPDX-FileCopyrightText: 2020 Carl Schwan <carlschwan@kde.org>
 // SPDX-FileCopyrightText: 2022 Devin Lin <devin@kde.org>
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #pragma once
 
+#include "constants.h"
+#include "accountworker.h"
+
 #include <QObject>
+#include <QThread>
+#include <QList>
+
+#include <MailCore/MailCore.h>
+
+using namespace mailcore;
 
 class Raven : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QString selectedFolderName READ selectedFolderName NOTIFY selectedFolderNameChanged)
 
 public:
     Raven(QObject *parent = nullptr);
-    ~Raven() override = default;
+    virtual ~Raven();
     
     static Raven *self();
-};
 
-Q_GLOBAL_STATIC(Raven, raven)
+    QString selectedFolderName() const;
+
+    void addAccountWorker(Account *account);
+    void removeAccountWorker(Account *account);
+
+Q_SIGNALS:
+    void selectedFolderNameChanged();
+
+private:
+    QList<std::pair<AccountWorker *, QThread *>> m_workers;
+};

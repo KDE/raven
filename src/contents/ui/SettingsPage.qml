@@ -7,7 +7,7 @@ import QtQuick.Controls 2.15 as Controls
 
 import org.kde.kirigami 2.19 as Kirigami
 import org.kde.kirigamiaddons.labs.mobileform 0.1 as MobileForm
-import org.kde.raven 1.0
+import org.kde.raven 1.0 as Raven
 
 Kirigami.ScrollablePage {
     id: root
@@ -55,15 +55,22 @@ Kirigami.ScrollablePage {
                 }
                 
                 Repeater {
-                    model: MailAccounts.runningMailAgents
+                    id: repeater
+                    model: Raven.AccountModel
+
                     delegate: MobileForm.AbstractFormDelegate {
+                        id: delegate
+
+                        property Raven.Account account: model.account
+
                         Layout.fillWidth: true
+
                         Loader {
                             id: dialogLoader
                             sourceComponent: Kirigami.PromptDialog {
                                 id: dialog
-                                title: i18n("Configure %1", model.display)
-                                subtitle: i18n("Modify or delete this account agent.")
+                                title: i18n("Configure %1", model.email)
+                                subtitle: i18n("Modify or delete this account.")
                                 standardButtons: Kirigami.Dialog.NoButton
                                 
                                 customFooterActions: [
@@ -71,7 +78,7 @@ Kirigami.ScrollablePage {
                                         text: i18n("Modify")
                                         iconName: "edit-entry"
                                         onTriggered: {
-                                            MailAccounts.openConfigWindow(model.index);
+                                            // TODO
                                             dialog.close();
                                         }
                                     },
@@ -79,8 +86,8 @@ Kirigami.ScrollablePage {
                                         text: i18n("Delete")
                                         iconName: "delete"
                                         onTriggered: {
-                                            MailAccounts.remove(model.index);
                                             dialog.close();
+                                            Raven.AccountModel.removeAccount(model.index);
                                         }
                                     }
                                 ]
@@ -94,7 +101,7 @@ Kirigami.ScrollablePage {
                         
                         contentItem: RowLayout {
                             Kirigami.Icon {
-                                source: model.decoration
+                                source: "folder-mail"
                                 Layout.rightMargin: Kirigami.Units.largeSpacing
                                 implicitWidth: Kirigami.Units.iconSizes.medium
                                 implicitHeight: Kirigami.Units.iconSizes.medium
@@ -106,7 +113,7 @@ Kirigami.ScrollablePage {
                                 
                                 Controls.Label {
                                     Layout.fillWidth: true
-                                    text: model.display
+                                    text: account.email
                                     elide: Text.ElideRight
                                     wrapMode: Text.Wrap
                                     maximumLineCount: 2
@@ -115,7 +122,7 @@ Kirigami.ScrollablePage {
                                 
                                 Controls.Label {
                                     Layout.fillWidth: true
-                                    text: model.statusMessage
+                                    text: account.name
                                     color: Kirigami.Theme.disabledTextColor
                                     font: Kirigami.Theme.smallFont
                                     elide: Text.ElideRight
@@ -130,7 +137,7 @@ Kirigami.ScrollablePage {
                     }
                 }
                 
-                MobileForm.FormDelegateSeparator { below: addAccountDelegate }
+                MobileForm.FormDelegateSeparator { visible: repeater.count > 0; below: addAccountDelegate }
                 
                 MobileForm.FormButtonDelegate {
                     id: addAccountDelegate

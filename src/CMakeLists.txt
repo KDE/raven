@@ -3,60 +3,32 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 set(raven_SRCS
+    abouttype.cpp
+    accountworker.cpp
+    constants.h
+    dbmanager.cpp
+    dbwatcher.cpp
     main.cpp
     raven.cpp
-    abouttype.cpp
+    utils.cpp
 
-    contactimageprovider.cpp
-    mailmanager.cpp
-    mailmodel.cpp
-    messagestatus.cpp
-    crypto.cpp
-    
-    accounts/ispdb/autoconfigkolabfreebusy.cpp
-    accounts/ispdb/autoconfigkolabldap.cpp
-    accounts/ispdb/autoconfigkolabmail.cpp
-    accounts/ispdb/ispdb.cpp
-    
-    accounts/setup/configfile.cpp
-    accounts/setup/identity.cpp
-    accounts/setup/key.cpp
-    accounts/setup/ldap.cpp
-    accounts/setup/resource.cpp
-    accounts/setup/restoreldapsettingsjob.cpp
-    accounts/setup/setupautoconfigkolabfreebusy.cpp
-    accounts/setup/setupautoconfigkolabldap.cpp
-    accounts/setup/setupautoconfigkolabmail.cpp
-    accounts/setup/setupispdb.cpp
-    accounts/setup/setupmanager.cpp
-    accounts/setup/setupobject.cpp
-    accounts/setup/transport.cpp
-    
-    accounts/mailaccounts.cpp
-    accounts/newaccount.cpp
-    
-    mimetreeparser/messagepart.cpp
-    mimetreeparser/bodypartformatter.cpp
-    mimetreeparser/bodypartformatter_impl.cpp
-    mimetreeparser/bodypartformatterbasefactory.cpp
-    mimetreeparser/bodypartformatterbasefactory.cpp
-    mimetreeparser/cryptohelper.cpp
-    mimetreeparser/messagepart.cpp
-    mimetreeparser/mimetreeparser_debug.cpp
-    mimetreeparser/objecttreeparser.cpp
-    mimetreeparser/utils.cpp
-    
-    mime/attachmentmodel.cpp
-    mime/htmlutils.cpp
-    mime/mailcrypto.cpp
-    mime/mailtemplates.cpp
-    mime/messageparser.cpp
-    mime/partmodel.cpp
+    models/account.cpp
+    models/folder.cpp
+    models/label.cpp
+    models/message.cpp
+    models/messagecontact.cpp
+
+    modelviews/accountmodel.cpp
+    modelviews/mailboxmodel.cpp
+
+    accounts/ispdb.cpp
+    accounts/newaccountmanager.cpp
 )
 
 qt_add_resources(RESOURCES resources.qrc)
 
 add_executable(raven ${raven_SRCS} ${RESOURCES})
+
 target_link_libraries(raven
     Qt::Core
     Qt::Gui
@@ -66,26 +38,26 @@ target_link_libraries(raven
     Qt::QuickControls2
     Qt::Svg
     Qt::Xml
+    Qt::Sql
     KF5::I18n
     KF5::CoreAddons
-    KF5::AkonadiCore
-    KF5::AkonadiContact
-    KF5::AkonadiAgentBase
-    KF5::AkonadiXml
-    KF5::AkonadiMime
-    KF5::KCMUtils
-    KF5::MailTransport
-    KF5::MailTransportAkonadi
-    KF5::IdentityManagement
-    KF5::ConfigWidgets
-    KF5::Contacts
-    KF5::ItemModels
-    KF5::MailCommon 
-    KF5::I18n
-    KF5::Ldap
     KF5::KIOCore
-    KF5::Mime
     KF5::Wallet
+    KF5::Mime
+
+    ${LIBXML2_LIBRARIES}
+    OpenSSL::Crypto
+    ICU::i18n
+    ICU::uc
+    PkgConfig::GLIB
+    PkgConfig::UUID
+    LibLZMA::LibLZMA
+    ZLIB::ZLIB
+    ${CTEMPLATE_LIB}
+    ${ETPAN_LIB}
+    ${TIDY_LIB}
+    MailCore
 )
+
 target_include_directories(raven PRIVATE ${CMAKE_BINARY_DIR})
 install(TARGETS raven ${KF5_INSTALL_TARGETS_DEFAULT_ARGS})
