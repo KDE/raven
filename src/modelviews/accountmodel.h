@@ -26,6 +26,8 @@ public:
     void addAccount(Account *account);
     Q_INVOKABLE void removeAccount(int index);
 
+    Account *accountById(const QString &id);
+
     int rowCount(const QModelIndex &parent) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;

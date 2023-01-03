@@ -5,16 +5,25 @@
 
 #include <QObject>
 #include <QAbstractListModel>
+#include <QHash>
 
 #include "models/folder.h"
 
-struct MailBoxEntry {
+struct MailBoxEntry
+{
     Folder *folder;
     QString name;
     QString accountId;
     int level;
     bool isCollapsible;
     bool isCollapsed;
+    bool visible;
+};
+
+struct MailBoxNode
+{
+    MailBoxEntry entry;
+    QList<MailBoxNode> children;
 };
 
 class MailBoxModel : public QAbstractListModel
@@ -29,7 +38,8 @@ public:
         FolderRole,
         LevelRole,
         IsCollapsibleRole,
-        IsCollapsedRole
+        IsCollapsedRole,
+        VisibleRole
     };
 
     static MailBoxModel *self();
@@ -44,5 +54,13 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
+    std::pair<MailBoxEntry, QStringList> folderToMailbox(Folder *folder);
+
+    QList<MailBoxEntry> initMailBoxes(const QList<Folder *> &folders);
+    void organizeMailBoxFolders(MailBoxNode &node);
+    void flattenMailBoxTree(const MailBoxNode &node, QList<MailBoxEntry> &list);
+    void insertMailBoxIntoTree(MailBoxNode &node, MailBoxEntry &entry, QStringList &ancestors, int level);
+
+
     QList<MailBoxEntry> m_mailBoxes;
 };

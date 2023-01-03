@@ -28,8 +28,9 @@ ListView {
             roleValue: true
 
             ColumnLayout {
-                visible: !model.isCollapsed
+                visible: model.visible
                 spacing: 0
+                height: visible ? implicitHeight : 0
                 width: ListView.view.width
                 
                 Item {
@@ -44,6 +45,9 @@ ListView {
                     bottomPadding: Kirigami.Units.largeSpacing
                     leftPadding: Kirigami.Units.largeSpacing * (model.level + 1)
 
+                    Kirigami.Theme.colorSet: applicationWindow().isWidescreen ? Kirigami.Theme.Window : Kirigami.Theme.View
+                    Kirigami.Theme.inherit: false
+
                     property string displayText: model.name
                     
                     onClicked: mailList.model.toggleCollapse(index)
@@ -51,7 +55,7 @@ ListView {
                     contentItem: RowLayout {
                         Kirigami.Icon {
                             Layout.alignment: Qt.AlignVCenter
-                            visible: model.level > 1
+                            visible: model.level > 0
                             source: "folder-symbolic"
                             Layout.preferredHeight: Kirigami.Units.iconSizes.small
                             Layout.preferredWidth: Layout.preferredHeight
@@ -81,10 +85,15 @@ ListView {
             
             QQC2.ItemDelegate {
                 id: controlRoot
-                visible: !model.isCollapsed
+                visible: model.visible
                 text: model.name
+
+                height: visible ? implicitHeight : 0
                 width: ListView.view.width
-                padding: Kirigami.Units.largeSpacing
+
+                topPadding: Kirigami.Units.largeSpacing
+                bottomPadding: Kirigami.Units.largeSpacing
+                rightPadding: Kirigami.Units.largeSpacing
                 leftPadding: Kirigami.Units.largeSpacing * (model.level + 1)
                 
                 property bool chosen: false
@@ -132,7 +141,7 @@ ListView {
                     
                     Kirigami.Icon {
                         Layout.alignment: Qt.AlignVCenter
-                        source: model.decoration // TODO
+                        source: "mail-folder-inbox" // model.decoration // TODO
                         Layout.preferredHeight: Kirigami.Units.iconSizes.small
                         Layout.preferredWidth: Layout.preferredHeight
                     }

@@ -80,6 +80,16 @@ void AccountModel::removeAccount(int index)
     // TODO enqueue jobs to delete entries from sql database
 }
 
+Account *AccountModel::accountById(const QString &id)
+{
+    for (auto account : m_accounts) {
+        if (account->id() == id) {
+            return account;
+        }
+    }
+    return nullptr;
+}
+
 int AccountModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
