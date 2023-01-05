@@ -24,6 +24,7 @@ public:
 
     QJsonObject toJson();
 
+    QString accountId;
     QString messageId() const;
     QString fileName() const;
     QString partId() const;
@@ -34,6 +35,7 @@ public:
 
 private:
     QString m_id;
+    QString m_accountId;
     QString m_messageId;
     QString m_filename;
     QString m_partId;

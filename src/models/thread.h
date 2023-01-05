@@ -12,16 +12,13 @@ class Thread : public QObject
     Q_OBJECT
 
 public:
-    Thread(QObject *parent = nullptr, QString messageId = {}, QString accountId = {}, QString subject = {}, QString gmailThreadId = {});
+    Thread(QObject *parent = nullptr, QString accountId = {}, QString subject = {}, QString gmailThreadId = {});
     Thread(QObject *parent, const QSqlQuery &query);
 
     void saveToDb(QSqlDatabase &db) const;
     void deleteFromDb(QSqlDatabase &db) const;
 
     QString id() const;
-
-    QString messageId() const;
-    void setMessageId(const QString &messageId);
 
     QString accountId() const;
     void setAccountId(const QString &accountId);
@@ -32,15 +29,18 @@ public:
     QString subject() const;
     void setSubject(const QString &subject);
 
+    QString snippet() const;
+    void setSnippet(const QString &snippet);
+
     int unread();
     void setUnread(int unread);
 
 private:
     QString m_id;
-    QString m_messageId;
     QString m_accountId;
     QString m_gmailThreadId;
 
     QString m_subject;
+    QString m_snippet;
     int m_unread;
 };

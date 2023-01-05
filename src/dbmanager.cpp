@@ -125,11 +125,7 @@ void DBManager::migrationV1(uint)
             "data TEXT,"
             "gmailThreadId TEXT,"
             "subject TEXT,"
-            "snippet TEXT,"
-            "firstMessageTimestamp DATETIME,"
-            "lastMessageTimestamp DATETIME,"
-            "lastMessageReceivedTimestamp DATETIME,"
-            "lastMessageSentTimestamp DATETIME"
+            "snippet TEXT"
         ")";
 
     auto threadRefsCreate =
@@ -165,12 +161,12 @@ void DBManager::migrationV1(uint)
             "id TEXT PRIMARY KEY,"
             "data TEXT,"
             "accountId TEXT,"
-            "filename TEXT"
+            "fileName TEXT"
         ")";
 
     createTables.exec(QString::fromStdString(jobsCreate));
     createTables.exec(QString::fromStdString(messagesCreate));
-    createTables.exec(QString::fromStdString(messageBodyCreate);
+    createTables.exec(QString::fromStdString(messageBodyCreate));
     createTables.exec(QString::fromStdString(threadsCreate));
     createTables.exec(QString::fromStdString(threadRefsCreate));
     createTables.exec(QString::fromStdString(foldersCreate));

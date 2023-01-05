@@ -20,7 +20,7 @@ void Label::saveToDb(QSqlDatabase &db) const
     QSqlQuery query{db};
     query.prepare(QStringLiteral("INSERT INTO ") + LABEL_TABLE +
         QStringLiteral(" (id, accountId, data, path, role, createdAt)") +
-        QStringLiteral(" VALUES (:id, :accountId, :data, :path, : role, :createdAt)"));
+        QStringLiteral(" VALUES (:id, :accountId, :data, :path, :role, :createdAt)"));
 
     query.bindValue(QStringLiteral(":id"), m_id);
     query.bindValue(QStringLiteral(":accountId"), m_accountId);
