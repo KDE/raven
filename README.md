@@ -5,11 +5,11 @@
 
 # Raven Mail <img src="logo.png" width="40" />
 
-An email client for Plasma Mobile, based on MailCore2.
+An email client for Plasma Mobile, based on [MailCore2](https://invent.kde.org/devinlin/mailcore2).
 
-Inspired by [Mailspring-Sync](https://github.com/Foundry376/Mailspring-Sync).
+Backend is partially derived from [Mailspring-Sync](https://github.com/Foundry376/Mailspring-Sync).
 
-For an Akonadi based mail client for mobile, see [Kalendar](https://invent.kde.org/pim/kalendar).
+For an Akonadi based mail client that works on mobile, see [Kalendar](https://invent.kde.org/pim/kalendar).
 
 ## Links
 * Project page: https://invent.kde.org/plasma-mobile/raven
