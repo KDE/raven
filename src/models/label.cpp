@@ -14,20 +14,26 @@ Label::Label(QObject *parent, const QSqlQuery &query)
 
 void Label::saveToDb(QSqlDatabase &db) const
 {
+    QJsonObject object;
+    object[QStringLiteral("localStatus")] = m_localStatus;
+
     QSqlQuery query{db};
-    query.prepare(QStringLiteral("INSERT INTO ") + LABELS_TABLE + QStringLiteral(" (id, accountId, data, path, role, createdAt) VALUES (?, ?, ?, ?, ?, ?)"));
-    query.addBindValue(m_id);
-    query.addBindValue(m_accountId);
-    query.addBindValue(QStringLiteral("{}")); // TODO data
-    query.addBindValue(m_path);
-    query.addBindValue(m_role);
-    query.addBindValue(m_createdAt);
+    query.prepare(QStringLiteral("INSERT INTO ") + LABEL_TABLE +
+        QStringLiteral(" (id, accountId, data, path, role, createdAt)") +
+        QStringLiteral(" VALUES (:id, :accountId, :data, :path, : role, :createdAt)"));
+
+    query.bindValue(QStringLiteral(":id"), m_id);
+    query.bindValue(QStringLiteral(":accountId"), m_accountId);
+    query.bindValue(QStringLiteral(":data"), object);
+    query.bindValue(QStringLiteral(":path"), m_path);
+    query.bindValue(QStringLiteral(":role"), m_role);
+    query.bindValue(QStringLiteral(":createdAt"), m_createdAt);
     query.exec();
 }
 
 void Label::deleteFromDb(QSqlDatabase &db) const
 {
     QSqlQuery query{db};
-    query.prepare(QStringLiteral("DELETE FROM ") + LABELS_TABLE + QStringLiteral(" WHERE id = ") + m_id);
+    query.prepare(QStringLiteral("DELETE FROM ") + LABEL_TABLE + QStringLiteral(" WHERE id = ") + m_id);
     query.exec();
 }

@@ -4,7 +4,7 @@
 #pragma once
 
 #include "constants.h"
-#include "accountworker.h"
+#include "backendworker/accountworker.h"
 
 #include <QObject>
 #include <QThread>

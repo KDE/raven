@@ -19,11 +19,14 @@
 
 using namespace mailcore;
 
-static const QString JOBS_TABLE = QStringLiteral("Jobs");
-static const QString MESSAGES_TABLE = QStringLiteral("Messages");
-static const QString THREADS_TABLE = QStringLiteral("Threads");
-static const QString FOLDERS_TABLE = QStringLiteral("Folders");
-static const QString LABELS_TABLE = QStringLiteral("Labels");
+static const QString JOB_TABLE = QStringLiteral("job");
+static const QString MESSAGE_TABLE = QStringLiteral("message");
+static const QString THREAD_TABLE = QStringLiteral("thread");
+static const QString FOLDER_TABLE = QStringLiteral("folder");
+static const QString LABEL_TABLE = QStringLiteral("label");
+static const QString THREAD_REFERENCE_TABLE = QStringLiteral("thread_reference");
+static const QString MESSAGE_BODY_TABLE = QStringLiteral("message_body");
+static const QString FILE_TABLE = QStringLiteral("file");
 
 static QMap<std::string, std::string> COMMON_FOLDER_NAMES = {
     {"gel\xc3\xb6scht", "trash"},

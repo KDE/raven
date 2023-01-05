@@ -89,7 +89,7 @@ void DBManager::migrationV1(uint)
     QSqlQuery createTables;
 
     auto jobsCreate =
-        "CREATE TABLE IF NOT EXISTS " + JOBS_TABLE.toStdString() + " ("
+        "CREATE TABLE IF NOT EXISTS " + JOB_TABLE.toStdString() + " ("
             "id INTEGER PRIMARY KEY,"
             "accountId TEXT,"
             "data TEXT,"
@@ -98,27 +98,50 @@ void DBManager::migrationV1(uint)
         ")";
 
     auto messagesCreate =
-        "CREATE TABLE IF NOT EXISTS " + MESSAGES_TABLE.toStdString() + " ("
+        "CREATE TABLE IF NOT EXISTS " + MESSAGE_TABLE.toStdString() + " ("
             "id TEXT PRIMARY KEY,"
             "accountId TEXT,"
-            "threadId TEXT,"
             "data TEXT,"
+            "folderId TEXT,"
+            "threadId TEXT,"
+            "headerMessageId TEXT,"
+            "gmailMessageId TEXT,"
+            "gmailThreadId TEXT,"
             "subject TEXT,"
+            "draft TINYINT(1),"
+            "unread TINYINT(1),"
+            "starred TINYINT(1),"
             "date DATETIME,"
-            "syncedAt DATETIME"
+            "remoteUID INTEGER"
         ")";
 
+    auto messageBodyCreate =
+        "CREATE TABLE IF NOT EXISTS " + MESSAGE_BODY_TABLE.toStdString() + " (id TEXT PRIMARY KEY, `value` TEXT)";
+
     auto threadsCreate =
-        "CREATE TABLE IF NOT EXISTS " + THREADS_TABLE.toStdString() + " ("
+        "CREATE TABLE IF NOT EXISTS " + THREAD_TABLE.toStdString() + " ("
             "id TEXT PRIMARY KEY,"
             "accountId TEXT,"
             "data TEXT,"
+            "gmailThreadId TEXT,"
             "subject TEXT,"
-            "snippet TEXT"
+            "snippet TEXT,"
+            "firstMessageTimestamp DATETIME,"
+            "lastMessageTimestamp DATETIME,"
+            "lastMessageReceivedTimestamp DATETIME,"
+            "lastMessageSentTimestamp DATETIME"
+        ")";
+
+    auto threadRefsCreate =
+        "CREATE TABLE IF NOT EXISTS " + THREAD_REFERENCE_TABLE.toStdString() + " ("
+            "threadId TEXT,"
+            "accountId TEXT,"
+            "headerMessageId TEXT,"
+            "PRIMARY KEY (threadId, accountId, headerMessageId)"
         ")";
 
     auto foldersCreate =
-        "CREATE TABLE IF NOT EXISTS " + FOLDERS_TABLE.toStdString() + " ("
+        "CREATE TABLE IF NOT EXISTS " + FOLDER_TABLE.toStdString() + " ("
             "id TEXT PRIMARY KEY,"
             "accountId TEXT,"
             "data TEXT,"
@@ -128,7 +151,7 @@ void DBManager::migrationV1(uint)
         ")";
 
     auto labelsCreate =
-        "CREATE TABLE IF NOT EXISTS " + LABELS_TABLE.toStdString() + " ("
+        "CREATE TABLE IF NOT EXISTS " + LABEL_TABLE.toStdString() + " ("
             "id TEXT PRIMARY KEY,"
             "accountId TEXT,"
             "data TEXT,"
@@ -137,10 +160,21 @@ void DBManager::migrationV1(uint)
             "createdAt DATETIME"
         ")";
 
+    auto filesCreate =
+        "CREATE TABLE IF NOT EXISTS " + FILE_TABLE.toStdString() + " ("
+            "id TEXT PRIMARY KEY,"
+            "data TEXT,"
+            "accountId TEXT,"
+            "filename TEXT"
+        ")";
+
     createTables.exec(QString::fromStdString(jobsCreate));
     createTables.exec(QString::fromStdString(messagesCreate));
+    createTables.exec(QString::fromStdString(messageBodyCreate);
     createTables.exec(QString::fromStdString(threadsCreate));
+    createTables.exec(QString::fromStdString(threadRefsCreate));
     createTables.exec(QString::fromStdString(foldersCreate));
     createTables.exec(QString::fromStdString(labelsCreate));
+    createTables.exec(QString::fromStdString(filesCreate));
     QSqlDatabase::database().commit();
 }

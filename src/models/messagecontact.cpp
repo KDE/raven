@@ -19,6 +19,21 @@ MessageContact::MessageContact(QObject *parent, mailcore::Address *address)
     }
 }
 
+MessageContact::MessageContact(QObject *parent, const QJsonObject &json)
+    : QObject{parent}
+    , m_name{json[QStringLiteral("name")].toString()}
+    , m_email{json[QStringLiteral("email")].toString()}
+{
+}
+
+QJsonObject MessageContact::toJson() const
+{
+    QJsonObject json;
+    json[QStringLiteral("name")] = m_name;
+    json[QStringLiteral("email")] = m_email;
+    return json;
+}
+
 QString MessageContact::name() const
 {
     return m_name;

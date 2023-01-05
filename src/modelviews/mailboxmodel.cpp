@@ -148,7 +148,7 @@ void MailBoxModel::load()
     QSqlDatabase db = QSqlDatabase::database();
 
     QSqlQuery query;
-    query.prepare(QStringLiteral("SELECT * FROM ") + FOLDERS_TABLE);
+    query.prepare(QStringLiteral("SELECT * FROM ") + FOLDER_TABLE);
 
     if (!query.exec()) {
         // TODO better error handling

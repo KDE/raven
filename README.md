@@ -9,6 +9,8 @@ An email client for Plasma Mobile, based on MailCore2.
 
 Inspired by [Mailspring-Sync](https://github.com/Foundry376/Mailspring-Sync).
 
+For an Akonadi based mail client for mobile, see [Kalendar](https://invent.kde.org/pim/kalendar).
+
 ## Links
 * Project page: https://invent.kde.org/plasma-mobile/raven
 * Issues: https://invent.kde.org/plasma-mobile/raven/issues

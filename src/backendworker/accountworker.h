@@ -9,8 +9,13 @@
 
 #include "models/account.h"
 #include "models/folder.h"
+#include "models/message.h"
+#include "models/label.h"
+#include "backendworker/mailprocessor.h"
 
 using namespace mailcore;
+
+class MailProcessor;
 
 // Worker that handles a single account, processing all backend mail tasks.
 //
@@ -30,11 +35,26 @@ public:
 
     void run();
 
+    void cleanMessageCache(Folder &folder);
+    time_t maxAgeForBodySync(Folder &folder);
+    bool shouldCacheBodiesInFolder(Folder &folder);
+    long long countBodiesDownloaded(Folder &folder);
+    long long countBodiesNeeded(Folder &folder);
+    bool syncMessageBodies(Folder &folder, IMAPFolderStatus &remoteStatus);
+    void syncMessageBody(Message *message);
 
 private:
     void setupSession();
-    QList<std::shared_ptr<Folder>> fetchFoldersAndLabels();
+    QList<std::shared_ptr<Folder>> syncFoldersAndLabels();
+
+    bool syncNow();
+    void syncFolderUIDRange(Folder &folder, Range range, bool heavyInitialRequest, QList<std::shared_ptr<Message>> * syncedMessages = nullptr);
+    void syncFolderChangesViaCondstore(Folder &folder, IMAPFolderStatus &remoteStatus, bool mustSyncAll);
 
     Account *m_account;
     IMAPSession *m_imapSession;
+    MailProcessor *m_mailProcessor;
+
+    int m_syncIterationsSinceLaunch;
+    int m_unlinkPhase;
 };

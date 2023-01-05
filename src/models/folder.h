@@ -9,6 +9,7 @@
 #include <QSqlQuery>
 #include <QVariant>
 #include <QDateTime>
+#include <QJsonObject>
 
 #include <MailCore/MailCore.h>
 
@@ -42,6 +43,7 @@ public:
     QString status() const;
     void setStatus(const QString &status);
 
+    QJsonObject &localStatus();
 
 Q_SIGNALS:
     void pathChanged();
@@ -54,6 +56,7 @@ private:
     QString m_path;
     QString m_role;
     QDateTime m_createdAt;
+    QJsonObject m_localStatus;
 
     // not SQL field
     QString m_status;

@@ -4,7 +4,6 @@
 
 set(raven_SRCS
     abouttype.cpp
-    accountworker.cpp
     constants.h
     dbmanager.cpp
     dbwatcher.cpp
@@ -14,15 +13,21 @@ set(raven_SRCS
 
     models/account.cpp
     models/folder.cpp
+    models/file.cpp
     models/label.cpp
     models/message.cpp
     models/messagecontact.cpp
+    models/thread.cpp
 
     modelviews/accountmodel.cpp
     modelviews/mailboxmodel.cpp
 
     accounts/ispdb.cpp
     accounts/newaccountmanager.cpp
+
+    backendworker/accountworker.cpp
+    backendworker/mailprocessor.cpp
+    backendworker/progresscollectors.cpp
 )
 
 qt_add_resources(RESOURCES resources.qrc)
