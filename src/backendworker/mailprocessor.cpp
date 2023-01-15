@@ -82,6 +82,7 @@ std::shared_ptr<Message> MailProcessor::insertMessage(IMAPMessage *mMsg, Folder 
         // find the correct thread, if it exists
 
         if (mMsg->gmailThreadID()) {
+            
             QSqlQuery query{db};
             query.exec(QStringLiteral("SELECT * FROM ") + THREAD_TABLE + QStringLiteral(" WHERE gmailThreadId = ") + QString::number(mMsg->gmailThreadID()));
 
@@ -113,7 +114,7 @@ std::shared_ptr<Message> MailProcessor::insertMessage(IMAPMessage *mMsg, Folder 
         // create the thread otherwise
         if (thread == nullptr) {
             // TODO: could move to message save hooks
-            thread = std::make_shared<Thread>(nullptr, msg->id(), m_worker->account()->id(), msg->subject(), QString::number(mMsg->gmailThreadID()));
+            thread = std::make_shared<Thread>(nullptr, m_worker->account()->id(), msg->subject(), QString::number(mMsg->gmailThreadID()));
         }
 
         msg->setThreadId(thread->id());
@@ -184,7 +185,7 @@ void MailProcessor::retrievedMessageBody(Message *message, MessageParser *parser
         for (auto &other : files) {
             if (other->partId() == QString::fromUtf8(a->partID()->UTF8Characters())) {
                 duplicate = true;
-                qDebug() << "Attachment is duplicate: " << f->toJSON().dump();
+                qDebug() << "Attachment is duplicate: " << f->toJson();
                 break;
             }
         }
@@ -244,10 +245,9 @@ void MailProcessor::retrievedMessageBody(Message *message, MessageParser *parser
 }
 
 
-bool MailProcessor::retrievedFileData(File * file, Data * data) {
-    QString root = Utils::getEnvUTF8("CONFIG_DIR_PATH") + FS_PATH_SEP + "files";
-    QString path = Utils::pathForFile(root, file, true);
-    return (data->writeToFile(AS_MCSTR(path)) == ErrorNone);
+bool MailProcessor::retrievedFileData(File *file, Data * data) {
+    QString path = RAVEN_DATA_LOCATION + QStringLiteral("/files/") + file->id();
+    return (data->writeToFile(AS_MCSTR(path.toStdString())) == ErrorNone);
 }
 
 void MailProcessor::unlinkMessagesMatchingQuery(const QString &sqlQuery, int phase)
@@ -311,7 +311,7 @@ void MailProcessor::deleteMessagesStillUnlinkedFromPhase(int phase)
         ++iterations;
 
         QSqlQuery query{db};
-        query.prepare(QString(QStringLiteral("SELECT * FROM %1 WHERE accountId = %1 AND remoteUID = %2 LIMIT %3"))
+        query.prepare(QString(QStringLiteral("SELECT * FROM %1 WHERE accountId = %2 AND remoteUID = %3 LIMIT %4"))
             .arg(MESSAGE_TABLE,
                  m_worker->account()->id(),
                  QString::number(UINT32_MAX - phase),
@@ -343,64 +343,65 @@ void MailProcessor::deleteMessagesStillUnlinkedFromPhase(int phase)
 }
 
 void MailProcessor::appendToThreadSearchContent(Thread *thread, Message *messageToAppendOrNull, String * bodyToAppendOrNull) {
-    QString to;
-    QString from;
-    QString categories = thread->categoriesSearchString();
-    QString body;
-
-    // retrieve the current index if there is one
-    if (thread->searchRowId()) {
-        SQLite::Statement existing(store->db(), "SELECT to_, from_, body FROM ThreadSearch WHERE rowid = ?");
-        existing.bind(1, (double)thread->searchRowId());
-        if (existing.executeStep()) {
-            to = existing.getColumn("to_").getString();
-            from = existing.getColumn("from_").getString();
-            body = existing.getColumn("body").getString();
-        }
-    }
-
-    if (messageToAppendOrNull != nullptr) {
-        for (auto c : messageToAppendOrNull->to()) {
-            if (c.count("email")) { to = stringByAppendingOrSkipping(to, c["email"].get<string>()); }
-            if (c.count("name")) { to = stringByAppendingOrSkipping(to, c["name"].get<string>()); }
-        }
-        for (auto c : messageToAppendOrNull->cc()) {
-            if (c.count("email")) { to = stringByAppendingOrSkipping(to, c["email"].get<string>()); }
-            if (c.count("name")) { to = stringByAppendingOrSkipping(to, c["name"].get<string>()); }
-        }
-        for (auto c : messageToAppendOrNull->bcc()) {
-            if (c.count("email")) { to = stringByAppendingOrSkipping(to, c["email"].get<string>()); }
-            if (c.count("name")) { to = stringByAppendingOrSkipping(to, c["name"].get<string>()); }
-        }
-        for (auto c : messageToAppendOrNull->from()) {
-            if (c.count("email")) { from = stringByAppendingOrSkipping(from, c["email"].get<string>()); }
-            if (c.count("name")) { from = stringByAppendingOrSkipping(from, c["name"].get<string>()); }
-        }
-    }
-
-    if (bodyToAppendOrNull != nullptr) {
-        body += QStringLiteral(" ") + QString::fromUtf8(bodyToAppendOrNull->substringToIndex(5000)->UTF8Characters());
-    }
-
-    if (thread->searchRowId()) {
-        SQLite::Statement update(store->db(), "UPDATE ThreadSearch SET to_ = ?, from_ = ?, body = ?, categories = ? WHERE rowid = ?");
-        update.bind(1, to);
-        update.bind(2, from);
-        update.bind(3, body);
-        update.bind(4, categories);
-        update.bind(5, (double)thread->searchRowId());
-        update.exec();
-    } else {
-        SQLite::Statement insert(store->db(), "INSERT INTO ThreadSearch (subject, to_, from_, body, categories, content_id) VALUES (?, ?, ?, ?, ?, ?)");
-        insert.bind(1, thread->subject());
-        insert.bind(2, to);
-        insert.bind(3, from);
-        insert.bind(4, body);
-        insert.bind(5, categories);
-        insert.bind(6, thread->id());
-        insert.exec();
-        thread->setSearchRowId(store->db().getLastInsertRowid());
-    }
+    // TODO
+    // QString to;
+    // QString from;
+    // QString categories = thread->categoriesSearchString();
+    // QString body;
+    // 
+    // // retrieve the current index if there is one
+    // if (thread->searchRowId()) {
+    //     SQLite::Statement existing(store->db(), "SELECT to_, from_, body FROM ThreadSearch WHERE rowid = ?");
+    //     existing.bind(1, (double)thread->searchRowId());
+    //     if (existing.executeStep()) {
+    //         to = existing.getColumn("to_").getString();
+    //         from = existing.getColumn("from_").getString();
+    //         body = existing.getColumn("body").getString();
+    //     }
+    // }
+    // 
+    // if (messageToAppendOrNull != nullptr) {
+    //     for (auto c : messageToAppendOrNull->to()) {
+    //         if (c.count("email")) { to = stringByAppendingOrSkipping(to, c["email"].get<string>()); }
+    //         if (c.count("name")) { to = stringByAppendingOrSkipping(to, c["name"].get<string>()); }
+    //     }
+    //     for (auto c : messageToAppendOrNull->cc()) {
+    //         if (c.count("email")) { to = stringByAppendingOrSkipping(to, c["email"].get<string>()); }
+    //         if (c.count("name")) { to = stringByAppendingOrSkipping(to, c["name"].get<string>()); }
+    //     }
+    //     for (auto c : messageToAppendOrNull->bcc()) {
+    //         if (c.count("email")) { to = stringByAppendingOrSkipping(to, c["email"].get<string>()); }
+    //         if (c.count("name")) { to = stringByAppendingOrSkipping(to, c["name"].get<string>()); }
+    //     }
+    //     for (auto c : messageToAppendOrNull->from()) {
+    //         if (c.count("email")) { from = stringByAppendingOrSkipping(from, c["email"].get<string>()); }
+    //         if (c.count("name")) { from = stringByAppendingOrSkipping(from, c["name"].get<string>()); }
+    //     }
+    // }
+    // 
+    // if (bodyToAppendOrNull != nullptr) {
+    //     body += QStringLiteral(" ") + QString::fromUtf8(bodyToAppendOrNull->substringToIndex(5000)->UTF8Characters());
+    // }
+    // 
+    // if (thread->searchRowId()) {
+    //     SQLite::Statement update(store->db(), "UPDATE ThreadSearch SET to_ = ?, from_ = ?, body = ?, categories = ? WHERE rowid = ?");
+    //     update.bind(1, to);
+    //     update.bind(2, from);
+    //     update.bind(3, body);
+    //     update.bind(4, categories);
+    //     update.bind(5, (double)thread->searchRowId());
+    //     update.exec();
+    // } else {
+    //     SQLite::Statement insert(store->db(), "INSERT INTO ThreadSearch (subject, to_, from_, body, categories, content_id) VALUES (?, ?, ?, ?, ?, ?)");
+    //     insert.bind(1, thread->subject());
+    //     insert.bind(2, to);
+    //     insert.bind(3, from);
+    //     insert.bind(4, body);
+    //     insert.bind(5, categories);
+    //     insert.bind(6, thread->id());
+    //     insert.exec();
+    //     thread->setSearchRowId(store->db().getLastInsertRowid());
+    // }
 }
 
 void MailProcessor::upsertThreadReferences(QString threadId, QString accountId, QString headerMessageId, Array *references) {

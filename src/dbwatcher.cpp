@@ -27,21 +27,21 @@ void DBWatcher::initWatcher()
 
     connect(driver, QOverload<const QString &, QSqlDriver::NotificationSource, const QVariant &>::of(&QSqlDriver::notification), this, &DBWatcher::notificationSlot);
 
-    driver->subscribeToNotification(FOLDERS_TABLE);
-    driver->subscribeToNotification(LABELS_TABLE);
-    driver->subscribeToNotification(MESSAGES_TABLE);
+    driver->subscribeToNotification(FOLDER_TABLE);
+    driver->subscribeToNotification(LABEL_TABLE);
+    driver->subscribeToNotification(MESSAGE_TABLE);
 }
 
 void DBWatcher::notificationSlot(const QString &name, QSqlDriver::NotificationSource source, const QVariant &payload)
 {
     qDebug() << "dbwatcher: event received:" << name << source << payload;
 
-    if (name == FOLDERS_TABLE) {
+    if (name == FOLDER_TABLE) {
         // reload folders
         MailBoxModel::self()->load();
-    } else if (name == LABELS_TABLE) {
+    } else if (name == LABEL_TABLE) {
 
-    } else if (name == MESSAGES_TABLE) {
+    } else if (name == MESSAGE_TABLE) {
         // TODO
     }
 }

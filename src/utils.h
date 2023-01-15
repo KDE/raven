@@ -6,6 +6,7 @@
 
 #include <QObject>
 #include <QStringList>
+#include <QList>
 
 #include <MailCore/MailCore.h>
 
@@ -45,4 +46,18 @@ public:
 
     static MessageAttributes messageAttributesForMessage(IMAPMessage *msg);
     static bool messageAttributesMatch(MessageAttributes a, MessageAttributes b);
+    
+    template<typename T>
+    static QList<QList<T>> chunksOfVector(QList<T> & v, size_t chunkSize) {
+        QList<QList<T>> results{};
+        
+        while (v.size() > 0) {
+            auto from = v.begin();
+            auto to = v.size() > chunkSize ? from + chunkSize : v.end();
+            
+            results.push_back(QList<T>{std::make_move_iterator(from), std::make_move_iterator(to)});
+            v.erase(from, to);
+        }
+        return results;
+    }
 };

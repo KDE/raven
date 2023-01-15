@@ -4,6 +4,7 @@
 
 #include "dbmanager.h"
 #include "constants.h"
+#include "models/message.h"
 
 #include <QStandardPaths>
 #include <QSqlQuery>
@@ -173,4 +174,55 @@ void DBManager::migrationV1(uint)
     createTables.exec(QString::fromStdString(labelsCreate));
     createTables.exec(QString::fromStdString(filesCreate));
     QSqlDatabase::database().commit();
+}
+
+QHash<uint32_t, MessageAttributes> DBManager::fetchMessagesAttributesInRange(Range range, Folder &folder, QSqlDatabase &db)
+{
+    QSqlQuery query{db};
+    query.prepare(QStringLiteral("SELECT * FROM ") + MESSAGE_TABLE + QStringLiteral(" WHERE accountId = ? AND folderId = ? AND remoteUID >= ? AND remoteUID <= ?"));
+    query.addBindValue(folder.accountId());
+    query.addBindValue(folder.id());
+    query.addBindValue((long long) (range.location));
+    
+    // Range is uint64_t, and "*" is represented by UINT64_MAX.
+    // SQLite doesn't support UINT64 and the conversion /can/ fail.
+    if (range.length == UINT64_MAX) {
+        query.addBindValue(LLONG_MAX);
+    } else {
+        query.addBindValue((long long) (range.location + range.length));
+    }
+    
+    query.exec();
+    
+    QHash<uint32_t, MessageAttributes> results;
+    
+    while (query.next()) {
+        auto msg = std::make_shared<Message>(nullptr, query);
+        
+        MessageAttributes attrs;
+        attrs.uid = (uint32_t) msg->remoteUid().toInt();
+        attrs.starred = msg->starred();
+        attrs.unread = msg->unread();
+        attrs.labels = msg->labels();
+        
+        results[attrs.uid] = attrs;
+    }
+    
+    return results;
+}
+
+uint32_t DBManager::fetchMessageUIDAtDepth(QSqlDatabase &db, Folder &folder, uint32_t depth, uint32_t before) {
+    QSqlQuery query{db};
+    query.prepare(QStringLiteral("SELECT remoteUID FROM ") + MESSAGE_TABLE + QStringLiteral(" WHERE accountId = ? AND folderId = ? AND remoteUID ? ORDER BY remoteUID DESC LIMIT 1 OFFSET ?"));
+    query.addBindValue(folder.accountId());
+    query.addBindValue(folder.id());
+    query.addBindValue(before);
+    query.addBindValue(depth);
+    query.exec();
+    
+    if (query.next()) {
+        return query.value(QStringLiteral("remoteUID")).toUInt();
+    }
+    
+    return 1;
 }

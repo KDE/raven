@@ -42,25 +42,33 @@ Message::Message(QObject *parent, mailcore::IMAPMessage *msg, const Folder &fold
     if (msg == nullptr) {
         return;
     }
-
-    for (unsigned int i = 0; i < msg->header()->to()->count(); ++i) {
-        auto addr = static_cast<mailcore::Address *>(msg->header()->to()->objectAtIndex(i));
-        m_to.push_back(new MessageContact((QObject *) this, addr));
+    
+    if (msg->header()->to()) {
+        for (unsigned int i = 0; i < msg->header()->to()->count(); ++i) {
+            auto addr = static_cast<mailcore::Address *>(msg->header()->to()->objectAtIndex(i));
+            m_to.push_back(new MessageContact((QObject *) this, addr));
+        }
     }
 
-    for (unsigned int i = 0; i < msg->header()->cc()->count(); ++i) {
-        auto addr = static_cast<mailcore::Address *>(msg->header()->cc()->objectAtIndex(i));
-        m_cc.push_back(new MessageContact((QObject *) this, addr));
+    if (msg->header()->cc()) {
+        for (unsigned int i = 0; i < msg->header()->cc()->count(); ++i) {
+            auto addr = static_cast<mailcore::Address *>(msg->header()->cc()->objectAtIndex(i));
+            m_cc.push_back(new MessageContact((QObject *) this, addr));
+        }
     }
 
-    for (unsigned int i = 0; i < msg->header()->bcc()->count(); ++i) {
-        auto addr = static_cast<mailcore::Address *>(msg->header()->cc()->objectAtIndex(i));
-        m_bcc.push_back(new MessageContact((QObject *) this, addr));
+    if (msg->header()->bcc()) {
+        for (unsigned int i = 0; i < msg->header()->bcc()->count(); ++i) {
+            auto addr = static_cast<mailcore::Address *>(msg->header()->bcc()->objectAtIndex(i));
+            m_bcc.push_back(new MessageContact((QObject *) this, addr));
+        }
     }
 
-    for (unsigned int i = 0; i < msg->header()->replyTo()->count(); ++i) {
-        auto addr = static_cast<mailcore::Address *>(msg->header()->cc()->objectAtIndex(i));
-        m_replyTo.push_back(new MessageContact((QObject *) this, addr));
+    if (msg->header()->replyTo()) {
+        for (unsigned int i = 0; i < msg->header()->replyTo()->count(); ++i) {
+            auto addr = static_cast<mailcore::Address *>(msg->header()->replyTo()->objectAtIndex(i));
+            m_replyTo.push_back(new MessageContact((QObject *) this, addr));
+        }
     }
 
     m_from = new MessageContact((QObject *) this, msg->header()->from());
@@ -252,9 +260,34 @@ QString Message::subject() const
     return m_subject;
 }
 
+bool Message::draft() const
+{
+    return m_draft;
+}
+
+bool Message::unread() const
+{
+    return m_unread;
+}
+
+bool Message::starred() const
+{
+    return m_starred;
+}
+
 QDateTime Message::date() const
 {
     return m_date;
+}
+
+QDateTime Message::syncedAt() const
+{
+    return m_syncedAt;
+}
+
+void Message::setSyncedAt(time_t syncedAt)
+{
+    m_syncedAt = QDateTime::fromSecsSinceEpoch(syncedAt);
 }
 
 QString Message::remoteUid() const
@@ -265,6 +298,11 @@ QString Message::remoteUid() const
 void Message::setRemoteUid(const QString &remoteUid)
 {
     m_remoteUid = remoteUid;
+}
+
+QStringList Message::labels() const
+{
+    return m_labels;
 }
 
 QString Message::snippet() const

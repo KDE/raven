@@ -6,6 +6,10 @@
 #include <QObject>
 #include <QSqlDatabase>
 #include <QSqlTableModel>
+#include <QHash>
+
+#include <models/folder.h>
+#include <utils.h>
 
 class DBManager : public QObject
 {
@@ -19,7 +23,10 @@ public:
     static void exec(QSqlQuery &query);
 
     void migrate();
-
+    
+    static QHash<uint32_t, MessageAttributes> fetchMessagesAttributesInRange(Range range, Folder &folder, QSqlDatabase &db);
+    static uint32_t fetchMessageUIDAtDepth(QSqlDatabase &db, Folder &folder, uint32_t depth, uint32_t before);
+    
 private:
     void migrationV1(uint current);
 };

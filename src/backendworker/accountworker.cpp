@@ -17,6 +17,7 @@
 #include <QThread>
 #include <QDebug>
 
+#define CACHE_CLEANUP_INTERVAL      60 * 60
 #define SHALLOW_SCAN_INTERVAL       60 * 2
 #define DEEP_SCAN_INTERVAL          60 * 10
 
@@ -76,12 +77,6 @@ void AccountWorker::run()
     qDebug() << "Finished setting up session for account" << m_account->email();
 
     syncNow();
-    // auto folders = fetchFoldersAndLabels();
-    //
-    // // TODO
-    // for (const auto &folder : folders) {
-    //     qDebug() << "FOLDER:" << folder->id() << folder->path();
-    // }
 }
 
 void AccountWorker::setupSession()
@@ -329,6 +324,7 @@ bool AccountWorker::syncNow()
 
     for (auto &folder : folders) {
         auto &localStatus = folder->localStatus();
+        auto initialLocalStatus = localStatus; // copy
 
         String path = AS_MCSTR(folder->path().toStdString());
         ErrorCode err = ErrorCode::ErrorNone;
@@ -444,9 +440,10 @@ bool AccountWorker::syncNow()
 
                     int count = 0;
                     for (auto &msg : synced) {
-                        if (!msg->isInInbox()) {
-                            continue; // skip "all mail" that is not in inbox
-                        }
+                        // TODO scan all mail 
+                        // if (!msg->isInInbox()) {
+                        //     continue; // skip "all mail" that is not in inbox
+                        // }
                         syncMessageBody(msg.get());
                         if (count++ > 30) { break; }
                     }
@@ -456,7 +453,7 @@ bool AccountWorker::syncNow()
             if (timeForShallowScan) {
                 // note: we use local uidnext here, because we just fetched everything between
                 // localUIDNext and remoteUIDNext so fetching that section again would just slow us down.
-                uint32_t bottomUID = store->fetchMessageUIDAtDepth(*folder, 399, localUidnext);
+                uint32_t bottomUID = DBManager::fetchMessageUIDAtDepth(db, *folder, 399, localUidnext);
                 if (bottomUID < syncedMinUID) {
                     bottomUID = syncedMinUID;
                 }
@@ -500,7 +497,9 @@ bool AccountWorker::syncNow()
 
         // Save the folder - note that helper methods above mutated localStatus.
         // Avoid the save if we can, because this creates a lot of noise in the client.
-        store->saveFolderStatus(folder.get(), initialLocalStatus);
+        if (folder->localStatus() != initialLocalStatus) {
+            folder->saveToDb(db);
+        }
     }
 
     // We've just unlinked a bunch of messages with PHASE A, now we'll delete the ones
@@ -533,16 +532,20 @@ void AccountWorker::syncFolderUIDRange(Folder &folder, Range range, bool heavyIn
 
     qDebug() << "syncFolderUIDRange for" << remotePath << ", UIDs:" << range.location << "-" << range.location + range.length << ", Heavy:" << heavyInitialRequest;
 
+    // allocated mailcore objects freed when `pool` is removed from the stack
     AutoreleasePool pool;
-    IndexSet * set = IndexSet::indexSetWithRange(range);
-    IndexSet * heavyNeeded = new IndexSet();
+    
+    IndexSet *set = IndexSet::indexSetWithRange(range);
+    IndexSet *heavyNeeded = new IndexSet();
     IMAPProgress cb;
-    ErrorCode err(ErrorCode::ErrorNone);
-    String path(AS_MCSTR(remotePath.toStdString()));
+    ErrorCode err{ErrorCode::ErrorNone};
+    String path{AS_MCSTR(remotePath.toStdString())};
     int heavyNeededIdeal = 0;
 
+    QSqlDatabase db = getDB();
+    
     // Step 1: fetch local attributes (unread, starred, etc.)
-    map<uint32_t, MessageAttributes> local(store->fetchMessagesAttributesInRange(range, folder));
+    QHash<uint32_t, MessageAttributes> local(DBManager::fetchMessagesAttributesInRange(range, folder, db));
 
     // Step 2: Fetch the remote attributes (unread, starred, etc.) for the same UID range
     time_t syncDataTimestamp = time(0);
@@ -556,7 +559,7 @@ void AccountWorker::syncFolderUIDRange(Folder &folder, Range range, bool heavyIn
 
     clock_t lastSleepClock = clock();
 
-    qDebug() << "syncFolderUIDRange - {}: remote={}, local={}, remoteUID={}", remotePath, remote->count(), local.size(), folder.id());
+    qDebug() << "syncFolderUIDRange - " << remotePath << ": remote=" << remote->count() << ", local=" << local.size() << ", remoteUID=" << folder.id();
 
     for (int ii = ((int)remote->count()) - 1; ii >= 0; ii--) {
         // Never sit in a hard loop inserting things into the database for more than 250ms.
@@ -571,7 +574,7 @@ void AccountWorker::syncFolderUIDRange(Folder &folder, Range range, bool heavyIn
 
         // Step 3: Collect messages that are different or not in our local UID set.
         bool inFolder = (local.count(remoteUID) > 0);
-        bool same = inFolder && MessageAttributesMatch(local[remoteUID], MessageAttributesForMessage(remoteMsg));
+        bool same = inFolder && Utils::messageAttributesMatch(local[remoteUID], Utils::messageAttributesForMessage(remoteMsg));
 
         if (!inFolder || !same) {
             // Step 4: Attempt to insert the new message. If we get unique exceptions,
@@ -595,7 +598,7 @@ void AccountWorker::syncFolderUIDRange(Folder &folder, Range range, bool heavyIn
             }
         }
 
-        local.erase(remoteUID);
+        local.remove(remoteUID);
     }
 
     if (!heavyInitialRequest && heavyNeeded->count() > 0) {
@@ -631,12 +634,19 @@ void AccountWorker::syncFolderUIDRange(Folder &folder, Range range, bool heavyIn
     // which the server reported were no longer there. Remove their remoteUID.
     // We'll delete them later if they don't appear in another folder during sync.
     if (local.size() > 0) {
-        vector<uint32_t> deletedUIDs {};
-        for (auto const &ent : local) {
-            deletedUIDs.push_back(ent.first);
+        QList<uint32_t> deletedUIDs {};
+        for (auto uid : local.keys()) {
+            deletedUIDs.push_back(uid);
         }
-        for (vector<uint32_t> chunk : Utils::chunksOfVector(deletedUIDs, 200)) {
-            auto query = Query().equal("remoteFolderId", folder.id()).equal("remoteUID", chunk);
+        for (QList<uint32_t> chunk : Utils::chunksOfVector(deletedUIDs, 200)) {
+            QString chunkList;
+            for (int i = 0; i < chunk.size(); ++i) {
+                if (i != 0) {
+                    chunkList += QStringLiteral(", ");
+                }
+                chunkList += QString::number(chunk[i]);
+            }
+            QString query = QStringLiteral("SELECT * FROM ") + MESSAGE_TABLE + QStringLiteral(" WHERE folderId = ") + folder.id() + QStringLiteral(" AND remoteUID IN(") + chunkList + QStringLiteral(")");
             m_mailProcessor->unlinkMessagesMatchingQuery(query, m_unlinkPhase);
         }
     }
@@ -687,35 +697,49 @@ void AccountWorker::syncFolderChangesViaCondstore(Folder &folder, IMAPFolderStat
     Array * modifiedOrAdded = result->modifiedOrAddedMessages();
     IndexSet * vanished = result->vanishedMessages();
 
-    logger->info("syncFolderChangesViaCondstore - Changes since HMODSEQ {}: {} changed, {} vanished",
-                 modseq, modifiedOrAdded->count(), (vanished != nullptr) ? vanished->count() : 0);
+    qDebug() << "syncFolderChangesViaCondstore - Changes since HMODSEQ " << modseq << ": " << modifiedOrAdded->count() << " changed, " << QString::number((vanished != nullptr) ? vanished->count() : 0) << " vanished";
 
+    QSqlDatabase db = getDB();
+    
     for (unsigned int ii = 0; ii < modifiedOrAdded->count(); ii ++) {
         IMAPMessage * msg = (IMAPMessage *)modifiedOrAdded->objectAtIndex(ii);
         QString id = Utils::idForMessage(folder.accountId(), folder.path(), msg);
 
-        Query query = Query().equal("id", id);
-        auto local = store->find<Message>(query);
+        QSqlQuery query{db};
+        query.prepare(QStringLiteral("SELECT * FROM ") + MESSAGE_TABLE + QStringLiteral(" WHERE id = ") + id);
+        query.exec();
+        
+        if (query.next()) {
+            auto local = std::make_shared<Message>(nullptr, query);
 
-        if (local == nullptr) {
-            // Found message with an ID we've never seen in any folder. Add it!
-            m_mailProcessor->insertFallbackToUpdateMessage(msg, folder, syncDataTimestamp);
-        } else {
-            // Found message with an existing ID. Update it's attributes & folderId.
-            // Note: Could potentially have moved from another folder!
-            m_mailProcessor->updateMessage(local.get(), msg, folder, syncDataTimestamp);
+            if (local == nullptr) {
+                // Found message with an ID we've never seen in any folder. Add it!
+                m_mailProcessor->insertFallbackToUpdateMessage(msg, folder, syncDataTimestamp);
+            } else {
+                // Found message with an existing ID. Update it's attributes & folderId.
+                // Note: Could potentially have moved from another folder!
+                local->setFolderId(folder.id());
+                local->setSyncedAt(syncDataTimestamp);
+                
+                // TODO AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+                // SHOULD UPDATE OTHER FIELDS OF THE MESSAGE
+                
+                local->saveToDb(db);
+            }
         }
     }
 
     // for deleted messages, collect UIDs and destroy. Note: vanishedMessages is only
     // populated when QRESYNC is available. IMPORTANT: vanished may include an infinite
     // range, like 12:* so we can't convert it to a fixed array.
-    if (vanished != NULL) {
-        vector<Query> queries = Utils::queriesForUIDRangesInIndexSet(folder.id(), vanished);
-        for (Query & query : queries) {
-            m_mailProcessor->unlinkMessagesMatchingQuery(query, m_unlinkPhase);
-        }
-    }
+    
+    // TODO 
+    // if (vanished != NULL) {
+    //     vector<Query> queries = Utils::queriesForUIDRangesInIndexSet(folder.id(), vanished);
+    //     for (Query & query : queries) {
+    //         m_mailProcessor->unlinkMessagesMatchingQuery(query, m_unlinkPhase);
+    //     }
+    // }
 
     folder.localStatus()[LS_UIDNEXT] = (int) remoteUIDNext;
     folder.localStatus()[LS_HIGHESTMODSEQ] = (int) remoteModseq;
@@ -869,26 +893,35 @@ void AccountWorker::syncMessageBody(Message *message) {
 
     IMAPProgress cb;
     ErrorCode err = ErrorCode::ErrorNone;
-    QString folderPath = message->remoteFolder()["path"].toString();
-    String path(AS_MCSTR(folderPath.toStdString()));
 
-    Data * data = m_imapSession->fetchMessageByUID(&path, message->remoteUid().toUInt(), &cb, &err);
-    if (err != ErrorNone) {
-        qWarning() << QString(QStringLiteral("Unable to fetch body for message \"%1\" (%2 UID %3). Error %4")).arg(message->subject(), folderPath, message->remoteUid(), QString::fromStdString(ErrorCodeToTypeMap[err]));
+    QSqlDatabase db = getDB();
+    QSqlQuery query{db};
+    query.prepare(QStringLiteral("SELECT * FROM ") + FOLDER_TABLE + QStringLiteral(" WHERE id = ") + message->folderId());
+    query.exec();
+    
+    if (query.exec()) {
+        auto folder = std::make_shared<Folder>(nullptr, query);
+        QString folderPath = folder->path();
+        String path(AS_MCSTR(folderPath.toStdString()));
 
-        if (err == ErrorFetch) {
-            // Syncing message bodies can fail often, because we query our local store
-            // and the sync worker may not have updated it yet. Messages, esp. drafts,
-            // can just disappear.
+        Data * data = m_imapSession->fetchMessageByUID(&path, message->remoteUid().toUInt(), &cb, &err);
+        if (err != ErrorNone) {
+            qWarning() << QString(QStringLiteral("Unable to fetch body for message \"%1\" (%2 UID %3). Error %4")).arg(message->subject(), folderPath, message->remoteUid(), QString::fromStdString(ErrorCodeToTypeMap[err]));
 
-            // oh well.
+            if (err == ErrorFetch) {
+                // Syncing message bodies can fail often, because we query our local store
+                // and the sync worker may not have updated it yet. Messages, esp. drafts,
+                // can just disappear.
+
+                // oh well.
+                return;
+            }
+
+            // TODO
+            // throw SyncException(err, "syncMessageBody - fetchMessageByUID");
             return;
         }
-
-        // TODO
-        // throw SyncException(err, "syncMessageBody - fetchMessageByUID");
-        return;
+        MessageParser *messageParser = MessageParser::messageParserWithData(data);
+        m_mailProcessor->retrievedMessageBody(message, messageParser);
     }
-    MessageParser * messageParser = MessageParser::messageParserWithData(data);
-    m_mailProcessor->retrievedMessageBody(message, messageParser);
 }

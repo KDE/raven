@@ -6,7 +6,7 @@
 MessageContact::MessageContact(QObject *parent, mailcore::Address *address)
     : QObject{parent}
 {
-    if (address != nullptr) {
+    if (address == nullptr) {
         return;
     }
 
@@ -15,7 +15,7 @@ MessageContact::MessageContact(QObject *parent, mailcore::Address *address)
     }
 
     if (address->mailbox()) {
-        m_email = QString::fromStdString(address->displayName()->UTF8Characters());
+        m_email = QString::fromStdString(address->mailbox()->UTF8Characters());
     }
 }
 

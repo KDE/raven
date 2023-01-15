@@ -28,8 +28,8 @@ Thread::Thread(QObject *parent, const QSqlQuery &query)
     , m_unread{0}
 {
     QJsonObject object = query.value(QStringLiteral("data")).toJsonObject();
-    m_snippet = object[QStringLiteral("snippet")].toString();
     m_unread = object[QStringLiteral("unread")].toInt();
+    m_snippet = object[QStringLiteral("snippet")].toString();
 }
 
 void Thread::saveToDb(QSqlDatabase &db) const
@@ -39,7 +39,7 @@ void Thread::saveToDb(QSqlDatabase &db) const
     object[QStringLiteral("snippet")] = m_snippet;
 
     QSqlQuery query{db};
-    query.prepare(QStringLiteral("INSERT INTO ") + FOLDER_TABLE +
+    query.prepare(QStringLiteral("INSERT INTO ") + THREAD_TABLE +
         QStringLiteral(" (id, accountId, data, gmailThreadId, subject, snippet)") +
         QStringLiteral(" VALUES (:id, :accountId, :data, :gmailThreadId, :subject, :snippet)"));
 
@@ -49,6 +49,11 @@ void Thread::saveToDb(QSqlDatabase &db) const
     query.bindValue(QStringLiteral(":gmailThreadId"), m_gmailThreadId);
     query.bindValue(QStringLiteral(":subject"), m_subject);
     query.exec();
+}
+
+QString Thread::id() const
+{
+    return m_id;
 }
 
 void Thread::deleteFromDb(QSqlDatabase &db) const

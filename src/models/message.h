@@ -14,6 +14,8 @@
 #include "models/file.h"
 #include "messagecontact.h"
 
+class File;
+
 class Message : public QObject
 {
     Q_OBJECT
@@ -46,11 +48,21 @@ public:
     QString headerMessageId() const;
 
     QString subject() const;
+    
+    bool draft() const;
+    bool unread() const;
+    bool starred() const;
+    
     QDateTime date() const;
+    
+    QDateTime syncedAt() const;
+    void setSyncedAt(time_t syncedAt);
 
     QString remoteUid() const;
     void setRemoteUid(const QString &remoteUid);
 
+    QStringList labels() const;
+    
     QString snippet() const;
     void setSnippet(const QString &snippet);
 
@@ -62,7 +74,7 @@ public:
 
 private:
     QString m_id;
-    QString m_folderId; // TODO not implemented
+    QString m_folderId;
     QString m_accountId;
     QString m_threadId;
 

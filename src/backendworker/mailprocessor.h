@@ -17,6 +17,8 @@
 
 using namespace mailcore;
 
+class AccountWorker;
+
 class MailProcessor : public QObject
 {
     Q_OBJECT

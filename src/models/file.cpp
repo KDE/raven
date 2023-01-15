@@ -124,6 +124,16 @@ QJsonObject File::toJson()
     return object;
 }
 
+QString File::id() const
+{
+    return m_id;
+}
+
+QString File::accountId() const
+{
+    return m_accountId;
+}
+
 QString File::messageId() const
 {
     return m_messageId;

@@ -57,6 +57,10 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     if (!QDir().mkpath(RAVEN_CONFIG_LOCATION)) {
         qWarning() << "Could not create config folder at" << RAVEN_CONFIG_LOCATION;
     }
+    
+    if (!QDir().mkpath(RAVEN_DATA_LOCATION + QStringLiteral("/files"))) {
+        qWarning() << "Could not create files folder at" << RAVEN_DATA_LOCATION + QStringLiteral("/files/");
+    }
 
     // run database migrations first
     // constructor enables sql connection for main thread

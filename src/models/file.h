@@ -24,7 +24,8 @@ public:
 
     QJsonObject toJson();
 
-    QString accountId;
+    QString id() const;
+    QString accountId() const;
     QString messageId() const;
     QString fileName() const;
     QString partId() const;
