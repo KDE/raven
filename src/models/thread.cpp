@@ -6,6 +6,8 @@
 
 #include <QVariant>
 #include <QJsonObject>
+#include <QJsonDocument>
+#include <QJsonArray>
 
 Thread::Thread(QObject *parent, QString accountId, QString subject, QString gmailThreadId)
     : QObject{parent}
@@ -15,6 +17,11 @@ Thread::Thread(QObject *parent, QString accountId, QString subject, QString gmai
     , m_subject{subject}
     , m_snippet{}
     , m_unread{0}
+    , m_starred{0}
+    , m_firstMessageTimestamp{QDateTime::fromSecsSinceEpoch(0)}
+    , m_lastMessageTimestamp{QDateTime::fromSecsSinceEpoch(0)}
+    , m_participants{}
+    , m_folderIds{}
 {
 }
 
@@ -24,31 +31,93 @@ Thread::Thread(QObject *parent, const QSqlQuery &query)
     , m_accountId{query.value(QStringLiteral("accountId")).toString()}
     , m_gmailThreadId{query.value(QStringLiteral("gmailThreadId")).toString()}
     , m_subject{query.value(QStringLiteral("subject")).toString()}
-    , m_snippet{}
-    , m_unread{0}
+    , m_snippet{query.value(QStringLiteral("snippet")).toString()}
+    , m_unread{query.value(QStringLiteral("unread")).toInt()}
+    , m_starred{query.value(QStringLiteral("starred")).toInt()}
+    , m_firstMessageTimestamp{query.value(QStringLiteral("firstMessageTimestamp")).toDateTime()}
+    , m_lastMessageTimestamp{query.value(QStringLiteral("lastMessageTimestamp")).toDateTime()}
+    , m_participants{}
+    , m_folderIds{}
 {
-    QJsonObject object = query.value(QStringLiteral("data")).toJsonObject();
-    m_unread = object[QStringLiteral("unread")].toInt();
-    m_snippet = object[QStringLiteral("snippet")].toString();
+    QJsonObject object = query.value(QStringLiteral("data")).toJsonDocument().object();
+    
+    for (auto participant : object[QStringLiteral("participants")].toArray()) {
+        m_participants.push_back(new MessageContact{(QObject *) this, participant.toObject()});
+    }
+    for (auto folderId : object[QStringLiteral("folderIds")].toArray()) {
+        m_folderIds.push_back(folderId.toString());
+    }
 }
 
 void Thread::saveToDb(QSqlDatabase &db) const
 {
+    QJsonArray participants;
+    for (auto contact : m_participants) {
+        participants.push_back(contact->toJson());
+    }
+    QJsonArray folderIds;
+    for (auto &folderId : m_folderIds) {
+        folderIds.push_back(folderId);
+    }
+    
     QJsonObject object;
-    object[QStringLiteral("unread")] = m_unread;
-    object[QStringLiteral("snippet")] = m_snippet;
+    object[QStringLiteral("participants")] = participants;
+    object[QStringLiteral("folderIds")] = folderIds;
 
     QSqlQuery query{db};
-    query.prepare(QStringLiteral("INSERT INTO ") + THREAD_TABLE +
-        QStringLiteral(" (id, accountId, data, gmailThreadId, subject, snippet)") +
-        QStringLiteral(" VALUES (:id, :accountId, :data, :gmailThreadId, :subject, :snippet)"));
-
+    query.prepare(QStringLiteral("INSERT OR REPLACE INTO ") + THREAD_TABLE +
+        QStringLiteral(" (id, accountId, data, gmailThreadId, subject, snippet, unread, starred, firstMessageTimestamp, lastMessageTimestamp)") +
+        QStringLiteral(" VALUES (:id, :accountId, :data, :gmailThreadId, :subject, :snippet, :unread, :starred, :firstMessageTimestamp, :lastMessageTimestamp)"));
+    
     query.bindValue(QStringLiteral(":id"), m_id);
     query.bindValue(QStringLiteral(":accountId"), m_accountId);
-    query.bindValue(QStringLiteral(":data"), object);
+    query.bindValue(QStringLiteral(":data"), QString::fromUtf8(QJsonDocument(object).toJson(QJsonDocument::Compact)));
     query.bindValue(QStringLiteral(":gmailThreadId"), m_gmailThreadId);
     query.bindValue(QStringLiteral(":subject"), m_subject);
+    query.bindValue(QStringLiteral(":snippet"), m_snippet);
+    query.bindValue(QStringLiteral(":unread"), m_unread);
+    query.bindValue(QStringLiteral(":starred"), m_starred);
+    query.bindValue(QStringLiteral(":firstMessageTimestamp"), m_firstMessageTimestamp);
+    query.bindValue(QStringLiteral(":lastMessageTimestamp"), m_lastMessageTimestamp);
     query.exec();
+}
+
+void Thread::updateAfterMessageChanges(const MessageSnapshot &oldMsg, Message *newMsg)
+{
+    // newMsg is nullptr if we are just removing oldMsg
+    
+    // remove oldData
+    setUnread(unread() - oldMsg.unread);
+    setStarred(starred() - oldMsg.starred);
+    
+    int folderIdIndex = m_folderIds.indexOf(oldMsg.folderId);
+    if (folderIdIndex != -1) {
+        m_folderIds.removeAt(folderIdIndex);
+    }
+    
+    // add new data
+    if (newMsg) {
+        setUnread(unread() + newMsg->unread());
+        setStarred(starred() + newMsg->starred());
+        
+        if (newMsg->date() > lastMessageTimestamp() || lastMessageTimestamp() == QDateTime::fromSecsSinceEpoch(0)) {
+            setLastMessageTimestamp(newMsg->date());
+        }
+        if (newMsg->date() < firstMessageTimestamp() || firstMessageTimestamp() == QDateTime::fromSecsSinceEpoch(0)) {
+            setFirstMessageTimestamp(newMsg->date());
+        }
+        
+        QSet<QString> emails;
+        for (const auto &participant : m_participants) {
+            emails.insert(participant->email());
+        }
+        
+        addMissingParticipants(emails, newMsg->to());
+        addMissingParticipants(emails, newMsg->cc());
+        addMissingParticipants(emails, newMsg->bcc());
+        
+        m_folderIds.push_back(newMsg->folderId());
+    }
 }
 
 QString Thread::id() const
@@ -103,7 +172,7 @@ void Thread::setSnippet(const QString &snippet)
     m_snippet = snippet;
 }
 
-int Thread::unread()
+int Thread::unread() const
 {
     return m_unread;
 }
@@ -111,4 +180,54 @@ int Thread::unread()
 void Thread::setUnread(int unread)
 {
     m_unread = unread;
+}
+
+int Thread::starred() const
+{
+    return m_starred;
+}
+
+void Thread::setStarred(int starred)
+{
+    m_starred = starred;
+}
+
+QDateTime Thread::firstMessageTimestamp() const
+{
+    return m_firstMessageTimestamp;
+}
+
+void Thread::setFirstMessageTimestamp(const QDateTime &firstMessageTimestamp)
+{
+    m_firstMessageTimestamp = firstMessageTimestamp;
+}
+
+QDateTime Thread::lastMessageTimestamp() const
+{
+    return m_lastMessageTimestamp;
+}
+
+void Thread::setLastMessageTimestamp(const QDateTime &lastMessageTimestamp)
+{
+    m_lastMessageTimestamp = lastMessageTimestamp;
+}
+
+QList<MessageContact *> &Thread::participants()
+{
+    return m_participants;
+}
+
+QStringList &Thread::folderIds()
+{
+    return m_folderIds;
+}
+
+void Thread::addMissingParticipants(QSet<QString> &emails, const QList<MessageContact *> &contacts)
+{
+    for (const auto &participant : contacts) {
+        if (emails.find(participant->email()) == emails.end()) {
+            m_participants.push_back(participant);
+            emails.insert(participant->email());
+        }
+    }
 }

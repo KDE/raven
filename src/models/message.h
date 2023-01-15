@@ -16,6 +16,13 @@
 
 class File;
 
+struct MessageSnapshot
+{
+    int unread;
+    int starred;
+    QString folderId;
+};
+
 class Message : public QObject
 {
     Q_OBJECT
@@ -25,8 +32,10 @@ public:
     Message(QObject *parent, mailcore::IMAPMessage *msg, const Folder &folder, time_t syncTimestamp);
     Message(QObject *parent, const QSqlQuery &query);
 
-    void saveToDb(QSqlDatabase &db) const;
-    void deleteFromDb(QSqlDatabase &db) const;
+    void saveToDb(QSqlDatabase &db);
+    void deleteFromDb(QSqlDatabase &db);
+    
+    void createSnapshot();
 
     QString id() const;
 
@@ -73,6 +82,8 @@ public:
     void setFiles(QList<std::shared_ptr<File>> files);
 
 private:
+    MessageSnapshot m_snapshot;
+    
     QString m_id;
     QString m_folderId;
     QString m_accountId;

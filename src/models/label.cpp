@@ -4,6 +4,8 @@
 #include "label.h"
 #include "constants.h"
 
+#include <QJsonDocument>
+
 Label::Label(QObject *parent, QString id, QString accountId)
     : Folder{parent, id, accountId}
 {}
@@ -18,13 +20,13 @@ void Label::saveToDb(QSqlDatabase &db) const
     object[QStringLiteral("localStatus")] = m_localStatus;
 
     QSqlQuery query{db};
-    query.prepare(QStringLiteral("INSERT INTO ") + LABEL_TABLE +
+    query.prepare(QStringLiteral("INSERT OR REPLACE INTO ") + LABEL_TABLE +
         QStringLiteral(" (id, accountId, data, path, role, createdAt)") +
         QStringLiteral(" VALUES (:id, :accountId, :data, :path, :role, :createdAt)"));
 
     query.bindValue(QStringLiteral(":id"), m_id);
     query.bindValue(QStringLiteral(":accountId"), m_accountId);
-    query.bindValue(QStringLiteral(":data"), object);
+    query.bindValue(QStringLiteral(":data"), QString::fromUtf8(QJsonDocument(object).toJson(QJsonDocument::Compact)));
     query.bindValue(QStringLiteral(":path"), m_path);
     query.bindValue(QStringLiteral(":role"), m_role);
     query.bindValue(QStringLiteral(":createdAt"), m_createdAt);

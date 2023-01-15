@@ -126,7 +126,12 @@ void DBManager::migrationV1(uint)
             "data TEXT,"
             "gmailThreadId TEXT,"
             "subject TEXT,"
-            "snippet TEXT"
+            "snippet TEXT,"
+            "unread INTEGER,"
+            "starred INTEGER,"
+            "firstMessageTimestamp DATETIME,"
+            "lastMessageTimestamp DATETIME,"
+            "participants TEXT"
         ")";
 
     auto threadRefsCreate =

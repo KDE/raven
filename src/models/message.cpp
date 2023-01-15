@@ -4,10 +4,13 @@
 #include "message.h"
 #include "constants.h"
 #include "utils.h"
+#include "models/thread.h"
 
 #include <QUuid>
+#include <QSqlError>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QJsonDocument>
 
 Message::Message(QObject *parent)
     : QObject{parent}
@@ -78,6 +81,8 @@ Message::Message(QObject *parent, mailcore::IMAPMessage *msg, const Folder &fold
     m_unread = attrs.unread;
     m_starred = attrs.starred;
     m_labels = attrs.labels;
+    
+    createSnapshot();
 }
 
 Message::Message(QObject *parent, const QSqlQuery &query)
@@ -105,7 +110,7 @@ Message::Message(QObject *parent, const QSqlQuery &query)
     , m_snippet{}
     , m_plaintext{}
 {
-    QJsonObject json = query.value(QStringLiteral("data")).toJsonObject();
+    QJsonObject json = query.value(QStringLiteral("data")).toJsonDocument().object();
 
     m_syncedAt = QDateTime::fromSecsSinceEpoch(json[QStringLiteral("syncedAt")].toDouble());
     m_from = new MessageContact{(QObject *) this, json[QStringLiteral("from")].toObject()};
@@ -126,9 +131,11 @@ Message::Message(QObject *parent, const QSqlQuery &query)
 
     m_snippet = json[QStringLiteral("snippet")].toString();
     m_plaintext = json[QStringLiteral("plaintext")].toBool();
+    
+    createSnapshot();
 }
 
-void Message::saveToDb(QSqlDatabase &db) const
+void Message::saveToDb(QSqlDatabase &db)
 {
     QJsonArray to;
     for (auto contact : m_to) {
@@ -163,12 +170,12 @@ void Message::saveToDb(QSqlDatabase &db) const
     json[QStringLiteral("plaintext")] = m_plaintext;
 
     QSqlQuery query{db};
-    query.prepare(QStringLiteral("INSERT INTO ") + MESSAGE_TABLE +
+    query.prepare(QStringLiteral("INSERT OR REPLACE INTO ") + MESSAGE_TABLE +
         QStringLiteral(" (id, accountId, data, folderId, threadId, headerMessageId, gmailMessageId, gmailThreadId, subject, draft, unread, starred, date, remoteUID)") +
         QStringLiteral(" VALUES (:id, :accountId, :data, :folderId, :threadId, :headerMessageId, :gmailMessageId, :gmailThreadId, :subject, :draft, :unread, :starred, :date, :remoteUID)"));
     query.bindValue(QStringLiteral(":id"), m_id);
     query.bindValue(QStringLiteral(":accountId"), m_accountId);
-    query.bindValue(QStringLiteral(":data"), json);
+    query.bindValue(QStringLiteral(":data"), QString::fromUtf8(QJsonDocument(json).toJson(QJsonDocument::Compact)));
     query.bindValue(QStringLiteral(":folderId"), m_folderId);
     query.bindValue(QStringLiteral(":threadId"), m_threadId);
     query.bindValue(QStringLiteral(":headerMessageId"), m_headerMessageId);
@@ -181,13 +188,54 @@ void Message::saveToDb(QSqlDatabase &db) const
     query.bindValue(QStringLiteral(":date"), m_date);
     query.bindValue(QStringLiteral(":remoteUID"), m_remoteUid);
     query.exec();
+    
+    // update thread details
+    if (!threadId().isEmpty()) {
+        QSqlQuery threadQuery{db};
+        query.prepare(QStringLiteral("SELECT * FROM ") + THREAD_TABLE + QStringLiteral(" WHERE id = ?"));
+        query.addBindValue(threadId());
+        query.exec();
+        
+        if (query.next()) {
+            auto thread = std::make_shared<Thread>(nullptr, query);
+            thread->updateAfterMessageChanges(m_snapshot, this);
+            thread->saveToDb(db);
+        }        
+    }
+    
+    createSnapshot();
 }
 
-void Message::deleteFromDb(QSqlDatabase &db) const
+void Message::deleteFromDb(QSqlDatabase &db)
 {
     QSqlQuery query{db};
     query.prepare(QStringLiteral("DELETE FROM ") + MESSAGE_TABLE + QStringLiteral(" WHERE id = ") + m_id);
     query.exec();
+    
+    // update thread details
+    if (!threadId().isEmpty()) {
+        QSqlQuery threadQuery{db};
+        query.prepare(QStringLiteral("SELECT * FROM ") + THREAD_TABLE + QStringLiteral(" WHERE id = ") + threadId());
+        query.exec();
+        
+        if (query.next()) {
+            auto thread = std::make_shared<Thread>(nullptr, query);
+            thread->updateAfterMessageChanges(m_snapshot, nullptr);
+            
+            // delete if there are no folders left that reference it
+            if (thread->folderIds().isEmpty()) {
+                thread->deleteFromDb(db);
+            } else {
+                thread->saveToDb(db);
+            }
+        }
+    }
+}
+
+void Message::createSnapshot()
+{
+    m_snapshot.unread = unread();
+    m_snapshot.starred = starred();
 }
 
 QString Message::id() const

@@ -61,6 +61,5 @@ private:
     void flattenMailBoxTree(const MailBoxNode &node, QList<MailBoxEntry> &list);
     void insertMailBoxIntoTree(MailBoxNode &node, MailBoxEntry &entry, QStringList &ancestors, int level);
 
-
     QList<MailBoxEntry> m_mailBoxes;
 };

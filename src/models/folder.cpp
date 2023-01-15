@@ -5,6 +5,7 @@
 #include "constants.h"
 
 #include <QUuid>
+#include <QJsonDocument>
 
 Folder::Folder(QObject *parent, QString id, QString accountId)
     : QObject{parent}
@@ -23,7 +24,7 @@ Folder::Folder(QObject *parent, const QSqlQuery &query)
     , m_localStatus{}
     , m_status{}
 {
-    QJsonObject data = query.value(QStringLiteral("data")).toJsonObject();
+    QJsonObject data = query.value(QStringLiteral("data")).toJsonDocument().object();
 
     m_localStatus = data[QStringLiteral("localStatus")].toObject();
 }
@@ -34,13 +35,13 @@ void Folder::saveToDb(QSqlDatabase &db) const
     object[QStringLiteral("localStatus")] = m_localStatus;
 
     QSqlQuery query{db};
-    query.prepare(QStringLiteral("INSERT INTO ") + FOLDER_TABLE +
+    query.prepare(QStringLiteral("INSERT OR REPLACE INTO ") + FOLDER_TABLE +
         QStringLiteral(" (id, accountId, data, path, role, createdAt)") +
         QStringLiteral(" VALUES (:id, :accountId, :data, :path, :role, :createdAt)"));
 
     query.bindValue(QStringLiteral(":id"), m_id);
     query.bindValue(QStringLiteral(":accountId"), m_accountId);
-    query.bindValue(QStringLiteral(":data"), object);
+    query.bindValue(QStringLiteral(":data"), QString::fromUtf8(QJsonDocument(object).toJson(QJsonDocument::Compact)));
     query.bindValue(QStringLiteral(":path"), m_path);
     query.bindValue(QStringLiteral(":role"), m_role);
     query.bindValue(QStringLiteral(":createdAt"), m_createdAt);

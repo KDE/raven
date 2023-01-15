@@ -5,6 +5,7 @@
 #include "constants.h"
 
 #include <KLocalizedString>
+#include <QJsonDocument>
 
 File::File(QObject *parent, Message *msg, mailcore::Attachment *a)
     : QObject{parent}
@@ -73,7 +74,7 @@ File::File(QObject *parent, const QSqlQuery &query)
     , m_accountId{query.value(QStringLiteral("accountId")).toString()}
 
 {
-    QJsonObject data = query.value(QStringLiteral("data")).toJsonObject();
+    QJsonObject data = query.value(QStringLiteral("data")).toJsonDocument().object();
 
     m_messageId = data[QStringLiteral("messageId")].toString();
     m_filename = data[QStringLiteral("fileName")].toString();
@@ -92,12 +93,12 @@ void File::saveToDb(QSqlDatabase &db) const
     object[QStringLiteral("size")] = m_size;
 
     QSqlQuery query{db};
-    query.prepare(QStringLiteral("INSERT INTO ") + FOLDER_TABLE +
+    query.prepare(QStringLiteral("INSERT OR REPLACE INTO ") + FOLDER_TABLE +
         QStringLiteral(" (id, data, accountId, fileName)") +
         QStringLiteral(" VALUES (:id, :data, :accountId, :fileName)"));
 
     query.bindValue(QStringLiteral(":id"), m_id);
-    query.bindValue(QStringLiteral(":data"), object);
+    query.bindValue(QStringLiteral(":data"), QString::fromUtf8(QJsonDocument(object).toJson(QJsonDocument::Compact)));
     query.bindValue(QStringLiteral(":accountId"), m_accountId);
     query.bindValue(QStringLiteral(":fileName"), m_filename);
     query.exec();

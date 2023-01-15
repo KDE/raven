@@ -69,7 +69,7 @@ std::shared_ptr<Message> MailProcessor::insertMessage(IMAPMessage *mMsg, Folder 
     std::shared_ptr<Message> msg = std::make_shared<Message>(nullptr, mMsg, folder, syncDataTimestamp);
     std::shared_ptr<Thread> thread = nullptr;
 
-    Array * references = mMsg->header()->references();
+    Array *references = mMsg->header()->references();
     if (references == nullptr) {
         references = new Array();
         references->autorelease();
@@ -77,15 +77,15 @@ std::shared_ptr<Message> MailProcessor::insertMessage(IMAPMessage *mMsg, Folder 
 
     {
         QSqlDatabase db = m_worker->getDB();
-        db.transaction();
 
         // find the correct thread, if it exists
 
         if (mMsg->gmailThreadID()) {
             
             QSqlQuery query{db};
-            query.exec(QStringLiteral("SELECT * FROM ") + THREAD_TABLE + QStringLiteral(" WHERE gmailThreadId = ") + QString::number(mMsg->gmailThreadID()));
-
+            query.prepare(QStringLiteral("SELECT * FROM ") + THREAD_TABLE + QStringLiteral(" WHERE gmailThreadId = ") + QString::number(mMsg->gmailThreadID()));
+            query.exec();
+            
             if (query.next()) {
                 thread = std::make_shared<Thread>(nullptr, query);
             }
@@ -97,10 +97,12 @@ std::shared_ptr<Message> MailProcessor::insertMessage(IMAPMessage *mMsg, Folder 
             int refcount = std::min(50, (int)references->count());
 
             QSqlQuery query{db};
-            query.exec(QString(QStringLiteral("SELECT %2.* FROM %2 INNER JOIN %1 ON %1.threadId = %2.id WHERE %1.accountId = ? AND %1.headerMessageId IN (%3) LIMIT 1"))
+            query.prepare(QString(QStringLiteral("SELECT %2.* FROM %2 INNER JOIN %1 ON %1.threadId = %2.id WHERE %1.accountId = ? AND %1.headerMessageId IN (%3) LIMIT 1"))
                         .arg(THREAD_REFERENCE_TABLE, THREAD_TABLE, Utils::qmarks(1 + refcount)));
             query.bindValue(0, msg->accountId());
             query.bindValue(1, msg->headerMessageId());
+            query.exec();
+            
             for (int i = 0; i < refcount; i ++) {
                 String * ref = (String *)references->objectAtIndex(i);
                 query.bindValue(2 + i, QString::fromUtf8(ref->UTF8Characters()));
@@ -124,14 +126,11 @@ std::shared_ptr<Message> MailProcessor::insertMessage(IMAPMessage *mMsg, Folder 
         appendToThreadSearchContent(thread.get(), msg.get(), nullptr);
         thread->saveToDb(db);
 
-        // Save the message - this will automatically find and update the counters
-        // on the thread we just created. Kind of a shame to find it twice but oh well.
+        // save message: - this will automatically update the thread with information.
         msg->saveToDb(db);
 
-        // Make the thread accessible by all of the message references
+        // make the thread accessible by all of the message references
         upsertThreadReferences(thread->id(), thread->accountId(), msg->headerMessageId(), references);
-
-        db.commit();
     }
     return msg;
 }

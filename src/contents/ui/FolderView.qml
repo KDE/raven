@@ -84,8 +84,8 @@ Kirigami.ScrollablePage {
             
             datetime: model.datetime.toLocaleTimeString(Qt.locale(), Locale.ShortFormat) // TODO this is not showing date !
             author: model.from
-            title: model.title
-            contentPreview: "This is a test of the message content........." // model.content
+            title: model.subject
+            contentPreview: model.snippet
             
             isRead: !model.status || model.status.isRead
             
