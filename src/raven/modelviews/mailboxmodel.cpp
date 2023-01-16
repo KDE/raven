@@ -4,6 +4,7 @@
 #include "mailboxmodel.h"
 #include "../libraven/constants.h"
 #include "../libraven/accountmodel.h"
+#include "../libraven/utils.h"
 
 #include <QDebug>
 #include <QSqlError>
@@ -150,9 +151,7 @@ void MailBoxModel::load()
     QSqlQuery query;
     query.prepare(QStringLiteral("SELECT * FROM ") + FOLDER_TABLE);
 
-    if (!query.exec()) {
-        // TODO better error handling
-        qDebug() << "error fetching folders:" << query.lastError();
+    if (!Utils::execWithLog(query, "fetching folders")) {
         endResetModel();
         return;
     }

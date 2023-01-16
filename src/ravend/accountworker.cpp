@@ -134,7 +134,7 @@ QList<std::shared_ptr<Folder>> AccountWorker::syncFoldersAndLabels()
 
     if (err != ErrorNone) {
         // TODO better error handling (enqueue job to retry, log errors)
-        qWarning() << "ISSUE: syncFoldersAndLabels" << err;
+        qWarning() << "ISSUE: syncFoldersAndLabels" << QString::fromStdString(ErrorCodeToTypeMap[err]);
         return {};
     }
 
@@ -332,9 +332,8 @@ bool AccountWorker::syncNow()
         bool firstChunk = false;
 
         if (err != ErrorNone) {
-            // TODO better error handling (enqueue job to retry, log errors)
-            qWarning() << "ISSUE: syncNow" << err;
-            return false;
+            qWarning() << "ISSUE: syncNow" << QString::fromStdString(ErrorCodeToTypeMap[err]);
+            continue;
         }
 
         // Step 1: Check folder UIDValidity
@@ -559,7 +558,7 @@ void AccountWorker::syncFolderUIDRange(Folder &folder, Range range, bool heavyIn
 
     clock_t lastSleepClock = clock();
 
-    qDebug() << "syncFolderUIDRange - " << remotePath << ": remote=" << remote->count() << ", local=" << local.size() << ", remoteUID=" << folder.id();
+    qDebug().nospace() << "syncFolderUIDRange - " << remotePath << ": remote=" << remote->count() << ", local=" << local.size() << ", remoteUID=" << folder.id();
 
     for (int ii = ((int)remote->count()) - 1; ii >= 0; ii--) {
         // Never sit in a hard loop inserting things into the database for more than 250ms.
@@ -896,32 +895,31 @@ void AccountWorker::syncMessageBody(Message *message) {
 
     QSqlDatabase db = getDB();
     QSqlQuery query{db};
-    query.prepare(QStringLiteral("SELECT * FROM ") + FOLDER_TABLE + QStringLiteral(" WHERE id = ") + message->folderId());
-    query.exec();
+    query.prepare(QStringLiteral("SELECT * FROM folder WHERE id = ?"));
+    query.bindValue(0, message->folderId());
+    Utils::execWithLog(query, "fetch folder for syncMessageBody");
     
-    if (query.exec()) {
-        auto folder = std::make_shared<Folder>(nullptr, query);
-        QString folderPath = folder->path();
-        String path(AS_MCSTR(folderPath.toStdString()));
+    if (!query.next()) {
+        return;
+    }
+    
+    auto folder = std::make_shared<Folder>(nullptr, query);
+    QString folderPath = folder->path();
+    String path(AS_MCSTR(folderPath.toStdString()));
 
-        Data * data = m_imapSession->fetchMessageByUID(&path, message->remoteUid().toUInt(), &cb, &err);
-        if (err != ErrorNone) {
-            qWarning() << QString(QStringLiteral("Unable to fetch body for message \"%1\" (%2 UID %3). Error %4")).arg(message->subject(), folderPath, message->remoteUid(), QString::fromStdString(ErrorCodeToTypeMap[err]));
+    Data * data = m_imapSession->fetchMessageByUID(&path, message->remoteUid().toUInt(), &cb, &err);
+    if (err != ErrorNone) {
+        qWarning() << QString(QStringLiteral("Unable to fetch body for message \"%1\" (%2 UID %3). Error %4")).arg(message->subject(), folderPath, message->remoteUid(), QString::fromStdString(ErrorCodeToTypeMap[err]));
 
-            if (err == ErrorFetch) {
-                // Syncing message bodies can fail often, because we query our local store
-                // and the sync worker may not have updated it yet. Messages, esp. drafts,
-                // can just disappear.
-
-                // oh well.
-                return;
-            }
-
-            // TODO
-            // throw SyncException(err, "syncMessageBody - fetchMessageByUID");
+        if (err == ErrorFetch) {
+            // syncing message bodies can fail often
             return;
         }
-        MessageParser *messageParser = MessageParser::messageParserWithData(data);
-        m_mailProcessor->retrievedMessageBody(message, messageParser);
+
+        qWarning() << "ISSUE: syncMessageBody - fetchMessageByUID:" << QString::fromStdString(ErrorCodeToTypeMap[err]);
+        return;
     }
+    
+    MessageParser *messageParser = MessageParser::messageParserWithData(data);
+    m_mailProcessor->retrievedMessageBody(message, messageParser);
 }

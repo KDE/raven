@@ -252,7 +252,7 @@ bool Utils::messageAttributesMatch(MessageAttributes a, MessageAttributes b) {
 bool Utils::execWithLog(QSqlQuery &query, const std::string &description)
 {
     if (!query.exec()) {
-        qWarning().nospace() << "Query error: " << QString::fromStdString(description) << ": " << query.lastError();
+        qWarning().nospace() << "Query error: " << QString::fromStdString(description) << ": " << query.lastError() << " " << query.lastQuery();
         return false;
     }
     return true;

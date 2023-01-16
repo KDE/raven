@@ -37,7 +37,7 @@ Message::Message(QObject *parent, mailcore::IMAPMessage *msg, const Folder &fold
     , m_starred{}
     , m_date{QDateTime::fromSecsSinceEpoch(msg->header()->date() == -1 ? msg->header()->receivedDate() : msg->header()->date())}
     , m_syncedAt{QDateTime::fromSecsSinceEpoch(syncTimestamp)}
-    , m_remoteUid{msg->uid()}
+    , m_remoteUid{QString::number(msg->uid())}
     , m_labels{}
     , m_snippet{}
     , m_plaintext{}

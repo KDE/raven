@@ -29,6 +29,7 @@ void MailListModel::loadFolder(Folder *folder)
         thread->deleteLater();
     }
     m_threads.clear();
+    m_threadFrom.clear();
 
     QSqlDatabase db = QSqlDatabase::database();
     
@@ -46,7 +47,9 @@ void MailListModel::loadFolder(Folder *folder)
 
     // loop over folders fetched from db
     while (query.next()) {
-        m_threads.push_back(new Thread(this, query));
+        auto thread = new Thread(this, query);
+        m_threads.push_back(thread);
+        m_threadFrom.push_back(getThreadFrom(thread));
     }
 
     endResetModel();
@@ -69,24 +72,8 @@ QVariant MailListModel::data(const QModelIndex &index, int role) const
     switch (role) {
         case ThreadRole:
             return QVariant::fromValue(thread);
-        case FromRole: {
-            // TODO cache this since this is being called constantly
-            QString from;
-            auto account = AccountModel::self()->accountById(thread->accountId());
-            
-            // return every participant except ourself
-            for (int i = 0; i < thread->participants().count(); ++i) {
-                auto participant = thread->participants()[i];
-                
-                if (participant->email() != account->email()) {
-                    if (i != 0) {
-                        from += QStringLiteral(", ");
-                    }
-                    from += QString{QStringLiteral("%1 <%2>")}.arg(participant->name(), participant->email());
-                }
-            }
-            return from;
-        }
+        case FromRole:
+            return m_threadFrom[index.row()];
         case SubjectRole:
             return thread->subject();
         case SnippetRole:
@@ -110,5 +97,24 @@ Qt::ItemFlags MailListModel::flags(const QModelIndex &index) const
 QHash<int, QByteArray> MailListModel::roleNames() const
 {
     return {{ThreadRole, "thread"}, {FromRole, "from"}, {SubjectRole, "subject"}, {SnippetRole, "snippet"}, {UnreadRole, "unread"}, {StarredRole, "starred"}, {DateRole, "date"}};
+}
+
+QString MailListModel::getThreadFrom(Thread *thread)
+{
+    QString from;
+    auto account = AccountModel::self()->accountById(thread->accountId());
+    
+    // return every participant except ourself
+    for (int i = 0; i < thread->participants().count(); ++i) {
+        auto participant = thread->participants()[i];
+        
+        if (participant->email() != account->email()) {
+            if (i != 0) {
+                from += QStringLiteral(", ");
+            }
+            from += QString{QStringLiteral("%1 <%2>")}.arg(participant->name(), participant->email());
+        }
+    }
+    return from;
 }
 

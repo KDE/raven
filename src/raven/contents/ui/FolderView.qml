@@ -62,6 +62,7 @@ Kirigami.ScrollablePage {
         id: mails
         model: Raven.MailListModel
         currentIndex: -1
+        reuseItems: true
         
         Kirigami.PlaceholderMessage {
             id: mailboxSelected

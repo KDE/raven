@@ -37,5 +37,8 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
+    QString getThreadFrom(Thread *thread);
+    
     QList<Thread *> m_threads;
+    QStringList m_threadFrom;
 };

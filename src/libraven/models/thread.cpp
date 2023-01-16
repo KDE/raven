@@ -156,6 +156,7 @@ void Thread::updateAfterMessageChanges(const MessageSnapshot &oldMsg, Message *n
         }
         if (newMsg->date() < firstMessageTimestamp() || firstMessageTimestamp() == QDateTime::fromSecsSinceEpoch(0)) {
             setFirstMessageTimestamp(newMsg->date());
+            setSnippet(newMsg->snippet());
         }
         
         QSet<QString> emails;

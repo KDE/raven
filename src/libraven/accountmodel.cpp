@@ -75,8 +75,13 @@ void AccountModel::removeAccount(int index)
     endRemoveRows();
 
     Q_EMIT accountRemoved(account);
-    account->deleteLater();
 
+    QString accountsFolder = RAVEN_CONFIG_LOCATION + QStringLiteral("/accounts");
+    QDir dir{accountsFolder + QStringLiteral("/") + account->id()};
+    dir.removeRecursively();
+    
+    account->deleteLater();
+    
     // TODO enqueue jobs to delete entries from sql database
 }
 

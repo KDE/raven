@@ -117,7 +117,7 @@ void DBManager::migrationV1(uint)
         ")";
 
     auto messageBodyCreate =
-        "CREATE TABLE IF NOT EXISTS " + MESSAGE_BODY_TABLE.toStdString() + " (id TEXT PRIMARY KEY, `value` TEXT)";
+        "CREATE TABLE IF NOT EXISTS " + MESSAGE_BODY_TABLE.toStdString() + " (id TEXT PRIMARY KEY, `value` TEXT, fetchedAt DATETIME)";
 
     auto threadsCreate = // TODO add foreign key??? (maybe not since annoying), add folderId
         "CREATE TABLE IF NOT EXISTS " + THREAD_TABLE.toStdString() + " ("

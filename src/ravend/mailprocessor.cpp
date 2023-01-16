@@ -84,8 +84,9 @@ std::shared_ptr<Message> MailProcessor::insertMessage(IMAPMessage *mMsg, Folder 
         if (mMsg->gmailThreadID()) {
             
             QSqlQuery query{db};
-            query.prepare(QStringLiteral("SELECT * FROM ") + THREAD_TABLE + QStringLiteral(" WHERE gmailThreadId = ") + QString::number(mMsg->gmailThreadID()));
-            query.exec();
+            query.prepare(QStringLiteral("SELECT * FROM thread WHERE gmailThreadId = ?"));
+            query.addBindValue((unsigned long long) mMsg->gmailThreadID());
+            Utils::execWithLog(query, "insertMessage - fetch thread from gmail thread id");
             
             if (query.next()) {
                 thread = std::make_shared<Thread>(nullptr, query);
@@ -98,14 +99,14 @@ std::shared_ptr<Message> MailProcessor::insertMessage(IMAPMessage *mMsg, Folder 
             int refcount = std::min(50, (int)references->count());
 
             QSqlQuery query{db};
-            query.prepare(QString(QStringLiteral("SELECT %2.* FROM %2 INNER JOIN %1 ON %1.threadId = %2.id WHERE %1.accountId = ? AND %1.headerMessageId IN (%3) LIMIT 1"))
-                        .arg(THREAD_REFERENCE_TABLE, THREAD_TABLE, Utils::qmarks(1 + refcount)));
+            query.prepare(QString(QStringLiteral("SELECT thread_reference.* FROM thread INNER JOIN thread_reference ON thread_reference.threadId = thread.id WHERE thread_reference.accountId = ? AND thread_reference.headerMessageId IN (%1) LIMIT 1"))
+                .arg(Utils::qmarks(1 + refcount)));
             query.bindValue(0, msg->accountId());
             query.bindValue(1, msg->headerMessageId());
-            query.exec();
+            Utils::execWithLog(query, "insertMessage - join thread ref table and thread table");
             
             for (int i = 0; i < refcount; i ++) {
-                String * ref = (String *)references->objectAtIndex(i);
+                String *ref = (String *)references->objectAtIndex(i);
                 query.bindValue(2 + i, QString::fromUtf8(ref->UTF8Characters()));
             }
 
@@ -215,10 +216,10 @@ void MailProcessor::retrievedMessageBody(Message *message, MessageParser *parser
 
         // write body to the MessageBodies table
         QSqlQuery query{db};
-        query.prepare(QString(QStringLiteral("REPLACE INTO %1 (id, value, fetchedAt) VALUES (?, ?, datetime('now'))")).arg(MESSAGE_BODY_TABLE));
+        query.prepare(QStringLiteral("REPLACE INTO message_body (id, value, fetchedAt) VALUES (?, ?, datetime('now'))"));
         query.bindValue(0, message->id());
         query.bindValue(1, QString::fromLatin1(bodyRepresentation));
-        query.exec();
+        Utils::execWithLog(query, "replace message body");
 
         // write files to the files table
         for (auto &file : files) {
@@ -226,11 +227,12 @@ void MailProcessor::retrievedMessageBody(Message *message, MessageParser *parser
         }
 
         // append the body text to the thread's FTS5 search index
-        QSqlQuery threadQuery{db};
-        threadQuery.prepare(QStringLiteral("SELECT * FROM %1 WHERE id = %2").arg(THREAD_TABLE, message->threadId()));
-        threadQuery.exec();
-        if (threadQuery.next()) {
-            std::shared_ptr<Thread> thread = std::make_shared<Thread>(nullptr, threadQuery);
+        query.prepare(QStringLiteral("SELECT * FROM thread WHERE id = ?"));
+        query.addBindValue(message->threadId());
+        Utils::execWithLog(query, "retrievedMessageBody - fetch folder");
+        
+        if (query.next()) {
+            std::shared_ptr<Thread> thread = std::make_shared<Thread>(nullptr, query);
             appendToThreadSearchContent(thread.get(), nullptr, text);
         }
 
@@ -313,12 +315,12 @@ void MailProcessor::deleteMessagesStillUnlinkedFromPhase(int phase)
         ++iterations;
 
         QSqlQuery query{db};
-        query.prepare(QString(QStringLiteral("SELECT * FROM %1 WHERE accountId = %2 AND remoteUID = %3 LIMIT %4"))
-            .arg(MESSAGE_TABLE,
-                 m_worker->account()->id(),
-                 QString::number(UINT32_MAX - phase),
-                 QString::number(chunkSize)));
-        query.exec();
+        query.prepare(QStringLiteral("SELECT * FROM message WHERE accountId = ? AND remoteUID = ? LIMIT ?"));
+        query.addBindValue(m_worker->account()->id());
+        query.addBindValue(UINT32_MAX - phase);
+        query.addBindValue(chunkSize);
+
+        Utils::execWithLog(query, "deleteMessagesStillUnlinkedFromPhase - select unlinked messages");
 
         QList<std::shared_ptr<Message>> messages;
         while (query.next()) {
