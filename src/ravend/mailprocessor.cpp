@@ -77,6 +77,7 @@ std::shared_ptr<Message> MailProcessor::insertMessage(IMAPMessage *mMsg, Folder 
 
     {
         QSqlDatabase db = m_worker->getDB();
+        db.transaction();
 
         // find the correct thread, if it exists
 
@@ -131,6 +132,8 @@ std::shared_ptr<Message> MailProcessor::insertMessage(IMAPMessage *mMsg, Folder 
 
         // make the thread accessible by all of the message references
         upsertThreadReferences(thread->id(), thread->accountId(), msg->headerMessageId(), references);
+        
+        db.commit();
     }
     return msg;
 }

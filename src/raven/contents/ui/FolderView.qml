@@ -12,7 +12,7 @@ import org.kde.kitemmodels 1.0 as KItemModels
 
 Kirigami.ScrollablePage {
     id: folderView
-    title: "TODO" // TODO
+    title: Raven.Raven.selectedFolderName
     
     Component {
         id: contextMenu
@@ -60,7 +60,7 @@ Kirigami.ScrollablePage {
 
     ListView {
         id: mails
-        model: [] // TODO
+        model: Raven.MailListModel
         currentIndex: -1
         
         Kirigami.PlaceholderMessage {
@@ -82,39 +82,39 @@ Kirigami.ScrollablePage {
         delegate: MailDelegate {
             showSeparator: model.index !== folderView.count - 1
             
-            datetime: model.datetime.toLocaleTimeString(Qt.locale(), Locale.ShortFormat) // TODO this is not showing date !
+            datetime: model.date.toLocaleTimeString(Qt.locale(), Locale.ShortFormat) // TODO this is not showing date !
             author: model.from
             title: model.subject
             contentPreview: model.snippet
             
-            isRead: !model.status || model.status.isRead
+            isRead: !model.unread
             
-            onOpenMailRequested: {
-                applicationWindow().pageStack.push(Qt.resolvedUrl('ConversationViewer.qml'), {
-                    item: model.item,
-                    props: model,
-                });
-
-                if (!model.status.isRead) {
-                    const status = MailManager.folderModel.copyMessageStatus(model.status);
-                    status.isRead = true;
-                    MailManager.folderModel.updateMessageStatus(index, status)
-                }
-            }
+            // onOpenMailRequested: {
+            //     applicationWindow().pageStack.push(Qt.resolvedUrl('ConversationViewer.qml'), {
+            //         item: model.item,
+            //         props: model,
+            //     });
+            // 
+            //     if (!model.status.isRead) {
+            //         const status = MailManager.folderModel.copyMessageStatus(model.status);
+            //         status.isRead = true;
+            //         MailManager.folderModel.updateMessageStatus(index, status)
+            //     }
+            // }
             
-            onStarMailRequested: {
-                const status = MailManager.folderModel.copyMessageStatus(model.status);
-                status.isImportant = !status.isImportant;
-                MailManager.folderModel.updateMessageStatus(index, status)
-            }
-            
-            onContextMenuRequested: {
-                const menu = contextMenu.createObject(folderView, {
-                    row: index,
-                    status: MailManager.folderModel.copyMessageStatus(model.status),
-                });
-                menu.popup();
-            }
+//             onStarMailRequested: {
+//                 const status = MailManager.folderModel.copyMessageStatus(model.status);
+//                 status.isImportant = !status.isImportant;
+//                 MailManager.folderModel.updateMessageStatus(index, status)
+//             }
+//             
+//             onContextMenuRequested: {
+//                 const menu = contextMenu.createObject(folderView, {
+//                     row: index,
+//                     status: MailManager.folderModel.copyMessageStatus(model.status),
+//                 });
+//                 menu.popup();
+//             }
         }
     }
 }

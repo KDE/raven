@@ -7,7 +7,35 @@
 #include <QAbstractListModel>
 #include <QHash>
 
-#include "models/thread.h"
-#include "models/message.h"
+#include "../libraven/models/folder.h"
+#include "../libraven/models/thread.h"
 
+class MailListModel : public QAbstractListModel
+{
+    Q_OBJECT
 
+public:
+    MailListModel(QObject *parent = nullptr);
+
+    enum {
+        ThreadRole,
+        FromRole,
+        SubjectRole,
+        SnippetRole,
+        UnreadRole,
+        StarredRole,
+        DateRole
+    };
+
+    static MailListModel *self();
+
+    Q_INVOKABLE void loadFolder(Folder *folder);
+
+    int rowCount(const QModelIndex &parent) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    QHash<int, QByteArray> roleNames() const override;
+
+private:
+    QList<Thread *> m_threads;
+};

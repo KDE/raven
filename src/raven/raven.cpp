@@ -19,5 +19,13 @@ Raven *Raven::self()
 
 QString Raven::selectedFolderName() const
 {
-    return {}; // TODO
+    return m_selectedFolderName;
+}
+
+void Raven::setSelectedFolderName(QString folderName)
+{
+    if (folderName != m_selectedFolderName) {
+        m_selectedFolderName = folderName;
+        Q_EMIT selectedFolderNameChanged();
+    }
 }

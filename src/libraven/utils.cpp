@@ -8,6 +8,7 @@
 #include <QCryptographicHash>
 #include <QDebug>
 #include <QDateTime>
+#include <QSqlError>
 
 Utils::Utils(QObject *parent)
     : QObject{parent}
@@ -246,4 +247,13 @@ MessageAttributes Utils::messageAttributesForMessage(IMAPMessage * msg) {
 
 bool Utils::messageAttributesMatch(MessageAttributes a, MessageAttributes b) {
     return a.unread == b.unread && a.starred == b.starred && a.uid == b.uid && a.labels == b.labels;
+}
+
+bool Utils::execWithLog(QSqlQuery &query, const std::string &description)
+{
+    if (!query.exec()) {
+        qWarning().nospace() << "Query error: " << QString::fromStdString(description) << ": " << query.lastError();
+        return false;
+    }
+    return true;
 }

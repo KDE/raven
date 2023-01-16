@@ -9,6 +9,11 @@
 
 #include "message.h"
 
+struct ThreadSnapshot
+{
+    QStringList folderIds;
+};
+
 class Thread : public QObject
 {
     Q_OBJECT
@@ -17,6 +22,8 @@ class Thread : public QObject
     Q_PROPERTY(QString snippet READ snippet CONSTANT)
     Q_PROPERTY(int unread READ unread CONSTANT)
     Q_PROPERTY(int starred READ starred CONSTANT)
+    Q_PROPERTY(QDateTime firstMessageDate READ firstMessageTimestamp CONSTANT)
+    Q_PROPERTY(QDateTime lastMessageDate READ lastMessageTimestamp CONSTANT)
     Q_PROPERTY(QList<MessageContact *> participants READ participants CONSTANT)
 
 public:
@@ -25,6 +32,8 @@ public:
 
     void saveToDb(QSqlDatabase &db) const;
     void deleteFromDb(QSqlDatabase &db) const;
+    
+    void createSnapshot();
     
     void updateAfterMessageChanges(const MessageSnapshot &oldMsg, Message *newMsg); 
 
@@ -75,4 +84,6 @@ private:
     
     QList<MessageContact *> m_participants;
     QStringList m_folderIds;
+    
+    ThreadSnapshot m_snapshot;
 };

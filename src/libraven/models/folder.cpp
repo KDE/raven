@@ -3,9 +3,11 @@
 
 #include "folder.h"
 #include "../constants.h"
+#include "../utils.h"
 
 #include <QUuid>
 #include <QJsonDocument>
+#include <QSqlError>
 
 Folder::Folder(QObject *parent, QString id, QString accountId)
     : QObject{parent}
@@ -16,7 +18,7 @@ Folder::Folder(QObject *parent, QString id, QString accountId)
 
 Folder::Folder(QObject *parent, const QSqlQuery &query)
     : QObject{parent}
-    , m_id{query.value(QStringLiteral("id")).toInt()}
+    , m_id{query.value(QStringLiteral("id")).toString()}
     , m_accountId{query.value(QStringLiteral("accountId")).toString()}
     , m_path{query.value(QStringLiteral("path")).toString()}
     , m_role{query.value(QStringLiteral("role")).toInt()}
@@ -24,7 +26,7 @@ Folder::Folder(QObject *parent, const QSqlQuery &query)
     , m_localStatus{}
     , m_status{}
 {
-    QJsonObject data = query.value(QStringLiteral("data")).toJsonDocument().object();
+    QJsonObject data = QJsonDocument::fromJson(query.value(QStringLiteral("data")).toString().toUtf8()).object();
 
     m_localStatus = data[QStringLiteral("localStatus")].toObject();
 }
@@ -50,9 +52,17 @@ void Folder::saveToDb(QSqlDatabase &db) const
 
 void Folder::deleteFromDb(QSqlDatabase &db) const
 {
+    db.transaction();
+    
     QSqlQuery query{db};
+    
+    query.prepare(QStringLiteral("DELETE FROM ") + THREAD_FOLDER_TABLE + QStringLiteral(" WHERE folderId = ") + m_id);
+    Utils::execWithLog(query, "removing folder <-> thread connections");
+    
     query.prepare(QStringLiteral("DELETE FROM ") + FOLDER_TABLE + QStringLiteral(" WHERE id = ") + m_id);
-    query.exec();
+    Utils::execWithLog(query, "removing folder");
+    
+    db.commit();
 }
 
 QString Folder::id() const

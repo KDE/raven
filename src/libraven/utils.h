@@ -7,6 +7,7 @@
 #include <QObject>
 #include <QStringList>
 #include <QList>
+#include <QSqlQuery>
 
 #include <MailCore/MailCore.h>
 
@@ -46,6 +47,9 @@ public:
 
     static MessageAttributes messageAttributesForMessage(IMAPMessage *msg);
     static bool messageAttributesMatch(MessageAttributes a, MessageAttributes b);
+    
+    // executes query and logs errors
+    static bool execWithLog(QSqlQuery &query, const std::string &description);
     
     template<typename T>
     static QList<QList<T>> chunksOfVector(QList<T> & v, size_t chunkSize) {

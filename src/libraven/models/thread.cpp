@@ -3,11 +3,13 @@
 
 #include "thread.h"
 #include "../constants.h"
+#include "../utils.h"
 
 #include <QVariant>
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QJsonArray>
+#include <QSqlError>
 
 Thread::Thread(QObject *parent, QString accountId, QString subject, QString gmailThreadId)
     : QObject{parent}
@@ -39,7 +41,7 @@ Thread::Thread(QObject *parent, const QSqlQuery &query)
     , m_participants{}
     , m_folderIds{}
 {
-    QJsonObject object = query.value(QStringLiteral("data")).toJsonDocument().object();
+    QJsonObject object = QJsonDocument::fromJson(query.value(QStringLiteral("data")).toString().toUtf8()).object();
     
     for (auto participant : object[QStringLiteral("participants")].toArray()) {
         m_participants.push_back(new MessageContact{(QObject *) this, participant.toObject()});
@@ -51,6 +53,8 @@ Thread::Thread(QObject *parent, const QSqlQuery &query)
 
 void Thread::saveToDb(QSqlDatabase &db) const
 {
+    db.transaction();
+    
     QJsonArray participants;
     for (auto contact : m_participants) {
         participants.push_back(contact->toJson());
@@ -79,7 +83,54 @@ void Thread::saveToDb(QSqlDatabase &db) const
     query.bindValue(QStringLiteral(":starred"), m_starred);
     query.bindValue(QStringLiteral(":firstMessageTimestamp"), m_firstMessageTimestamp);
     query.bindValue(QStringLiteral(":lastMessageTimestamp"), m_lastMessageTimestamp);
+    Utils::execWithLog(query, "saving thread");
+    
+    // update thread <-> folder join table with any changes
+    QStringList folderIdsToUpdate = m_folderIds;
+    for (auto &folderId : m_snapshot.folderIds) {
+        if (folderIdsToUpdate.indexOf(folderId) == -1) {
+            
+            query.prepare(QStringLiteral("DELETE FROM ") + THREAD_FOLDER_TABLE + QStringLiteral(" WHERE threadId = ? AND folderId = ?"));
+            query.addBindValue(m_id);
+            query.addBindValue(folderId);
+            Utils::execWithLog(query, "remove thread <-> folder relationship");
+            
+        } else {
+            folderIdsToUpdate.removeAll(folderId);
+        }
+    }
+    
+    for (auto &folderId : folderIdsToUpdate) {
+        query.prepare(QStringLiteral("INSERT OR REPLACE INTO ") + THREAD_FOLDER_TABLE + 
+            QStringLiteral(" (accountId, threadId, folderId) VALUES (:accountId, :threadId, :folderId)"));
+        
+        query.bindValue(QStringLiteral(":accountId"), m_accountId);
+        query.bindValue(QStringLiteral(":threadId"), m_id);
+        query.bindValue(QStringLiteral(":folderId"), folderId);
+        
+        Utils::execWithLog(query, "add thread <-> folder relationship");
+    }
+    
+    db.commit();
+}
+
+void Thread::deleteFromDb(QSqlDatabase &db) const
+{
+    db.transaction();
+    
+    QSqlQuery query{db};
+    query.prepare(QStringLiteral("DELETE FROM ") + THREAD_FOLDER_TABLE + QStringLiteral(" WHERE threadId = ") + m_id);
     query.exec();
+    
+    query.prepare(QStringLiteral("DELETE FROM ") + THREAD_TABLE + QStringLiteral(" WHERE id = ") + m_id);
+    query.exec();
+    
+    db.commit();
+}
+
+void Thread::createSnapshot()
+{
+    m_snapshot.folderIds = m_folderIds;
 }
 
 void Thread::updateAfterMessageChanges(const MessageSnapshot &oldMsg, Message *newMsg)
@@ -112,6 +163,7 @@ void Thread::updateAfterMessageChanges(const MessageSnapshot &oldMsg, Message *n
             emails.insert(participant->email());
         }
         
+        addMissingParticipants(emails, {newMsg->from()});
         addMissingParticipants(emails, newMsg->to());
         addMissingParticipants(emails, newMsg->cc());
         addMissingParticipants(emails, newMsg->bcc());
@@ -123,13 +175,6 @@ void Thread::updateAfterMessageChanges(const MessageSnapshot &oldMsg, Message *n
 QString Thread::id() const
 {
     return m_id;
-}
-
-void Thread::deleteFromDb(QSqlDatabase &db) const
-{
-    QSqlQuery query{db};
-    query.prepare(QStringLiteral("DELETE FROM ") + THREAD_TABLE + QStringLiteral(" WHERE id = ") + m_id);
-    query.exec();
 }
 
 QString Thread::accountId() const

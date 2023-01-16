@@ -43,12 +43,12 @@ void DBManager::migrate()
 {
     // Create migration table
     QSqlQuery createMetadata(QSqlDatabase::database());
-    createMetadata.prepare(QStringLiteral("CREATE TABLE IF NOT EXISTS Metadata (migrationId INTEGER NOT NULL)"));
+    createMetadata.prepare(QStringLiteral("CREATE TABLE IF NOT EXISTS metadata (migrationId INTEGER NOT NULL)"));
     exec(createMetadata);
 
     // Find out current revision
     QSqlQuery currentRevision(QSqlDatabase::database());
-    currentRevision.prepare(QStringLiteral("SELECT migrationId FROM Metadata ORDER BY migrationId DESC LIMIT 1"));
+    currentRevision.prepare(QStringLiteral("SELECT migrationId FROM metadata ORDER BY migrationId DESC LIMIT 1"));
     exec(currentRevision);
     currentRevision.first();
 
@@ -68,7 +68,7 @@ void DBManager::migrate()
 
     // Update migration info if necessary
     QSqlQuery update;
-    update.prepare(QStringLiteral("INSERT INTO Metadata (migrationId) VALUES (:migrationId)"));
+    update.prepare(QStringLiteral("INSERT INTO metadata (migrationId) VALUES (:migrationId)"));
     update.bindValue(QStringLiteral(":migrationId"), DATABASE_REVISION);
     exec(update);
 }
@@ -119,7 +119,7 @@ void DBManager::migrationV1(uint)
     auto messageBodyCreate =
         "CREATE TABLE IF NOT EXISTS " + MESSAGE_BODY_TABLE.toStdString() + " (id TEXT PRIMARY KEY, `value` TEXT)";
 
-    auto threadsCreate =
+    auto threadsCreate = // TODO add foreign key??? (maybe not since annoying), add folderId
         "CREATE TABLE IF NOT EXISTS " + THREAD_TABLE.toStdString() + " ("
             "id TEXT PRIMARY KEY,"
             "accountId TEXT,"
@@ -139,6 +139,16 @@ void DBManager::migrationV1(uint)
             "accountId TEXT,"
             "headerMessageId TEXT,"
             "PRIMARY KEY (threadId, accountId, headerMessageId)"
+        ")";
+        
+    auto threadFolderCreate =
+        "CREATE TABLE IF NOT EXISTS " + THREAD_FOLDER_TABLE.toStdString() + " ("
+            "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "accountId TEXT,"
+            "threadId TEXT,"
+            "folderId TEXT,"
+            "FOREIGN KEY(threadId) REFERENCES " + THREAD_TABLE.toStdString() + "(id),"
+            "FOREIGN KEY(folderId) REFERENCES " + FOLDER_TABLE.toStdString() + "(id)"
         ")";
 
     auto foldersCreate =
@@ -174,6 +184,7 @@ void DBManager::migrationV1(uint)
     createTables.exec(QString::fromStdString(messageBodyCreate));
     createTables.exec(QString::fromStdString(threadsCreate));
     createTables.exec(QString::fromStdString(threadRefsCreate));
+    createTables.exec(QString::fromStdString(threadFolderCreate));
     createTables.exec(QString::fromStdString(foldersCreate));
     createTables.exec(QString::fromStdString(labelsCreate));
     createTables.exec(QString::fromStdString(filesCreate));

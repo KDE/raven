@@ -23,6 +23,7 @@
 #include "../libraven/utils.h"
 
 #include "modelviews/mailboxmodel.h"
+#include "modelviews/maillistmodel.h"
 
 #include "accounts/newaccountmanager.h"
 
@@ -71,6 +72,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     qmlRegisterType<Message>("org.kde.raven", 1, 0, "Message");
     qmlRegisterType<MessageContact>("org.kde.raven", 1, 0, "MessageContact");
 
+    qmlRegisterSingletonInstance("org.kde.raven", 1, 0, "MailListModel", MailListModel::self());
     qmlRegisterSingletonInstance("org.kde.raven", 1, 0, "MailBoxModel", MailBoxModel::self());
     qmlRegisterSingletonInstance("org.kde.raven", 1, 0, "AccountModel", AccountModel::self());
 

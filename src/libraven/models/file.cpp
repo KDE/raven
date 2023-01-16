@@ -74,7 +74,7 @@ File::File(QObject *parent, const QSqlQuery &query)
     , m_accountId{query.value(QStringLiteral("accountId")).toString()}
 
 {
-    QJsonObject data = query.value(QStringLiteral("data")).toJsonDocument().object();
+    QJsonObject data = QJsonDocument::fromJson(query.value(QStringLiteral("data")).toString().toUtf8()).object();
 
     m_messageId = data[QStringLiteral("messageId")].toString();
     m_filename = data[QStringLiteral("fileName")].toString();

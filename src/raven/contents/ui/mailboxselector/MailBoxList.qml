@@ -163,17 +163,16 @@ ListView {
                 }
 
                 onClicked: {
-                    // TODO
-//                     model.checkState = model.checkState === 0 ? 2 : 0
-//                     MailManager.loadMailCollection(foldersModel.mapToSource(foldersModel.index(model.index, 0)));
-//
-//                     controlRoot.chosen = true;
-//                     mailList.folderChosen();
-//
-//                     // push list page if in narrow mode
-//                     if (!applicationWindow().isWidescreen) {
-//                         applicationWindow().pageStack.push(applicationWindow().getPage("FolderView"));
-//                     }
+                    Raven.Raven.selectedFolderName = model.name;
+                    Raven.MailListModel.loadFolder(model.folder);
+
+                    controlRoot.chosen = true;
+                    mailList.folderChosen();
+
+                    // push list page if in narrow mode
+                    if (!applicationWindow().isWidescreen) {
+                        applicationWindow().pageStack.push(applicationWindow().getPage("FolderView"));
+                    }
                 }
             }
         }

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "../libraven/constants.h"
+#include "../libraven/models/folder.h"
 
 #include <QObject>
 #include <QThread>
@@ -16,7 +17,7 @@ using namespace mailcore;
 class Raven : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString selectedFolderName READ selectedFolderName NOTIFY selectedFolderNameChanged)
+    Q_PROPERTY(QString selectedFolderName READ selectedFolderName WRITE setSelectedFolderName NOTIFY selectedFolderNameChanged)
 
 public:
     Raven(QObject *parent = nullptr);
@@ -24,7 +25,11 @@ public:
     static Raven *self();
 
     QString selectedFolderName() const;
+    void setSelectedFolderName(QString folderName);
 
 Q_SIGNALS:
     void selectedFolderNameChanged();
+
+private:
+    QString m_selectedFolderName;
 };

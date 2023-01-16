@@ -110,7 +110,7 @@ Message::Message(QObject *parent, const QSqlQuery &query)
     , m_snippet{}
     , m_plaintext{}
 {
-    QJsonObject json = query.value(QStringLiteral("data")).toJsonDocument().object();
+    QJsonObject json = QJsonDocument::fromJson(query.value(QStringLiteral("data")).toString().toUtf8()).object();
 
     m_syncedAt = QDateTime::fromSecsSinceEpoch(json[QStringLiteral("syncedAt")].toDouble());
     m_from = new MessageContact{(QObject *) this, json[QStringLiteral("from")].toObject()};
