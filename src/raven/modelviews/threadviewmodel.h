@@ -8,29 +8,32 @@
 #include <QHash>
 #include <QList>
 
-#include "../libraven/models/folder.h"
+#include "../libraven/models/message.h"
 #include "../libraven/models/thread.h"
 
-class MailListModel : public QAbstractListModel
+class ThreadViewModel : public QAbstractListModel
 {
     Q_OBJECT
 
 public:
-    MailListModel(QObject *parent = nullptr);
+    ThreadViewModel(QObject *parent = nullptr);
 
     enum {
-        ThreadRole,
-        FromRole,
         SubjectRole,
+        FromRole,
+        ToRole,
+        BccRole,
+        CcRole,
+        IsPlaintextRole,
+        ContentRole,
         SnippetRole,
         UnreadRole,
-        StarredRole,
         DateRole
     };
 
-    static MailListModel *self();
+    static ThreadViewModel *self();
 
-    Q_INVOKABLE void loadFolder(Folder *folder);
+    Q_INVOKABLE void loadThread(Thread *thread);
 
     int rowCount(const QModelIndex &parent) const override;
     QVariant data(const QModelIndex &index, int role) const override;
@@ -38,8 +41,12 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    QString getThreadFrom(Thread *thread);
-    
-    QList<Thread *> m_threads;
-    QStringList m_threadFrom;
+    QString getContactsStr(QList<MessageContact *> contacts);
+
+    QList<Message *> m_messages;
+    QStringList m_messageContents;
+    QStringList m_messageTo;
+    QStringList m_messageCc;
+    QStringList m_messageBcc;
 };
+

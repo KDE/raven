@@ -10,6 +10,7 @@ set(raven_SRCS
 
     modelviews/mailboxmodel.cpp
     modelviews/maillistmodel.cpp
+    modelviews/threadviewmodel.cpp
 
     accounts/ispdb.cpp
     accounts/newaccountmanager.cpp

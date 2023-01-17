@@ -13,7 +13,7 @@
 
 Thread::Thread(QObject *parent, QString accountId, QString subject, QString gmailThreadId)
     : QObject{parent}
-    , m_id{QUuid::createUuid().toString(QUuid::WithoutBraces)}
+    , m_id{QUuid::createUuid().toString(QUuid::Id128)}
     , m_accountId{accountId}
     , m_gmailThreadId{gmailThreadId}
     , m_subject{subject}

@@ -14,7 +14,7 @@ const QString METADATA_CONFIG_GROUP = QStringLiteral("Metadata");
 Account::Account(QObject *parent)
     : QObject{parent}
     , m_wallet{Wallet::openWallet(Wallet::NetworkWallet(), 0)}
-    , m_id{QUuid::createUuid().toString(QUuid::WithoutBraces)}
+    , m_id{QUuid::createUuid().toString(QUuid::Id128)}
 {
     setupWallet();
 }

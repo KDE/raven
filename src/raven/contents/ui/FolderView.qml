@@ -90,18 +90,11 @@ Kirigami.ScrollablePage {
             
             isRead: !model.unread
             
-            // onOpenMailRequested: {
-            //     applicationWindow().pageStack.push(Qt.resolvedUrl('ConversationViewer.qml'), {
-            //         item: model.item,
-            //         props: model,
-            //     });
-            // 
-            //     if (!model.status.isRead) {
-            //         const status = MailManager.folderModel.copyMessageStatus(model.status);
-            //         status.isRead = true;
-            //         MailManager.folderModel.updateMessageStatus(index, status)
-            //     }
-            // }
+            onOpenMailRequested: {
+                Raven.ThreadViewModel.loadThread(model.thread);
+                
+                applicationWindow().pageStack.push(Qt.resolvedUrl('ConversationViewer.qml'), {subject: model.subject});
+            }
             
 //             onStarMailRequested: {
 //                 const status = MailManager.folderModel.copyMessageStatus(model.status);

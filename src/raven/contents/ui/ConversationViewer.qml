@@ -8,14 +8,14 @@ import QtQuick.Controls 2.15 as QQC2
 import org.kde.raven 1.0
 import org.kde.kirigami 2.14 as Kirigami
 import org.kde.kitemmodels 1.0 as KItemModels
+import org.kde.raven 1.0 as Raven
 
 import './mailpartview'
 
 Kirigami.ScrollablePage {
     id: root
 
-    property var item
-    property var props
+    property string subject
     
     leftPadding: 0
     rightPadding: 0
@@ -40,25 +40,29 @@ Kirigami.ScrollablePage {
             Layout.bottomMargin: Kirigami.Units.gridUnit
             Layout.fillWidth: true
             
-            text: props.title
+            text: root.subject
             maximumLineCount: 2
             wrapMode: Text.Wrap
-            elide: Text.ElideRIght
+            elide: Text.ElideRight
             
             font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.2
         }
         
-        // TODO use repeater to see the full conversation
-        MailViewer {
-            Layout.bottomMargin: Kirigami.Units.gridUnit * 2
-            Layout.fillWidth: true
+        Repeater {
+            model: Raven.ThreadViewModel
+            
+            delegate: MailViewer {
+                Layout.bottomMargin: Kirigami.Units.gridUnit * 2
+                Layout.fillWidth: true
 
-            item: root.item
-            subject: props.title
-            from: props.from
-            to: props.to
-            sender: props.sender
-            dateTime: props.datetime
+                item: root.item
+                subject: model.subject
+                from: model.from
+                to: model.to
+                sender: "" // TODO props.sender
+                dateTime: model.date
+                content: model.content
+            }
         }
     }
 }

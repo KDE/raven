@@ -19,7 +19,7 @@ Message::Message(QObject *parent)
 
 Message::Message(QObject *parent, mailcore::IMAPMessage *msg, const Folder &folder, time_t syncTimestamp)
     : QObject{parent}
-    , m_id{QUuid::createUuid().toString(QUuid::WithoutBraces)}
+    , m_id{QUuid::createUuid().toString(QUuid::Id128)}
     , m_folderId{folder.id()}
     , m_accountId{folder.accountId()}
     , m_threadId{}

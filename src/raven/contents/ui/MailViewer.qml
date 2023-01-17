@@ -19,7 +19,10 @@ QQC2.Page {
     property string subject
     property string from
     property string sender
+    property string cc
+    property string bcc
     property string to
+    property string content
     property date dateTime
 
     Kirigami.Theme.colorSet: Kirigami.Theme.View
@@ -105,14 +108,54 @@ QQC2.Page {
                     Layout.fillWidth: true
                 }
             }
+            
+            RowLayout {
+                visible: root.cc !== ""
+                Layout.fillWidth: true
+                
+                QQC2.Label {
+                    text: i18n("CC:")
+                    font.bold: true
+                    Layout.rightMargin: Kirigami.Units.largeSpacing
+                }
+
+                QQC2.Label {
+                    text: root.cc
+                    elide: Text.ElideRight
+                    Layout.fillWidth: true
+                }
+            }
+            
+            RowLayout {
+                visible: root.bcc !== ""
+                Layout.fillWidth: true
+                
+                QQC2.Label {
+                    text: i18n("BCC:")
+                    font.bold: true
+                    Layout.rightMargin: Kirigami.Units.largeSpacing
+                }
+
+                QQC2.Label {
+                    text: root.bcc
+                    elide: Text.ElideRight
+                    Layout.fillWidth: true
+                }
+            }
         }
     }
 
-    MailPartView {
-        id: mailPartView
+    QQC2.Label {
         anchors.fill: parent
-        item: root.item
+        text: root.content
+        wrapMode: Text.Wrap
     }
+    
+    // MailPartView {
+    //     id: mailPartView
+    //     anchors.fill: parent
+    //     item: root.item
+    // }
 
     footer: QQC2.ToolBar {
         padding: root.padding
@@ -131,26 +174,26 @@ QQC2.Page {
             }
         }
 
-        Flow {
-            anchors.fill: parent
-            spacing: Kirigami.Units.smallSpacing
-            Repeater {
-                model: mailPartView.attachmentModel
-
-                delegate: AttachmentDelegate {
-                    name: model.name
-                    type: model.type
-                    icon.name: model.iconName
-
-                    clip: true
-
-                    actionIcon: 'download'
-                    actionTooltip: i18n("Save attachment")
-                    onExecute: mailPartView.attachmentModel.saveAttachmentToDisk(mailPartView.attachmentModel.index(index, 0))
-                    onClicked: mailPartView.attachmentModel.openAttachment(mailPartView.attachmentModel.index(index, 0))
-                    onPublicKeyImport: mailPartView.attachmentModel.importPublicKey(mailPartView.attachmentModel.index(index, 0))
-                }
-            }
-        }
+        // Flow {
+        //     anchors.fill: parent
+        //     spacing: Kirigami.Units.smallSpacing
+        //     Repeater {
+        //         model: mailPartView.attachmentModel
+        // 
+        //         delegate: AttachmentDelegate {
+        //             name: model.name
+        //             type: model.type
+        //             icon.name: model.iconName
+        // 
+        //             clip: true
+        // 
+        //             actionIcon: 'download'
+        //             actionTooltip: i18n("Save attachment")
+        //             onExecute: mailPartView.attachmentModel.saveAttachmentToDisk(mailPartView.attachmentModel.index(index, 0))
+        //             onClicked: mailPartView.attachmentModel.openAttachment(mailPartView.attachmentModel.index(index, 0))
+        //             onPublicKeyImport: mailPartView.attachmentModel.importPublicKey(mailPartView.attachmentModel.index(index, 0))
+        //         }
+        //     }
+        // }
     }
 }
