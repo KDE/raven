@@ -45,11 +45,29 @@ void MailListModel::loadFolder(Folder *folder)
         return;
     }
 
+    auto currentDate = QDateTime::currentDateTime();
+    
     // loop over folders fetched from db
     while (query.next()) {
         auto thread = new Thread(this, query);
         m_threads.push_back(thread);
         m_threadFrom.push_back(getThreadFrom(thread));
+        
+        // calculate date display
+        auto date = thread->lastMessageTimestamp();
+        if (date.daysTo(currentDate) == 0) {
+            // today, just display time
+            m_threadDate.push_back(date.toString(QStringLiteral("h:mm ap")));
+        } else if (date.daysTo(currentDate) < 7) {
+            // this week
+            m_threadDate.push_back(date.toString(QStringLiteral("ddd h:mm ap")));
+        } else if (date.date().year() == currentDate.date().year()) {
+            // this year
+            m_threadDate.push_back(date.toString(QStringLiteral("ddd MMM dd")));
+        } else {
+            // previous years
+            m_threadDate.push_back(date.toString(QStringLiteral("MMM dd, yyyy")));
+        }
     }
 
     endResetModel();
@@ -83,7 +101,7 @@ QVariant MailListModel::data(const QModelIndex &index, int role) const
         case StarredRole:
             return thread->starred() != 0;
         case DateRole:
-            return thread->lastMessageTimestamp();
+            return m_threadDate[index.row()];
     }
     return {};
 }
@@ -105,14 +123,16 @@ QString MailListModel::getThreadFrom(Thread *thread)
     auto account = AccountModel::self()->accountById(thread->accountId());
     
     // return every participant except ourself
+    bool firstAdded = false;
     for (int i = 0; i < thread->participants().count(); ++i) {
         auto participant = thread->participants()[i];
         
-        if (participant->email() != account->email()) {
-            if (i != 0) {
+        if (participant->email().toLower() != account->email().toLower()) {
+            if (firstAdded) {
                 from += QStringLiteral(", ");
             }
             from += QString{QStringLiteral("%1 <%2>")}.arg(participant->name(), participant->email());
+            firstAdded = true;
         }
     }
     return from;

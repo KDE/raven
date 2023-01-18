@@ -41,5 +41,6 @@ private:
     QString getThreadFrom(Thread *thread);
     
     QList<Thread *> m_threads;
+    QStringList m_threadDate;
     QStringList m_threadFrom;
 };

@@ -104,6 +104,7 @@ Kirigami.AbstractListItem {
                     }
                     
                     QQC2.Label {
+                        font.pointSize: applicationWindow().isWidescreen ? Kirigami.Theme.defaultFont.pointSize : Kirigami.Theme.smallFont.pointSize
                         color: Kirigami.Theme.disabledTextColor
                         text: root.datetime
                     }

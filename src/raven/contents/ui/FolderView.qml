@@ -83,7 +83,7 @@ Kirigami.ScrollablePage {
         delegate: MailDelegate {
             showSeparator: model.index !== folderView.count - 1
             
-            datetime: model.date.toLocaleTimeString(Qt.locale(), Locale.ShortFormat) // TODO this is not showing date !
+            datetime: model.date
             author: model.from
             title: model.subject
             contentPreview: model.snippet
@@ -101,14 +101,14 @@ Kirigami.ScrollablePage {
 //                 status.isImportant = !status.isImportant;
 //                 MailManager.folderModel.updateMessageStatus(index, status)
 //             }
-//             
-//             onContextMenuRequested: {
-//                 const menu = contextMenu.createObject(folderView, {
-//                     row: index,
-//                     status: MailManager.folderModel.copyMessageStatus(model.status),
-//                 });
-//                 menu.popup();
-//             }
+            
+            onContextMenuRequested: {
+                const menu = contextMenu.createObject(folderView, {
+                    row: index,
+                    status: MailManager.folderModel.copyMessageStatus(model.status),
+                });
+                menu.popup();
+            }
         }
     }
 }
