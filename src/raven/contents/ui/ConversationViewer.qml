@@ -21,6 +21,9 @@ Kirigami.ScrollablePage {
     rightPadding: 0
     topPadding: 0
     bottomPadding: 0
+    
+    Kirigami.Theme.colorSet: Kirigami.Theme.Window
+    Kirigami.Theme.inherit: false
 
     contextualActions: [
         Kirigami.Action {
@@ -30,39 +33,47 @@ Kirigami.ScrollablePage {
         }
     ]
     
-    ColumnLayout {
-        spacing: 0
+    ListView {
+        id: listView
+        spacing: Kirigami.Units.gridUnit * 2
+        model: Raven.ThreadViewModel
         
-        QQC2.Label {
-            Layout.leftMargin: Kirigami.Units.largeSpacing * 2
-            Layout.rightMargin: Kirigami.Units.largeSpacing * 2
-            Layout.topMargin: Kirigami.Units.gridUnit 
-            Layout.bottomMargin: Kirigami.Units.gridUnit
-            Layout.fillWidth: true
+        header: RowLayout {
+            id: rowLayout
+            width: listView.width
             
-            text: root.subject
-            maximumLineCount: 2
-            wrapMode: Text.Wrap
-            elide: Text.ElideRight
-            
-            font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.2
+            QQC2.Label {
+                Layout.fillWidth: true
+                Layout.leftMargin: Kirigami.Units.largeSpacing * 2
+                Layout.rightMargin: Kirigami.Units.largeSpacing * 2
+                Layout.topMargin: Kirigami.Units.gridUnit 
+                Layout.bottomMargin: Kirigami.Units.gridUnit
+                
+                text: root.subject
+                maximumLineCount: 2
+                wrapMode: Text.Wrap
+                elide: Text.ElideRight
+                
+                font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.2
+            }
         }
         
-        Repeater {
-            model: Raven.ThreadViewModel
-            
-            delegate: MailViewer {
-                Layout.bottomMargin: Kirigami.Units.gridUnit * 2
-                Layout.fillWidth: true
+        delegate: MailViewer {
+            width: listView.width
+            item: root.item
+            subject: model.subject
+            from: model.from
+            to: model.to
+            sender: "" // TODO props.sender
+            dateTime: model.date
+            content: model.content
+            isPlaintext: model.isPlaintext
+        }
 
-                item: root.item
-                subject: model.subject
-                from: model.from
-                to: model.to
-                sender: "" // TODO props.sender
-                dateTime: model.date
-                content: model.content
-            }
+        // footer spacing
+        footer: Item {
+            width: listView.width
+            height: Kirigami.Units.gridUnit * 2
         }
     }
 }

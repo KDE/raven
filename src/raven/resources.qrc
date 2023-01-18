@@ -13,7 +13,6 @@
         <file alias="mailpartview/ErrorPart.qml">contents/ui/mailpartview/ErrorPart.qml</file>
         <file alias="mailpartview/HtmlPart.qml">contents/ui/mailpartview/HtmlPart.qml</file>
         <file alias="mailpartview/ICalPart.qml">contents/ui/mailpartview/ICalPart.qml</file>
-        <file alias="mailpartview/MailPart.qml">contents/ui/mailpartview/MailPart.qml</file>
         <file alias="mailpartview/MailPartModel.qml">contents/ui/mailpartview/MailPartModel.qml</file>
         <file alias="mailpartview/MailPartView.qml">contents/ui/mailpartview/MailPartView.qml</file>
         <file alias="mailpartview/TextPart.qml">contents/ui/mailpartview/TextPart.qml</file>
