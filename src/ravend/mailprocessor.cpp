@@ -99,7 +99,7 @@ std::shared_ptr<Message> MailProcessor::insertMessage(IMAPMessage *mMsg, Folder 
             int refcount = std::min(50, (int)references->count());
 
             QSqlQuery query{db};
-            query.prepare(QString(QStringLiteral("SELECT thread_reference.* FROM thread INNER JOIN thread_reference ON thread_reference.threadId = thread.id WHERE thread_reference.accountId = ? AND thread_reference.headerMessageId IN (%1) LIMIT 1"))
+            query.prepare(QString(QStringLiteral("SELECT * FROM thread INNER JOIN thread_reference ON thread_reference.threadId = thread.id WHERE thread_reference.accountId = ? AND thread_reference.headerMessageId IN (%1) LIMIT 1"))
                 .arg(Utils::qmarks(1 + refcount)));
             query.bindValue(0, msg->accountId());
             query.bindValue(1, msg->headerMessageId());
@@ -117,7 +117,6 @@ std::shared_ptr<Message> MailProcessor::insertMessage(IMAPMessage *mMsg, Folder 
 
         // create the thread otherwise
         if (thread == nullptr) {
-            // TODO: could move to message save hooks
             thread = std::make_shared<Thread>(nullptr, m_worker->account()->id(), msg->subject(), QString::number(mMsg->gmailThreadID()));
         }
 
@@ -147,11 +146,8 @@ void MailProcessor::retrievedMessageBody(Message *message, MessageParser *parser
     Array * partAttachments = Array::array();
     Array * htmlInlineAttachments = Array::array();
 
-    // Note - exposed this lower level API manually so that we can avoid running this renderer three
-    // times to retrieve attachments, relatedAttachments, message HTML separately. The code seems to build
-    // and discard things you don't ask for.
-    String * html = parser->htmlRenderingAndAttachments(htmlCallback, partAttachments, htmlInlineAttachments);
-    String * text = html;
+    String *html = parser->htmlRenderingAndAttachments(htmlCallback, partAttachments, htmlInlineAttachments);
+    String *text = html;
 
     if (html->hasPrefix(MCSTR("PLAINTEXT:"))) {
         text = html->substringFromIndex(10);
@@ -219,7 +215,7 @@ void MailProcessor::retrievedMessageBody(Message *message, MessageParser *parser
         query.prepare(QStringLiteral("REPLACE INTO message_body (id, value, fetchedAt) VALUES (?, ?, datetime('now'))"));
         query.bindValue(0, message->id());
         query.bindValue(1, QString::fromLatin1(bodyRepresentation));
-        Utils::execWithLog(query, "replace message body");
+        Utils::execWithLog(query, "retrievedMessageBody - replace message body");
 
         // write files to the files table
         for (auto &file : files) {
@@ -254,17 +250,19 @@ bool MailProcessor::retrievedFileData(File *file, Data * data) {
     return (data->writeToFile(AS_MCSTR(path.toStdString())) == ErrorNone);
 }
 
-void MailProcessor::unlinkMessagesMatchingQuery(const QString &sqlQuery, int phase)
+void MailProcessor::unlinkMessagesMatchingQuery(QSqlQuery &query, int phase)
 {
-    qDebug() << "Unlinking messages " << sqlQuery << " no longer present in remote range.";
+    qDebug() << "Unlinking messages no longer present in remote range.";
 
     {
         QSqlDatabase db = m_worker->getDB();
         db.transaction();
 
-        QSqlQuery query{db};
-        query.prepare(sqlQuery);
-        query.exec();
+        if (!Utils::execWithLog(query, "unlinkMessagesMatchingQuery - fetch messages to delete")) {
+            qDebug() << query.lastQuery();
+            return;
+        }
+        
 
         QList<std::shared_ptr<Message>> deletedMsgs;
         while (query.next()) {
@@ -412,11 +410,11 @@ void MailProcessor::upsertThreadReferences(QString threadId, QString accountId, 
     QSqlDatabase db = m_worker->getDB();
 
     QSqlQuery query{db};
-    query.prepare(QString(QStringLiteral("INSERT OR IGNORE INTO %1 (threadId, accountId, headerMessageId) VALUES (?,?,?)")).arg(THREAD_REFERENCE_TABLE));
+    query.prepare(QStringLiteral("INSERT OR IGNORE INTO thread_reference (threadId, accountId, headerMessageId) VALUES (?,?,?)"));
     query.bindValue(0, threadId);
     query.bindValue(1, accountId);
     query.bindValue(2, headerMessageId);
-    query.exec();
+    Utils::execWithLog(query, "upsertThreadReferences");
 
     for (int i = 0; i < std::min(100, (int)references->count()); i ++) {
         String *address = (String*)references->objectAtIndex(i);

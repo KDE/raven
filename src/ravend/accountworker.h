@@ -34,6 +34,8 @@ public:
     QSqlDatabase getDB() const;
 
     void run();
+    
+    void idleCycleIteration();
 
     void cleanMessageCache(Folder &folder);
     time_t maxAgeForBodySync(Folder &folder);

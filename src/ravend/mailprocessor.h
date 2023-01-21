@@ -30,7 +30,7 @@ public:
     std::shared_ptr<Message> insertMessage(IMAPMessage *mMsg, Folder &folder, time_t syncDataTimestamp);
     void retrievedMessageBody(Message *message, MessageParser *parser);
     bool retrievedFileData(File *file, Data *data);
-    void unlinkMessagesMatchingQuery(const QString &sqlQuery, int phase);
+    void unlinkMessagesMatchingQuery(QSqlQuery &query, int phase);
     void deleteMessagesStillUnlinkedFromPhase(int phase);
 
 private:
