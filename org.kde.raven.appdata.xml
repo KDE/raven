@@ -8,6 +8,7 @@
   <name>Mail</name>
   <name xml:lang="ca">Correu</name>
   <name xml:lang="ca-valencia">Correu</name>
+  <name xml:lang="cs">Pošta</name>
   <name xml:lang="en-GB">Mail</name>
   <name xml:lang="es">Correo</name>
   <name xml:lang="eu">Posta</name>
@@ -28,6 +29,7 @@
   <summary>Send and receive email</summary>
   <summary xml:lang="ca">Envia i rep correu electrònic</summary>
   <summary xml:lang="ca-valencia">Envia i rep correu electrònic</summary>
+  <summary xml:lang="cs">Posílat a přijímat e-maily</summary>
   <summary xml:lang="en-GB">Send and receive email</summary>
   <summary xml:lang="es">Enviar y recibir correo electrónico</summary>
   <summary xml:lang="eu">E-posta bidaltzea eta jasotzea</summary>
@@ -50,6 +52,7 @@
   <developer_name>KDE Community</developer_name>
   <developer_name xml:lang="ca">La comunitat KDE</developer_name>
   <developer_name xml:lang="ca-valencia">La comunitat KDE</developer_name>
+  <developer_name xml:lang="cs">Komunita KDE</developer_name>
   <developer_name xml:lang="en-GB">KDE Community</developer_name>
   <developer_name xml:lang="es">La Comunidad KDE</developer_name>
   <developer_name xml:lang="eu">KDE komunitatea</developer_name>
