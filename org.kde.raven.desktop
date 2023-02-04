@@ -5,6 +5,7 @@
 Name=Raven
 Name[ca]=Raven
 Name[ca@valencia]=Raven
+Name[cs]=Raven
 Name[en_GB]=Raven
 Name[es]=Raven
 Name[eu]=Raven
@@ -23,6 +24,7 @@ Name[x-test]=xxRavenxx
 Comment=Send and receive email
 Comment[ca]=Envia i rep correu electrònic
 Comment[ca@valencia]=Envia i rep correu electrònic
+Comment[cs]=Posílat a přijímat e-maily
 Comment[en_GB]=Send and receive email
 Comment[es]=Enviar y recibir correo electrónico
 Comment[eu]=E-posta bidaltzea eta jasotzea
