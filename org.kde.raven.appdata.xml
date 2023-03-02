@@ -17,6 +17,7 @@
   <name xml:lang="id">Mail</name>
   <name xml:lang="it">Posta</name>
   <name xml:lang="ka">ფოსტა</name>
+  <name xml:lang="ko">메일</name>
   <name xml:lang="nl">E-mail</name>
   <name xml:lang="nn">E-post</name>
   <name xml:lang="pt">E-mail</name>
@@ -38,6 +39,7 @@
   <summary xml:lang="id">Kirim dan terima surat email</summary>
   <summary xml:lang="it">Invia e ricevi messaggi di posta elettronica</summary>
   <summary xml:lang="ka">ელფოსტის გაგზავნა და მიღება</summary>
+  <summary xml:lang="ko">이메일 주고받기</summary>
   <summary xml:lang="nl">E-mail verzenden en ontvangen</summary>
   <summary xml:lang="nn">Send og ta imot e-post</summary>
   <summary xml:lang="pt">Enviar e receber e-mail</summary>
@@ -61,6 +63,7 @@
   <developer_name xml:lang="id">KDE Community</developer_name>
   <developer_name xml:lang="it">Comunità KDE</developer_name>
   <developer_name xml:lang="ka">KDE-ის საზოგადოება</developer_name>
+  <developer_name xml:lang="ko">KDE Community</developer_name>
   <developer_name xml:lang="nl">KDE-gemeenschap</developer_name>
   <developer_name xml:lang="nn">KDE-fellesskapet</developer_name>
   <developer_name xml:lang="pt">Comunidade do KDE</developer_name>
@@ -82,6 +85,7 @@
     <p xml:lang="id">Sebuah klien untuk Plasma, berdasarkan pada Akonadi.</p>
     <p xml:lang="it">Un client di posta per Plasma, basato su Akonadi.</p>
     <p xml:lang="ka">ელფოსტის კლიენტი Plasma-სთვის, დაფუძნებული Akonadi-ზე.</p>
+    <p xml:lang="ko">Akonadi를 사용하는 Plasma용 이메일 클라이언트입니다.</p>
     <p xml:lang="nl">Een e-mailclient voor Plasma, gebaseerd op Akonadi.</p>
     <p xml:lang="nn">E-postprogram for Plasma, bygd på Akonadi.</p>
     <p xml:lang="pt">Um cliente de e-mail para o Plasma, baseado no Akonadi.</p>
