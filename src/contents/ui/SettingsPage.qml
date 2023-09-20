@@ -124,7 +124,7 @@ Kirigami.ScrollablePage {
                             
                             MobileForm.FormArrow {
                                 Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-                                direction: MobileForm.FormArrow.Right
+                                direction: Qt.RightArrow
                             }
                         }
                     }
