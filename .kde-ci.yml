@@ -24,3 +24,6 @@ Dependencies:
     'pim/kmailtransport': '@same'
     'pim/messagelib': '@same'
     'libraries/kirigami-addons': '@latest'
+
+Options:
+  require-passing-tests-on: ['Linux', 'FreeBSD', 'Windows']
