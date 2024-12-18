@@ -214,7 +214,7 @@ static DecryptionResult::Result toResult(gpgme_error_t err)
     } else if (err == GPG_ERR_CANCELED || err == GPG_ERR_INV_PASSPHRASE) {
         return DecryptionResult::PassphraseError;
     }
-    qWarning() << "unknown error" << err << gpgme_strerror(err);
+    qWarning() << "Unknown error" << err << gpgme_strerror(err);
     return DecryptionResult::NoSecretKeyError;
 }
 
@@ -246,7 +246,7 @@ std::pair<DecryptionResult, VerificationResult> Crypto::decryptAndVerify(CryptoP
     Context context{protocol};
     if (!context) {
         qWarning() << "Failed to create context " << gpgme_strerror(context.error);
-        qWarning() << "returning early";
+        qWarning() << "Returning early";
         return std::make_pair(DecryptionResult{{}, {context.error}, DecryptionResult::NoSecretKeyError}, VerificationResult{{}, context.error});
     }
     auto ctx = context.context;
