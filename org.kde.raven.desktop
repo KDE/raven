@@ -3,6 +3,7 @@
 
 [Desktop Entry]
 Name=Raven
+Name[ar]=الغراف
 Name[ca]=Raven
 Name[ca@valencia]=Raven
 Name[cs]=Raven
@@ -32,6 +33,7 @@ Name[uk]=Ворон
 Name[x-test]=xxRavenxx
 Name[zh_TW]=Raven
 Comment=Send and receive email
+Comment[ar]=إرسال واستقبال البريد الإلكتروني
 Comment[ca]=Envia i rep correu electrònic
 Comment[ca@valencia]=Envia i rep correu electrònic
 Comment[cs]=Posílat a přijímat e-maily
