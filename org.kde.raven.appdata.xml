@@ -6,6 +6,7 @@
 <component type="desktop-application">
   <id>org.kde.raven</id>
   <name>Mail</name>
+  <name xml:lang="ar">البريد</name>
   <name xml:lang="ca">Correu</name>
   <name xml:lang="ca-valencia">Correu</name>
   <name xml:lang="cs">Pošta</name>
@@ -36,6 +37,7 @@
   <name xml:lang="x-test">xxMailxx</name>
   <name xml:lang="zh-TW">郵件</name>
   <summary>Send and receive email</summary>
+  <summary xml:lang="ar">إرسال واستقبال البريد الإلكتروني</summary>
   <summary xml:lang="ca">Envia i rep correu electrònic</summary>
   <summary xml:lang="ca-valencia">Envia i rep correu electrònic</summary>
   <summary xml:lang="cs">Posílat a přijímat e-maily</summary>
@@ -68,6 +70,7 @@
   <metadata_license>A permissive license for this metadata, e.g. "FSFAP"</metadata_license>
   <project_license>The license of this software as SPDX string, e.g. "GPL-3+"</project_license>
   <developer_name>KDE Community</developer_name>
+  <developer_name xml:lang="ar">مجتمع كِيدِي</developer_name>
   <developer_name xml:lang="ca">La comunitat KDE</developer_name>
   <developer_name xml:lang="ca-valencia">La comunitat KDE</developer_name>
   <developer_name xml:lang="cs">Komunita KDE</developer_name>
@@ -99,6 +102,7 @@
   <developer_name xml:lang="zh-TW">KDE 社群</developer_name>
   <description>
     <p>An email client for Plasma, based on Akonadi.</p>
+    <p xml:lang="ar">عميل بريد إلكتروني لبلازما يعتمد على أكونادي.</p>
     <p xml:lang="ca">Un client de correu electrònic per al Plasma, basat en l'Akonadi.</p>
     <p xml:lang="ca-valencia">Un client de correu electrònic per a Plasma, basat en Akonadi.</p>
     <p xml:lang="cs">Poštovní klient pro Plasma založený na Akonadi.</p>
