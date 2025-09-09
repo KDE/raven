@@ -35,7 +35,6 @@
   <name xml:lang="sv">E-post</name>
   <name xml:lang="tr">Posta</name>
   <name xml:lang="uk">Пошта</name>
-  <name xml:lang="x-test">xxMailxx</name>
   <name xml:lang="zh-TW">郵件</name>
   <summary>Send and receive email</summary>
   <summary xml:lang="ar">إرسال واستقبال البريد الإلكتروني</summary>
@@ -67,7 +66,6 @@
   <summary xml:lang="sv">Skicka och ta emot e-post</summary>
   <summary xml:lang="tr">E-posta gönderin ve alın</summary>
   <summary xml:lang="uk">Надсилання та одержання пошти</summary>
-  <summary xml:lang="x-test">xxSend and receive emailxx</summary>
   <summary xml:lang="zh-TW">傳送和接收文字電子郵件</summary>
   <metadata_license>A permissive license for this metadata, e.g. "FSFAP"</metadata_license>
   <project_license>The license of this software as SPDX string, e.g. "GPL-3+"</project_license>
@@ -101,7 +99,6 @@
   <developer_name xml:lang="sv">KDE-gemenskapen</developer_name>
   <developer_name xml:lang="tr">KDE Topluluğu</developer_name>
   <developer_name xml:lang="uk">Спільнота KDE</developer_name>
-  <developer_name xml:lang="x-test">xxKDE Communityxx</developer_name>
   <developer_name xml:lang="zh-TW">KDE 社群</developer_name>
   <description>
     <p>An email client for Plasma, based on Akonadi.</p>
@@ -134,7 +131,6 @@
     <p xml:lang="sv">En e-postklient för Plasma, baserad på Akonadi.</p>
     <p xml:lang="tr">Akonadi tabanlı, Plasma için bir e-posta istemcisi.</p>
     <p xml:lang="uk">Клієнт електронної пошти для Плазми, засновано на Akonadi.</p>
-    <p xml:lang="x-test">xxAn email client for Plasma, based on Akonadi.xx</p>
     <p xml:lang="zh-TW">一個 Plasma 用的電子郵件用戶端，基於 Akonadi。</p>
   </description>
   <launchable type="desktop-id">org.kde.raven.desktop</launchable>
