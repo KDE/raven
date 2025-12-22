@@ -8,6 +8,8 @@ set(ravend_SRCS
     mailprocessor.cpp
     progresscollectors.cpp
     workermanager.cpp
+    mailcorelogger.cpp
+    dbuslistener.cpp
 )
 
 add_executable(ravend ${ravend_SRCS})

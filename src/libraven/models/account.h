@@ -5,6 +5,7 @@
 
 #include <QObject>
 #include <QJsonObject>
+#include <QSqlDatabase>
 
 #include <KConfigGroup>
 #include <KWallet>
@@ -54,6 +55,8 @@ public:
 
     void initSettings();
     Q_INVOKABLE void saveSettings();
+    
+    void remove(QSqlDatabase &db);
 
     QString id() const;
 

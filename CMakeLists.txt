@@ -25,11 +25,12 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
 include(KDEInstallDirs)
 include(KDECMakeSettings)
 include(KDECompilerSettings NO_POLICY_SCOPE)
+include(KDEClangFormat)
 include(ECMSetupVersion)
 include(ECMGenerateHeaders)
 include(ECMPoQmTools)
-include(KDEClangFormat)
 include(ECMQmlModule)
+include(ECMConfiguredInstall)
 
 ecm_setup_version(${PROJECT_VERSION}
     VARIABLE_PREFIX RAVEN
@@ -95,8 +96,11 @@ add_definitions(-DQT_STRICT_ITERATORS)
 add_subdirectory(src)
 
 install(PROGRAMS org.kde.raven.desktop DESTINATION ${KDE_INSTALL_APPDIR})
+install(PROGRAMS org.kde.ravend-autostart.desktop DESTINATION ${KDE_INSTALL_AUTOSTARTDIR})
 install(FILES org.kde.raven.appdata.xml DESTINATION ${KDE_INSTALL_METAINFODIR})
 install(FILES org.kde.raven.svg DESTINATION ${KDE_INSTALL_FULL_ICONDIR}/hicolor/scalable/apps/)
+
+ecm_install_configured_files(INPUT org.kde.ravend.service.in DESTINATION ${KDE_INSTALL_DBUSSERVICEDIR} @ONLY)
 
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
 

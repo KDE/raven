@@ -10,6 +10,8 @@
 #include "dbmanager.h"
 #include "progresscollectors.h"
 #include "mailprocessor.h"
+#include "mailcorelogger.h"
+#include "taskprocessor.h"
 
 #include <QSqlQuery>
 #include <QSqlError>
@@ -122,145 +124,192 @@ void AccountWorker::setupSession()
             // it will figure it out itself
             break;
     }
+    
+    // TODO add config option
+    m_imapSession->setCheckCertificateEnabled(false);
+    m_imapSession->setAutomaticConfigurationEnabled(true);
+    
+    m_imapSession->setConnectionLogger(new MailCoreLogger);
+    
+    ErrorCode err = ErrorCode::ErrorNone;
+    m_imapSession->connectIfNeeded(&err);
+    
+    if (err != ErrorCode::ErrorNone) {
+        qDebug() << "Could not connect to IMAP server for" << m_account->email() << "due to" << QString::fromStdString(ErrorCodeToTypeMap[err]);
+        m_enabled = false;
+    } else {
+        m_enabled = true;
+    }
 }
 
 void AccountWorker::idleCycleIteration()
 {
-//     // Run body requests from the client
-//     while (idleFetchBodyIDs.size() > 0) {
-//         string id = idleFetchBodyIDs.back();
-//         idleFetchBodyIDs.pop_back();
-//         Query byId = Query().equal("id", id);
-//         auto msg = store->find<Message>(byId);
-//         if (msg.get() != nullptr) {
-//             logger->info("Fetching body for message ID {}", msg->id());
-//             syncMessageBody(msg.get());
-//         }
-//     }
-// 
-//     if (idleShouldReloop) {
-//         idleShouldReloop = false;
-//         return;
-//     }
-//     
-//     // Connect and login to the IMAP server
-//     
-//     ErrorCode err = ErrorCode::ErrorNone;
-//     session.connectIfNeeded(&err);
-//     if (err != ErrorCode::ErrorNone) {
-//         throw SyncException(err, "connectIfNeeded");
-//     }
-//     
-//     if (idleShouldReloop) {
-//         idleShouldReloop = false;
-//         return;
-//     }
-//     
-//     session.loginIfNeeded(&err);
-//     if (err != ErrorCode::ErrorNone) {
-//         throw SyncException(err, "loginIfNeeded");
-//     }
-//     
-//     if (idleShouldReloop) {
-//         idleShouldReloop = false;
-//         return;
-//     }
-// 
-//     // Run tasks ready for performRemote. This is set up in an odd way
-//     // because we want tasks created when a task runs to also be run
-//     // immediately. (eg: A SendDraftTask queueing a SyncbackMetadataTask)
-//     //
-//     vector<shared_ptr<Task>> tasks;
-//     TaskProcessor processor { account, store, &session };
-// 
-//     // Ensure our pile of completed tasks doesn't grow unbounded
-//     processor.cleanupOldTasksAtRuntime();
-// 
-//     // Find tasks ready for "remote" that we haven't processed yet in this pass
-//     int rowid = -1;
-//     SQLite::Statement statement(store->db(), "SELECT rowid, data FROM Task WHERE accountId = ? AND status = \"remote\" AND rowid > ?");
-// 
-//     do {
-//         tasks = {};
-//         statement.bind(1, account->id());
-//         statement.bind(2, rowid);
-//         while (statement.executeStep()) {
-//             tasks.push_back(make_shared<Task>(statement));
-//             rowid = max(rowid, statement.getColumn("rowid").getInt());
-//         }
-//         statement.reset();
-//         for (auto & task : tasks) {
-//             processor.performRemote(task.get());
-//         }
-//     } while (tasks.size() > 0);
-// 
-//     if (idleShouldReloop) {
-//         idleShouldReloop = false;
-//         return;
-//     }
-// 
-//     // Identify the preferred idle folder (inbox / all)
-//     
-//     Query q = Query().equal("accountId", account->id()).equal("role", "inbox");
-//     auto inbox = store->find<Folder>(q);
-//     if (inbox.get() == nullptr) {
-//         Query q = Query().equal("accountId", account->id()).equal("role", "all");
-//         inbox = store->find<Folder>(q);
-//         if (inbox.get() == nullptr) {
-//             throw SyncException("no-inbox", "There is no inbox or all folder to IDLE on.", false);
-//         }
-//     }
-//     json inboxInitialStatus { inbox->localStatus() };
-//     
-//     if (idleShouldReloop) {
-//         idleShouldReloop = false;
-//         return;
-//     }
-//     
-//     // Check for mail in the preferred idle folder (inbox / all)
-//     bool hasStartedSyncingFolder = inbox->localStatus().count(LS_SYNCED_MIN_UID) > 0;
-// 
-//     if (hasStartedSyncingFolder) {
-//         String path = AS_MCSTR(inbox->path());
-//         IMAPFolderStatus remoteStatus = session.folderStatus(&path, &err);
-//         
-//         // Note: If we have CONDSTORE but don't have QRESYNC, this if/else may result
-//         // in us not seeing "vanished" messages until the next shallow sync iteration.
-//         // Right now I think that's fine.
-//         if (session.storedCapabilities()->containsIndex(IMAPCapabilityCondstore)) {
-//             syncFolderChangesViaCondstore(*inbox, remoteStatus, false);
-//         } else {
-//             uint32_t uidnext = remoteStatus.uidNext();
-//             uint32_t syncedMinUID = inbox->localStatus()[LS_SYNCED_MIN_UID].get<uint32_t>();
-//             uint32_t bottomUID = store->fetchMessageUIDAtDepth(*inbox, 100, uidnext);
-//             if (bottomUID < syncedMinUID) { bottomUID = syncedMinUID; }
-//             syncFolderUIDRange(*inbox, RangeMake(bottomUID, uidnext - bottomUID), false);
-//             inbox->localStatus()[LS_LAST_SHALLOW] = time(0);
-//             inbox->localStatus()[LS_UIDNEXT] = uidnext;
-//         }
-// 
-//         syncMessageBodies(*inbox, remoteStatus);
-//         
-//         store->saveFolderStatus(inbox.get(), inboxInitialStatus);
-//     }
-// 
-//     // Idle on the folder
-//     
-//     if (idleShouldReloop) {
-//         idleShouldReloop = false;
-//         return;
-//     }
-//     if (session.setupIdle()) {
-//         logger->info("Idling on folder {}", inbox->path());
-//         String path = AS_MCSTR(inbox->path());
-//         session.idle(&path, 0, &err);
-//         session.unsetupIdle();
-//         logger->info("Idle exited with code {}", err);
-//     } else {
-//         logger->info("Connection does not support idling. Locking until more to do...");
-//         std::unique_lock<std::mutex> lck(idleMtx);
-//         idleCv.wait(lck);
-//     }
+    QSqlDatabase db = getDB();
+    
+    // run body fetch requests from the client
+    while (m_idleFetchBodyIDs.size() > 0) {
+        QString id = m_idleFetchBodyIDs.back();
+        m_idleFetchBodyIDs.pop_back();
+        
+        QSqlQuery query{db};
+        query.prepare(QStringLiteral("SELECT * FROM message WHERE id = ?"));
+        query.addBindValue(id);
+        
+        Utils::execWithLog(query, "idleCycleIteration - fetch messages to sync body");
+        
+        if (query.next()) {
+            auto msg = std::make_shared<Message>(nullptr, query);
+            qDebug() << "Fetching body for message ID" << msg->id();
+            syncMessageBody(msg.get());
+        }
+    }
+
+    if (m_interruptIdle) {
+        m_interruptIdle = false;
+        return;
+    }
+    
+    // Connect and login to the IMAP server
+    
+    ErrorCode err = ErrorCode::ErrorNone;
+    m_imapSession->connectIfNeeded(&err);
+    if (err != ErrorCode::ErrorNone) {
+        qDebug() << "ISSUE: idleCycleIteration - connectIfNeeded" << QString::fromStdString(ErrorCodeToTypeMap[err]);
+        return;
+    }
+    
+    if (m_interruptIdle) {
+        m_interruptIdle = false;
+        return;
+    }
+    
+    m_imapSession->loginIfNeeded(&err);
+    if (err != ErrorCode::ErrorNone) {
+        qDebug() << "ISSUE: idleCycleIteration - loginIfNeeded" << QString::fromStdString(ErrorCodeToTypeMap[err]);
+        return;
+    }
+    
+    if (m_interruptIdle) {
+        m_interruptIdle = false;
+        return;
+    }
+
+    // Run tasks ready for performRemote. This is set up in an odd way
+    // because we want tasks created when a task runs to also be run
+    // immediately. (eg: A SendDraftTask queueing a SyncbackMetadataTask)
+    //
+    vector<shared_ptr<Task>> tasks;
+    TaskProcessor processor { m_account, store, &session };
+
+    // Ensure our pile of completed tasks doesn't grow unbounded
+    processor.cleanupOldTasksAtRuntime();
+
+    // Find tasks ready for "remote" that we haven't processed yet in this pass
+    int rowid = -1;
+    QSqlQuery query{db};
+    query.prepare(QStringLiteral("SELECT * FROM Task WHERE accountId = ? AND status = \"remote\" AND rowid > ?"));
+    Utils::execWithLog(query, "idleCycleIteration - find task");
+
+    do {
+        tasks = {};
+        statement.bind(1, m_account->id());
+        statement.bind(2, rowid);
+        while (statement.executeStep()) {
+            tasks.push_back(make_shared<Task>(statement));
+            rowid = max(rowid, statement.getColumn("rowid").getInt());
+        }
+        statement.reset();
+        for (auto & task : tasks) {
+            processor.performRemote(task.get());
+        }
+    } while (tasks.size() > 0);
+
+    if (m_interruptIdle) {
+        m_interruptIdle = false;
+        return;
+    }
+
+    // identify the preferred idle folder (inbox / all)
+    
+    query.prepare(QStringLiteral("SELECT * FROM folder WHERE accountId = ? AND role = inbox"));
+    query.addBindValue(m_account->id());
+    Utils::execWithLog(query, "idleCycleIteration - select folder with inbox role");
+    
+    std::shared_ptr<Folder> inbox;
+    if (query.next()) {
+        inbox = std::make_shared<Folder>(nullptr, query);
+    } else {
+        query.prepare(QStringLiteral("SELECT * FROM folder WHERE accountId = ? AND role = all"));
+        query.addBindValue(m_account->id());
+        
+        inbox = std::make_shared<Folder>(nullptr, query);
+        if (query.next()) {
+            qDebug() << "ISSUE: no-inbox - There is no inbox or all folder to IDLE on.";
+            return;
+        }
+    }
+    QJsonObject inboxInitialStatus { inbox->localStatus() };
+    
+    if (m_interruptIdle) {
+        m_interruptIdle = false;
+        return;
+    }
+    
+    // Check for mail in the preferred idle folder (inbox / all)
+    bool hasStartedSyncingFolder = !inbox->localStatus()[LS_SYNCED_MIN_UID].isUndefined();
+
+    if (hasStartedSyncingFolder) {
+        String path = AS_MCSTR(inbox->path().toStdString());
+        IMAPFolderStatus remoteStatus = m_imapSession->folderStatus(&path, &err);
+        
+        // Note: If we have CONDSTORE but don't have QRESYNC, this if/else may result
+        // in us not seeing "vanished" messages until the next shallow sync iteration.
+        // Right now I think that's fine.
+        if (m_imapSession->storedCapabilities()->containsIndex(IMAPCapabilityCondstore)) {
+            syncFolderChangesViaCondstore(*inbox, remoteStatus, false);
+        } else {
+            uint32_t uidnext = remoteStatus.uidNext();
+            uint32_t syncedMinUID = inbox->localStatus()[LS_SYNCED_MIN_UID].toInt();
+            uint32_t bottomUID = store->fetchMessageUIDAtDepth(*inbox, 100, uidnext);
+            if (bottomUID < syncedMinUID) { bottomUID = syncedMinUID; }
+            syncFolderUIDRange(*inbox, RangeMake(bottomUID, uidnext - bottomUID), false);
+            inbox->localStatus()[LS_LAST_SHALLOW] = (long long) time(0);
+            inbox->localStatus()[LS_UIDNEXT] = (long long) uidnext;
+        }
+
+        syncMessageBodies(*inbox, remoteStatus);
+        
+        if (inboxInitialStatus != inbox->localStatus()) {
+            db.transaction();
+            
+            query.prepare();
+            for (auto field : inbox->localStatus()) {
+                
+            }
+            
+            db.commit();
+        }
+        
+        store->saveFolderStatus(inbox.get(), inboxInitialStatus);
+    }
+
+    // Idle on the folder
+    
+    if (m_interruptIdle) {
+        m_interruptIdle = false;
+        return;
+    }
+    if (m_imapSession->setupIdle()) {
+        qDebug() << "Idling on folder" << inbox->path();
+        String path = AS_MCSTR(inbox->path().toStdString());
+        m_imapSession->idle(&path, 0, &err);
+        m_imapSession->unsetupIdle();
+        qDebug() << "Idle exited with code" << QString::fromStdString(ErrorCodeToTypeMap[err]);
+    } else {
+        qDebug() << "Connection does not support idling. Locking until more to do...";
+        std::unique_lock<std::mutex> lck(idleMtx);
+        idleCv.wait(lck);
+    }
 }
 
 // Much of the logic is based on https://github.com/Foundry376/Mailspring-Sync/blob/master/MailSync/SyncWorker.cpp
@@ -442,14 +491,17 @@ QList<std::shared_ptr<Folder>> AccountWorker::syncFoldersAndLabels()
 // Much of the logic is based on https://github.com/Foundry376/Mailspring-Sync/blob/master/MailSync/SyncWorker.cpp
 bool AccountWorker::syncNow()
 {
+    if (!m_enabled) {
+        return false;
+    }
+    
     bool syncAgainImmediately = false;
 
     QList<std::shared_ptr<Folder>> folders = syncFoldersAndLabels();
-    bool hasCondstore = m_imapSession->storedCapabilities()->containsIndex(IMAPCapabilityCondstore);
-    bool hasQResync = m_imapSession->storedCapabilities()->containsIndex(IMAPCapabilityQResync);
+    bool hasCondstore = m_imapSession->isCondstoreEnabled();
+    bool hasQResync = m_imapSession->isQResyncEnabled();
 
-    // Identify folders to sync. On Gmail, labels are mapped to IMAP folders and
-    // we only want to sync all, spam, and trash.
+    // Identify folders to sync. On Gmail, labels are mapped to IMAP folders and we only want to sync all, spam, and trash.
 
     std::array<std::string, 7> roleOrder{"inbox", "sent", "drafts", "all", "archive", "trash", "spam"};
     std::sort(folders.begin(), folders.end(), [&roleOrder](const std::shared_ptr<Folder> lhs, const std::shared_ptr<Folder> rhs) {

@@ -262,7 +262,6 @@ void MailProcessor::unlinkMessagesMatchingQuery(QSqlQuery &query, int phase)
             qDebug() << query.lastQuery();
             return;
         }
-        
 
         QList<std::shared_ptr<Message>> deletedMsgs;
         while (query.next()) {

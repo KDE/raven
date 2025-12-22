@@ -304,7 +304,7 @@ Account::AuthenticationType NewAccountManager::ispdbTypeToAuth(Ispdb::authType a
         case Ispdb::GSSAPI:
             return Account::AuthenticationType::NoAuth; // TODO
         case Ispdb::OAuth2:
-            return Account::AuthenticationType::OAuth2;
+            return Account::AuthenticationType::Plain; // TODO we don't support OAuth2 right now
         case Ispdb::ClientIP:
         case Ispdb::NoAuth:
         default:

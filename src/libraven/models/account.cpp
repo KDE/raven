@@ -5,6 +5,7 @@
 #include "constants.h"
 
 #include <QDir>
+#include <QSqlQuery>
 
 #include <KWallet>
 
@@ -107,6 +108,31 @@ void Account::saveSettings()
     group.writeEntry("smtpConnectionType", (int) m_smtpConnectionType);
 
     m_config->sync();
+}
+
+void Account::remove(QSqlDatabase &db)
+{
+    QString accountsFolder = RAVEN_CONFIG_LOCATION + QStringLiteral("/accounts");
+    QDir dir{accountsFolder + QStringLiteral("/") + m_id};
+    dir.removeRecursively();
+    
+    m_wallet->removeEntry(m_id + QStringLiteral("-imapPassword"));
+    m_wallet->removeEntry(m_id + QStringLiteral("-smtpPassword"));
+    
+    db.transaction();
+    
+    QSqlQuery query{db};
+    query.exec(QStringLiteral("DELETE FROM jobs WHERE accountId = ")  + m_id);
+    query.exec(QStringLiteral("DELETE FROM message_body JOIN message ON message.id = message_body.id WHERE accountId = ") + m_id);
+    query.exec(QStringLiteral("DELETE FROM message WHERE accountId = ") + m_id);
+    query.exec(QStringLiteral("DELETE FROM thread WHERE accountId = ") + m_id);
+    query.exec(QStringLiteral("DELETE FROM thread_reference WHERE accountId = ") + m_id);
+    query.exec(QStringLiteral("DELETE FROM thread_folder WHERE accountId = ") + m_id);
+    query.exec(QStringLiteral("DELETE FROM folder WHERE accountId = ") + m_id);
+    query.exec(QStringLiteral("DELETE FROM label WHERE accountId = ") + m_id);
+    query.exec(QStringLiteral("DELETE FROM file WHERE accountId = ") + m_id);
+    
+    db.commit();
 }
 
 QString Account::id() const

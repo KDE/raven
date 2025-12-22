@@ -57,6 +57,11 @@ private:
     IMAPSession *m_imapSession;
     MailProcessor *m_mailProcessor;
 
+    bool m_enabled;
+    
     int m_syncIterationsSinceLaunch;
     int m_unlinkPhase;
+    
+    QList<QString> m_idleFetchBodyIDs;
+    bool m_interruptIdle;
 };

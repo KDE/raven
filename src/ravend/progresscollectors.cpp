@@ -4,16 +4,18 @@
 
 #include "progresscollectors.h"
 
+#include <QDebug>
+
 IMAPProgress::~IMAPProgress()
 {
 }
 
 void IMAPProgress::bodyProgress(IMAPSession * session, unsigned int current, unsigned int maximum) {
-    //        cout << "Progress: " << current << "\n";
+           // qDebug() << "Progress: " << current;
 }
 
 void IMAPProgress::itemsProgress(IMAPSession * session, unsigned int current, unsigned int maximum) {
-    //        cout << "Progress on Item: " << current << "\n";
+           // qDebug() << "Progress on Item: " << current;
 }
 
 SMTPProgress::~SMTPProgress()
