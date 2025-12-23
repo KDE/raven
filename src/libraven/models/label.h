@@ -10,8 +10,6 @@
 #include <QVariant>
 #include <QDateTime>
 
-#include <MailCore/MailCore.h>
-
 #include "messagecontact.h"
 #include "folder.h"
 

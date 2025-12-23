@@ -8,8 +8,6 @@
 #include <QList>
 #include <QDateTime>
 
-#include <MailCore/MailCore.h>
-
 #include "folder.h"
 #include "file.h"
 #include "messagecontact.h"
@@ -29,12 +27,12 @@ class Message : public QObject
 
 public:
     Message(QObject *parent = nullptr);
-    Message(QObject *parent, mailcore::IMAPMessage *msg, const Folder &folder, time_t syncTimestamp);
+    // Message(QObject *parent, mailcore::IMAPMessage *msg, const Folder &folder, time_t syncTimestamp);
     Message(QObject *parent, const QSqlQuery &query);
 
     void saveToDb(QSqlDatabase &db);
     void deleteFromDb(QSqlDatabase &db);
-    
+
     void createSnapshot();
 
     QString id() const;
@@ -57,13 +55,13 @@ public:
     QString headerMessageId() const;
 
     QString subject() const;
-    
+
     bool draft() const;
     bool unread() const;
     bool starred() const;
-    
+
     QDateTime date() const;
-    
+
     QDateTime syncedAt() const;
     void setSyncedAt(time_t syncedAt);
 
@@ -71,7 +69,7 @@ public:
     void setRemoteUid(const QString &remoteUid);
 
     QStringList labels() const;
-    
+
     QString snippet() const;
     void setSnippet(const QString &snippet);
 
@@ -83,7 +81,7 @@ public:
 
 private:
     MessageSnapshot m_snapshot;
-    
+
     QString m_id;
     QString m_folderId;
     QString m_accountId;

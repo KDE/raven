@@ -21,7 +21,7 @@ Folder::Folder(QObject *parent, const QSqlQuery &query)
     , m_id{query.value(QStringLiteral("id")).toString()}
     , m_accountId{query.value(QStringLiteral("accountId")).toString()}
     , m_path{query.value(QStringLiteral("path")).toString()}
-    , m_role{query.value(QStringLiteral("role")).toInt()}
+    , m_role{query.value(QStringLiteral("role")).toString()}
     , m_createdAt{query.value(QStringLiteral("createdAt")).toDateTime()}
     , m_localStatus{}
     , m_status{}
@@ -53,15 +53,15 @@ void Folder::saveToDb(QSqlDatabase &db) const
 void Folder::deleteFromDb(QSqlDatabase &db) const
 {
     db.transaction();
-    
+
     QSqlQuery query{db};
-    
+
     query.prepare(QStringLiteral("DELETE FROM ") + THREAD_FOLDER_TABLE + QStringLiteral(" WHERE folderId = ") + m_id);
     Utils::execWithLog(query, "removing folder <-> thread connections");
-    
+
     query.prepare(QStringLiteral("DELETE FROM ") + FOLDER_TABLE + QStringLiteral(" WHERE id = ") + m_id);
     Utils::execWithLog(query, "removing folder");
-    
+
     db.commit();
 }
 

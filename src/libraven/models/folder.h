@@ -11,8 +11,6 @@
 #include <QDateTime>
 #include <QJsonObject>
 
-#include <MailCore/MailCore.h>
-
 #include "messagecontact.h"
 
 class Folder : public QObject

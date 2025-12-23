@@ -7,35 +7,36 @@ import QtQuick.Controls 2.15 as QQC2
 import QtQuick.Layouts 1.15
 
 import org.kde.kirigami 2.19 as Kirigami
+import org.kde.kirigamiaddons.components as Components
 
-Kirigami.AbstractListItem {
+QQC2.ItemDelegate {
     id: root
-    
+
     property bool showSeparator: false
-    
+
     property string datetime
     property string author
     property string title
     property string contentPreview
-    
+
     property bool isRead
-    
+
     leftPadding: Kirigami.Units.gridUnit
     rightPadding: Kirigami.Units.gridUnit
     topPadding: Kirigami.Units.largeSpacing + Kirigami.Units.smallSpacing
     bottomPadding: Kirigami.Units.largeSpacing + Kirigami.Units.smallSpacing
-    
+
     hoverEnabled: true
-    
+
     signal openMailRequested()
     signal starMailRequested()
     signal contextMenuRequested()
-    
+
     property bool showSelected: (mouseArea.pressed || (root.highlighted && applicationWindow().isWidescreen))
-    
+
     background: Rectangle {
-        color: Qt.rgba(Kirigami.Theme.highlightColor.r, Kirigami.Theme.highlightColor.g, Kirigami.Theme.highlightColor.b, root.showSelected ? 0.5 : hoverHandler.hovered ? 0.2 : 0)
-        
+        color: Qt.rgba(Kirigami.Theme.highlightColor.r, Kirigami.Theme.highlightColor.g, Kirigami.Theme.highlightColor.b, root.showSelected ? 0.5 : (!Kirigami.Settings.isMobile && root.hovered) ? 0.2 : 0)
+
         // indicator rectangle
         Rectangle {
             anchors.left: parent.left
@@ -43,18 +44,12 @@ Kirigami.AbstractListItem {
             anchors.topMargin: 1
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 1
-            
+
             width: 4
             visible: !root.isRead
             color: Kirigami.Theme.highlightColor
         }
-        
-        HoverHandler {
-            id: hoverHandler
-            // disable hover input on mobile because touchscreens trigger hover feedback and do not "unhover" in Qt
-            enabled: !Kirigami.Settings.isMobile
-        }
-        
+
         Kirigami.Separator {
             anchors.bottom: parent.bottom
             anchors.left: parent.left
@@ -67,18 +62,18 @@ Kirigami.AbstractListItem {
     }
 
     onClicked: root.openMailRequested()
-    
-    Item {
+
+    contentItem: Item {
         id: item
         implicitHeight: rowLayout.implicitHeight
-        
+
         RowLayout {
             id: rowLayout
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            
-            Kirigami.Avatar {
+
+            Components.Avatar {
                 // Euristic to extract name from "Name <email>" pattern
                 name: author.replace(/<.*>/, '').replace(/\(.*\)/, '')
                 // Extract and use email address as unique identifier for image provider
@@ -89,11 +84,11 @@ Kirigami.AbstractListItem {
                 Layout.preferredWidth: Kirigami.Units.gridUnit + Kirigami.Units.largeSpacing * 2
                 Layout.preferredHeight: Kirigami.Units.gridUnit + Kirigami.Units.largeSpacing * 2
             }
-            
+
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: Kirigami.Units.smallSpacing
-                
+
                 RowLayout {
                     Layout.fillWidth: true
                     QQC2.Label {
@@ -102,7 +97,7 @@ Kirigami.AbstractListItem {
                         elide: Text.ElideRight
                         font.weight: root.isRead ? Font.Normal : Font.Bold
                     }
-                    
+
                     QQC2.Label {
                         font.pointSize: applicationWindow().isWidescreen ? Kirigami.Theme.defaultFont.pointSize : Kirigami.Theme.smallFont.pointSize
                         color: Kirigami.Theme.disabledTextColor
@@ -123,12 +118,12 @@ Kirigami.AbstractListItem {
                 }
             }
         }
-        
+
         MouseArea {
             id: mouseArea
             anchors.fill: parent
             acceptedButtons: Qt.LeftButton | Qt.RightButton
-            
+
             onClicked: {
                 if (mouse.button === Qt.RightButton) {
                     root.contextMenuRequested();

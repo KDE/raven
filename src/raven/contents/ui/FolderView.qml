@@ -13,7 +13,7 @@ import org.kde.kitemmodels 1.0 as KItemModels
 Kirigami.ScrollablePage {
     id: folderView
     title: Raven.Raven.selectedFolderName
-    
+
     Component {
         id: contextMenu
         QQC2.Menu {
@@ -63,7 +63,7 @@ Kirigami.ScrollablePage {
         model: Raven.MailListModel
         currentIndex: -1
         reuseItems: true
-        
+
         Kirigami.PlaceholderMessage {
             id: mailboxSelected
             anchors.centerIn: parent
@@ -72,36 +72,37 @@ Kirigami.ScrollablePage {
             explanation: i18n("Select a mailbox from the sidebar.")
             icon.name: "mail-unread"
         }
-        
+
         Kirigami.PlaceholderMessage {
             anchors.centerIn: parent
             visible: mails.count === 0 && !mailboxSelected.visible
             text: i18n("Mailbox is empty")
             icon.name: "mail-folder-inbox"
         }
-        
+
         delegate: MailDelegate {
+            width: mails.width
             showSeparator: model.index !== folderView.count - 1
-            
+
             datetime: model.date
             author: model.from
             title: model.subject
             contentPreview: model.snippet
-            
+
             isRead: !model.unread
-            
+
             onOpenMailRequested: {
                 Raven.ThreadViewModel.loadThread(model.thread);
-                
+
                 applicationWindow().pageStack.push(Qt.resolvedUrl('ConversationViewer.qml'), {subject: model.subject});
             }
-            
+
 //             onStarMailRequested: {
 //                 const status = MailManager.folderModel.copyMessageStatus(model.status);
 //                 status.isImportant = !status.isImportant;
 //                 MailManager.folderModel.updateMessageStatus(index, status)
 //             }
-            
+
             onContextMenuRequested: {
                 const menu = contextMenu.createObject(folderView, {
                     row: index,

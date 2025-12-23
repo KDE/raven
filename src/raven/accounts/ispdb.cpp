@@ -9,7 +9,7 @@
 
 #include "ispdb.h"
 #include <KLocalizedString>
-#include <kio/jobclasses.h>
+#include <KIO/TransferJob>
 
 #include <QDomDocument>
 #include <QDebug>
@@ -117,7 +117,7 @@ void Ispdb::slotResult(KJob *job)
 
     // qCDebug(ACCOUNTWIZARD_LOG) << mData;
     QDomDocument document;
-    bool ok = document.setContent(mData);
+    bool ok = static_cast<bool>(document.setContent(mData));
     if (!ok) {
         qDebug() << "Could not parse xml" << mData;
         Q_EMIT finished(false);

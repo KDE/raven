@@ -3,21 +3,21 @@
 
 #include "messagecontact.h"
 
-MessageContact::MessageContact(QObject *parent, mailcore::Address *address)
-    : QObject{parent}
-{
-    if (address == nullptr) {
-        return;
-    }
+// MessageContact::MessageContact(QObject *parent, mailcore::Address *address)
+//     : QObject{parent}
+// {
+//     if (address == nullptr) {
+//         return;
+//     }
 
-    if (address->displayName()) {
-        m_name = QString::fromStdString(address->displayName()->UTF8Characters());
-    }
+//     if (address->displayName()) {
+//         m_name = QString::fromStdString(address->displayName()->UTF8Characters());
+//     }
 
-    if (address->mailbox()) {
-        m_email = QString::fromStdString(address->mailbox()->UTF8Characters());
-    }
-}
+//     if (address->mailbox()) {
+//         m_email = QString::fromStdString(address->mailbox()->UTF8Characters());
+//     }
+// }
 
 MessageContact::MessageContact(QObject *parent, const QJsonObject &json)
     : QObject{parent}

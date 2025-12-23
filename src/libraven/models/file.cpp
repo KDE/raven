@@ -7,53 +7,53 @@
 #include <KLocalizedString>
 #include <QJsonDocument>
 
-File::File(QObject *parent, Message *msg, mailcore::Attachment *a)
-    : QObject{parent}
-    , m_id{QUuid::createUuid().toString(QUuid::Id128)} 
-    , m_accountId{msg->accountId()}
-    , m_messageId{msg->id()}
-    , m_partId{QString::fromUtf8(a->partID()->UTF8Characters())}
-{
-    if (a->isInlineAttachment() && a->contentID()) {
-        m_contentId = QString::fromUtf8(a->contentID()->UTF8Characters());
-    }
-    if (a->mimeType()) {
-        m_contentType = QString::fromUtf8(a->mimeType()->UTF8Characters());
-    }
+// File::File(QObject *parent, Message *msg, mailcore::Attachment *a)
+//     : QObject{parent}
+//     , m_id{QUuid::createUuid().toString(QUuid::Id128)}
+//     , m_accountId{msg->accountId()}
+//     , m_messageId{msg->id()}
+//     , m_partId{QString::fromUtf8(a->partID()->UTF8Characters())}
+// {
+//     if (a->isInlineAttachment() && a->contentID()) {
+//         m_contentId = QString::fromUtf8(a->contentID()->UTF8Characters());
+//     }
+//     if (a->mimeType()) {
+//         m_contentType = QString::fromUtf8(a->mimeType()->UTF8Characters());
+//     }
 
-    QString name;
+//     QString name;
 
-    if (a->filename()) {
-        m_filename = QString::fromUtf8(a->filename()->UTF8Characters());
-    }
+//     if (a->filename()) {
+//         m_filename = QString::fromUtf8(a->filename()->UTF8Characters());
+//     }
 
-    // default names for attachment if no file name is specified
-    // TODO: i18nc properly
-    if (m_filename.isEmpty()) {
-        m_filename = QStringLiteral("Unnamed Attachment");
+//     // default names for attachment if no file name is specified
+//     // TODO: i18nc properly
+//     if (m_filename.isEmpty()) {
+//         m_filename = QStringLiteral("Unnamed Attachment");
 
-        if (m_contentType == QStringLiteral("text/calendar")) {
-            m_filename = QStringLiteral("Event.ics");
-        }
-        if (m_contentType == QStringLiteral("image/png") || m_contentType == QStringLiteral("image/x-png")) {
-            m_filename = QStringLiteral("Unnamed Image.png");
-        }
-        if (m_contentType == QStringLiteral("image/jpg")) {
-            m_filename = QStringLiteral("Unnamed Image.jpg");
-        }
-        if (m_contentType == QStringLiteral("image/jpeg")) {
-            m_filename = QStringLiteral("Unnamed Image.gif");
-        }
-        if (m_contentType == QStringLiteral("message/delivery-status")) {
-            m_filename = QStringLiteral("Delivery Status.txt");
-        }
-        if (m_contentType == QStringLiteral("message/feedback-report")) {
-            m_filename = QStringLiteral("Feedback Report.txt");
-        }
-    }
+//         if (m_contentType == QStringLiteral("text/calendar")) {
+//             m_filename = QStringLiteral("Event.ics");
+//         }
+//         if (m_contentType == QStringLiteral("image/png") || m_contentType == QStringLiteral("image/x-png")) {
+//             m_filename = QStringLiteral("Unnamed Image.png");
+//         }
+//         if (m_contentType == QStringLiteral("image/jpg")) {
+//             m_filename = QStringLiteral("Unnamed Image.jpg");
+//         }
+//         if (m_contentType == QStringLiteral("image/jpeg")) {
+//             m_filename = QStringLiteral("Unnamed Image.gif");
+//         }
+//         if (m_contentType == QStringLiteral("message/delivery-status")) {
+//             m_filename = QStringLiteral("Delivery Status.txt");
+//         }
+//         if (m_contentType == QStringLiteral("message/feedback-report")) {
+//             m_filename = QStringLiteral("Feedback Report.txt");
+//         }
+//     }
 
-    m_size = a->data()->length();
-}
+//     m_size = a->data()->length();
+// }
 
 File::File(QObject *parent, const QJsonObject &json)
     : QObject{parent}

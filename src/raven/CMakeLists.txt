@@ -30,25 +30,13 @@ target_link_libraries(raven
     Qt::Svg
     Qt::Xml
     Qt::Sql
-    KF5::I18n
-    KF5::CoreAddons
-    KF5::KIOCore
-    KF5::Wallet
-    KF5::Mime
+    KF6::I18n
+    KF6::CoreAddons
+    KF6::KIOCore
+    KF6::Wallet
+    KF6::ConfigCore
+    KPim6::Mime
 
-    ${LIBXML2_LIBRARIES}
-    OpenSSL::Crypto
-    ICU::i18n
-    ICU::uc
-    PkgConfig::GLIB
-    PkgConfig::UUID
-    LibLZMA::LibLZMA
-    ZLIB::ZLIB
-    ${CTEMPLATE_LIB}
-    ${ETPAN_LIB}
-    ${TIDY_LIB}
-    MailCore
-    
     libraven
 )
 

@@ -2,6 +2,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 add_subdirectory(libraven)
-
 add_subdirectory(raven)
-add_subdirectory(ravend)
+# add_subdirectory(rs)

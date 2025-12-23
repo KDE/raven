@@ -32,10 +32,10 @@ public:
 
     void saveToDb(QSqlDatabase &db) const;
     void deleteFromDb(QSqlDatabase &db) const;
-    
+
     void createSnapshot();
-    
-    void updateAfterMessageChanges(const MessageSnapshot &oldMsg, Message *newMsg); 
+
+    void updateAfterMessageChanges(const MessageSnapshot &oldMsg, Message *newMsg);
 
     QString id() const;
 
@@ -53,23 +53,23 @@ public:
 
     int unread() const;
     void setUnread(int unread);
-    
+
     int starred() const;
     void setStarred(int starred);
-    
+
     QDateTime firstMessageTimestamp() const;
     void setFirstMessageTimestamp(const QDateTime &firstMessageTimestamp);
-    
+
     QDateTime lastMessageTimestamp() const;
     void setLastMessageTimestamp(const QDateTime &lastMessageTimestamp);
-    
+
     QList<MessageContact *> &participants();
-    
+
     QStringList &folderIds();
 
 private:
     void addMissingParticipants(QSet<QString> &emails, const QList<MessageContact *> &contacts);
-                                
+
     QString m_id;
     QString m_accountId;
     QString m_gmailThreadId;
@@ -78,12 +78,12 @@ private:
     QString m_snippet;
     int m_unread;
     int m_starred;
-    
+
     QDateTime m_firstMessageTimestamp;
     QDateTime m_lastMessageTimestamp;
-    
+
     QList<MessageContact *> m_participants;
     QStringList m_folderIds;
-    
+
     ThreadSnapshot m_snapshot;
 };

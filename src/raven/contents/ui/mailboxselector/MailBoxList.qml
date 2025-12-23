@@ -16,14 +16,14 @@ ListView {
     id: mailList
 
     model: Raven.MailBoxModel
-    
+
     onModelChanged: currentIndex = -1
-    
+
     signal folderChosen()
 
     delegate: DelegateChooser {
         role: 'isCollapsible'
-        
+
         DelegateChoice {
             roleValue: true
 
@@ -32,12 +32,12 @@ ListView {
                 spacing: 0
                 height: visible ? implicitHeight : 0
                 width: ListView.view.width
-                
+
                 Item {
                     Layout.topMargin: Kirigami.Units.largeSpacing
                     visible: (model.level === 0) && (model.index !== 0)
                 }
-                
+
                 QQC2.ItemDelegate {
                     id: categoryHeader
                     Layout.fillWidth: true
@@ -49,9 +49,9 @@ ListView {
                     Kirigami.Theme.inherit: false
 
                     property string displayText: model.name
-                    
+
                     onClicked: mailList.model.toggleCollapse(index)
-                    
+
                     contentItem: RowLayout {
                         Kirigami.Icon {
                             Layout.alignment: Qt.AlignVCenter
@@ -60,16 +60,16 @@ ListView {
                             Layout.preferredHeight: Kirigami.Units.iconSizes.small
                             Layout.preferredWidth: Layout.preferredHeight
                         }
-                        
+
                         QQC2.Label {
                             Layout.fillWidth: true
-                            
+
                             color: Kirigami.Theme.disabledTextColor
                             text: categoryHeader.displayText
                             font.weight: Font.DemiBold
                             elide: Text.ElideRight
                         }
-                        
+
                         Kirigami.Icon {
                             implicitWidth: Kirigami.Units.iconSizes.small
                             implicitHeight: Kirigami.Units.iconSizes.small
@@ -82,7 +82,7 @@ ListView {
 
         DelegateChoice {
             roleValue: false
-            
+
             QQC2.ItemDelegate {
                 id: controlRoot
                 visible: model.visible
@@ -95,12 +95,12 @@ ListView {
                 bottomPadding: Kirigami.Units.largeSpacing
                 rightPadding: Kirigami.Units.largeSpacing
                 leftPadding: Kirigami.Units.largeSpacing * (model.level + 1)
-                
+
                 property bool chosen: false
-                
+
                 Connections {
                     target: mailList
-                    
+
                     function onFolderChosen() {
                         if (controlRoot.chosen) {
                             controlRoot.chosen = false;
@@ -110,42 +110,40 @@ ListView {
                         }
                     }
                 }
-                
+
                 property bool showSelected: (controlRoot.pressed || (controlRoot.highlighted && applicationWindow().isWidescreen))
-    
-                background: Rectangle {
-                    color: Qt.rgba(Kirigami.Theme.highlightColor.r, Kirigami.Theme.highlightColor.g, Kirigami.Theme.highlightColor.b, controlRoot.showSelected ? 0.5 : hoverHandler.hovered ? 0.2 : 0)
-                    
-                    // indicator rectangle
-                    Rectangle {
-                        anchors.left: parent.left
-                        anchors.top: parent.top
-                        anchors.topMargin: 1
-                        anchors.bottom: parent.bottom
-                        anchors.bottomMargin: 1
-                        
-                        width: 4
-                        visible: controlRoot.highlighted
-                        color: Kirigami.Theme.highlightColor
-                    }
-                    
-                    HoverHandler {
-                        id: hoverHandler
-                        // disable hover input on mobile because touchscreens trigger hover feedback and do not "unhover" in Qt
-                        enabled: !Kirigami.Settings.isMobile
-                    }
+
+                // background: Rectangle {
+                //     color: Qt.rgba(
+                //         Kirigami.Theme.highlightColor.r,
+                //         Kirigami.Theme.highlightColor.g,
+                //         Kirigami.Theme.highlightColor.b,
+                //         controlRoot.showSelected ? 0.5 : (controlRoot.hovered && !Kirigami.Settings.isMobile) ? 0.2 : 0)
+                // }
+
+                // indicator rectangle
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    anchors.topMargin: 1
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 1
+
+                    width: 4
+                    visible: controlRoot.highlighted
+                    color: Kirigami.Theme.highlightColor
                 }
-                
+
                 contentItem: RowLayout {
                     spacing: Kirigami.Units.smallSpacing
-                    
+
                     Kirigami.Icon {
                         Layout.alignment: Qt.AlignVCenter
                         source: "mail-folder-inbox" // model.decoration // TODO
                         Layout.preferredHeight: Kirigami.Units.iconSizes.small
                         Layout.preferredWidth: Layout.preferredHeight
                     }
-                    
+
                     QQC2.Label {
                         leftPadding: controlRoot.mirrored ? (controlRoot.indicator ? controlRoot.indicator.width : 0) + controlRoot.spacing : 0
                         rightPadding: !controlRoot.mirrored ? (controlRoot.indicator ? controlRoot.indicator.width : 0) + controlRoot.spacing : 0

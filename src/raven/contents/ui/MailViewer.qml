@@ -4,7 +4,6 @@
 import QtQuick 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15 as QQC2
-import QtGraphicalEffects 1.15
 
 import org.kde.raven 1.0
 import org.kde.kirigami 2.14 as Kirigami
@@ -30,9 +29,9 @@ Item {
     Kirigami.Theme.inherit: false
 
     property real padding: Kirigami.Units.largeSpacing * 2
-    
+
     implicitHeight: column.implicitHeight
-    
+
     Rectangle {
         anchors.fill: parent
         color: Kirigami.Theme.backgroundColor
@@ -41,11 +40,11 @@ Item {
     ColumnLayout {
         id: column
         spacing: 0
-        
+
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        
+
         QQC2.ToolBar {
             id: mailHeader
             Layout.fillWidth: true
@@ -59,13 +58,13 @@ Item {
                     anchors.fill: parent
                     color: Kirigami.Theme.alternateBackgroundColor
                 }
-                
+
                 Kirigami.Separator {
                     anchors.top: parent.top
                     anchors.left: parent.left
                     anchors.right: parent.right
                 }
-                
+
                 Kirigami.Separator {
                     anchors.bottom: parent.bottom
                     anchors.left: parent.left
@@ -79,7 +78,7 @@ Item {
 
                 RowLayout {
                     Layout.fillWidth: true
-                    
+
                     QQC2.Label {
                         text: root.from
                         elide: Text.ElideRight
@@ -94,7 +93,7 @@ Item {
 
                 RowLayout {
                     Layout.fillWidth: true
-                    
+
                     QQC2.Label {
                         text: i18n("Sender:")
                         font.bold: true
@@ -112,7 +111,7 @@ Item {
 
                 RowLayout {
                     Layout.fillWidth: true
-                    
+
                     QQC2.Label {
                         text: i18n("To:")
                         font.bold: true
@@ -125,11 +124,11 @@ Item {
                         Layout.fillWidth: true
                     }
                 }
-                
+
                 RowLayout {
                     visible: root.cc !== ""
                     Layout.fillWidth: true
-                    
+
                     QQC2.Label {
                         text: i18n("CC:")
                         font.bold: true
@@ -142,11 +141,11 @@ Item {
                         Layout.fillWidth: true
                     }
                 }
-                
+
                 RowLayout {
                     visible: root.bcc !== ""
                     Layout.fillWidth: true
-                    
+
                     QQC2.Label {
                         text: i18n("BCC:")
                         font.bold: true
@@ -181,7 +180,7 @@ Item {
                     textFormat: TextEdit.PlainText
                 }
             }
-            
+
             // html view
             Loader {
                 active: !root.isPlaintext
@@ -195,10 +194,10 @@ Item {
         // QQC2.ToolBar {
         //     Layout.fillWidth: true
         //     padding: root.padding
-        // 
+        //
         //     Kirigami.Theme.inherit: false
         //     Kirigami.Theme.colorSet: Kirigami.Theme.View
-        // 
+        //
         //     background: Item {
         //         Kirigami.Separator {
         //             anchors {
@@ -215,14 +214,14 @@ Item {
             //     spacing: Kirigami.Units.smallSpacing
             //     Repeater {
             //         model: mailPartView.attachmentModel
-            // 
+            //
             //         delegate: AttachmentDelegate {
             //             name: model.name
             //             type: model.type
             //             icon.name: model.iconName
-            // 
+            //
             //             clip: true
-            // 
+            //
             //             actionIcon: 'download'
             //             actionTooltip: i18n("Save attachment")
             //             onExecute: mailPartView.attachmentModel.saveAttachmentToDisk(mailPartView.attachmentModel.index(index, 0))

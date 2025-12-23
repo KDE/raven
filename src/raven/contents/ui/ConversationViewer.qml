@@ -16,48 +16,48 @@ Kirigami.ScrollablePage {
     id: root
 
     property string subject
-    
+
     leftPadding: 0
     rightPadding: 0
     topPadding: 0
     bottomPadding: 0
-    
+
     Kirigami.Theme.colorSet: Kirigami.Theme.Window
     Kirigami.Theme.inherit: false
 
-    contextualActions: [
+    actions: [
         Kirigami.Action {
             text: i18n("Move to trash")
-            iconName: "albumfolder-user-trash"
+            icon.name: "albumfolder-user-trash"
             // TODO implement move to trash
         }
     ]
-    
+
     ListView {
         id: listView
         spacing: Kirigami.Units.gridUnit * 2
         model: Raven.ThreadViewModel
-        
+
         header: RowLayout {
             id: rowLayout
             width: listView.width
-            
+
             QQC2.Label {
                 Layout.fillWidth: true
                 Layout.leftMargin: Kirigami.Units.largeSpacing * 2
                 Layout.rightMargin: Kirigami.Units.largeSpacing * 2
-                Layout.topMargin: Kirigami.Units.gridUnit 
+                Layout.topMargin: Kirigami.Units.gridUnit
                 Layout.bottomMargin: Kirigami.Units.gridUnit
-                
+
                 text: root.subject
                 maximumLineCount: 2
                 wrapMode: Text.Wrap
                 elide: Text.ElideRight
-                
+
                 font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.2
             }
         }
-        
+
         delegate: MailViewer {
             width: listView.width
             item: root.item

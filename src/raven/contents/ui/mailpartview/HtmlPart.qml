@@ -2,26 +2,26 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 
-import QtQuick 2.7
-import QtQuick.Controls 2.15 as QQC2
-import QtWebEngine 1.4
-import QtQuick.Window 2.0
+import QtQuick
+import QtQuick.Controls as QQC2
+import QtWebEngine
+import QtQuick.Window
 
-import org.kde.raven 1.0
-import org.kde.kirigami 2.19 as Kirigami
+import org.kde.raven
+import org.kde.kirigami as Kirigami
 
 Item {
     id: root
     objectName: "htmlPart"
     property string content
-    
+
     property string searchString
     property bool autoLoadImages: true
-    
+
     //We have to give it a minimum size so the html content starts to expand
     property int minimumSize: 10
     implicitHeight: minimumSize
-    
+
     onSearchStringChanged: {
         htmlView.findText(searchString)
     }
@@ -40,14 +40,14 @@ Item {
             anchors.fill: parent
 
             Component.onCompleted: loadHtml(content, "file:///")
-            onLoadingChanged: {
-                if (loadRequest.status == WebEngineView.LoadFailedStatus) {
+            onLoadingChanged: (loadingInfo) => {
+                if (loadingInfo.status == WebEngineView.LoadFailedStatus) {
                     console.warn("Failed to load html content.")
-                    console.warn("Error is ", loadRequest.errorString)
+                    console.warn("Error is ", loadingInfo.errorString)
                 }
                 root.implicitWidth = Math.max(contentsSize.width, flickable.minimumSize)
 
-                if (loadRequest.status == WebEngineView.LoadSucceededStatus) {
+                if (loadingInfo.status == WebEngineView.LoadSucceededStatus) {
                     runJavaScript("[document.body.scrollHeight, document.body.scrollWidth, document.documentElement.scrollHeight]", function(result) {
                         let height = Math.min(Math.max(result[0], result[2]), 4000);
                         let width = Math.min(Math.max(result[1], flickable.width), 2000);
@@ -68,7 +68,7 @@ Item {
                     request.action = WebEngineNavigationRequest.IgnoreRequest
                 }
             }
-            onNewViewRequested: {
+            onNewWindowRequested: (request) => {
                 console.debug("New view request ", request, request.requestedUrl)
                 //We ignore requests for new views and open a browser instead
                 Qt.openUrlExternally(request.requestedUrl)

@@ -7,7 +7,6 @@
 #include <QList>
 #include <QJsonObject>
 
-#include <MailCore/MailCore.h>
 
 class MessageContact : public QObject
 {
@@ -16,7 +15,7 @@ class MessageContact : public QObject
     Q_PROPERTY(QString email READ email CONSTANT)
 
 public:
-    MessageContact(QObject *parent = nullptr, mailcore::Address *address = nullptr);
+    // MessageContact(QObject *parent = nullptr, mailcore::Address *address = nullptr);
     MessageContact(QObject *parent, const QJsonObject &json);
 
     QJsonObject toJson() const;

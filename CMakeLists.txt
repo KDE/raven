@@ -10,14 +10,14 @@ set (CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(PROJECT_VERSION "0.1")
-set(QT_MIN_VERSION "5.15.0")
-set(KF5_MIN_VERSION "5.101.0")
-set(LIBKDEPIM_VERSION "5.19.0")
+set(QT_MIN_VERSION "6.8.0")
+set(KF_MIN_VERSION "6.8.0")
+set(LIBKDEPIM_VERSION "6.1.0")
 
 include(FeatureSummary)
 
 ################# set KDE specific information #################
-find_package(ECM ${KF5_MIN_VERSION} REQUIRED NO_MODULE)
+find_package(ECM ${KF_MIN_VERSION} REQUIRED NO_MODULE)
 
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH})
@@ -31,6 +31,7 @@ include(ECMGenerateHeaders)
 include(ECMPoQmTools)
 include(ECMQmlModule)
 include(ECMConfiguredInstall)
+include(ECMFindQmlModule)
 
 ecm_setup_version(${PROJECT_VERSION}
     VARIABLE_PREFIX RAVEN
@@ -38,52 +39,46 @@ ecm_setup_version(${PROJECT_VERSION}
 )
 
 ################# Find dependencies #################
-find_package(Qt5 ${QT_MIN_VERSION} REQUIRED COMPONENTS 
-    Core 
-    Gui 
-    Qml 
-    QuickControls2 
-    Svg 
-    Sql 
+find_package(Qt6 ${QT_MIN_VERSION} REQUIRED COMPONENTS
+    Core
+    Gui
+    Qml
+    QuickControls2
+    Svg
+    Sql
     WebEngineWidgets
 )
 
-find_package(KF5 ${KF5_MIN_VERSION} REQUIRED COMPONENTS 
-    Kirigami2 
-    I18n 
-    CoreAddons 
-    Declarative 
+find_package(KF6 ${KF_MIN_VERSION} REQUIRED COMPONENTS
+    Kirigami
+    I18n
+    CoreAddons
+    Declarative
     ItemModels
     KCMUtils
     KIO
     Wallet
     DBusAddons
+    Config
 )
 
-find_package(KF5 ${LIBKDEPIM_VERSION} REQUIRED COMPONENTS
-    Mime
-)
+find_package(KPim6Mime REQUIRED)
 
 find_package(QCoro${QT_MAJOR_VERSION} COMPONENTS Core DBus REQUIRED)
 qcoro_enable_coroutines()
 
-find_package(KF5KirigamiAddons 0.6 REQUIRED)
+find_package(KF6KirigamiAddons 0.6 REQUIRED)
 
-# Dependencies of MailCore and co.
-find_package(OpenSSL REQUIRED)
-find_package(ICU COMPONENTS i18n uc REQUIRED)
-find_package(LibXml2 REQUIRED)
-find_package(LibLZMA REQUIRED)
-find_package(ZLIB REQUIRED)
-find_library(RESOLV_LIB resolv)
-find_library(CTEMPLATE_LIB ctemplate)
-find_library(ETPAN_LIB etpan)
-find_library(TIDY_LIB tidy)
-find_package(PkgConfig REQUIRED)
+# For daemon
+find_package(Corrosion)
+set_package_properties(Corrosion PROPERTIES
+    TYPE RECOMMENDED
+    PURPOSE "Required to build the daemon"
+    DESCRIPTION "CMake scripts to seamlessly build and link to targets using cargo"
+    URL https://github.com/AndrewGaspar/corrosion
+)
+
 pkg_search_module(UUID uuid REQUIRED IMPORTED_TARGET)
-pkg_search_module(GLIB glib-2.0 REQUIRED IMPORTED_TARGET)
-
-find_package(MailCore REQUIRED)
 
 ################# build and install #################
 
@@ -106,4 +101,4 @@ feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAG
 
 file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES src/*.cpp src/*.h)
 kde_clang_format(${ALL_CLANG_FORMAT_SOURCE_FILES})
-        
+

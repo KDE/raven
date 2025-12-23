@@ -5,8 +5,6 @@
 
 #include <QObject>
 
-#include <MailCore/MailCore.h>
-
 #include "message.h"
 
 class Message;
@@ -15,7 +13,7 @@ class File : public QObject
     Q_OBJECT
 
 public:
-    File(QObject *parent = nullptr, Message *msg = nullptr, mailcore::Attachment *a = nullptr);
+    // File(QObject *parent = nullptr, Message *msg = nullptr, mailcore::Attachment *a = nullptr);
     File(QObject *parent, const QJsonObject &json);
     File(QObject *parent, const QSqlQuery &query);
 

@@ -17,73 +17,73 @@ Message::Message(QObject *parent)
 {
 }
 
-Message::Message(QObject *parent, mailcore::IMAPMessage *msg, const Folder &folder, time_t syncTimestamp)
-    : QObject{parent}
-    , m_id{QUuid::createUuid().toString(QUuid::Id128)}
-    , m_folderId{folder.id()}
-    , m_accountId{folder.accountId()}
-    , m_threadId{}
-    , m_to{}
-    , m_cc{}
-    , m_bcc{}
-    , m_replyTo{}
-    , m_from{}
-    , m_headerMessageId{msg->header()->messageID() ? QString::fromUtf8(msg->header()->messageID()->UTF8Characters()) : QStringLiteral("no-header-message-id")}
-    , m_gmailMessageId{QString::number(msg->gmailMessageID())}
-    , m_gmailThreadId{} // TODO NOT IMPLEMENTED
-    , m_subject{QString::fromStdString(msg->header()->subject() ? msg->header()->subject()->UTF8Characters() : "")}
-    , m_draft{}
-    , m_unread{}
-    , m_starred{}
-    , m_date{QDateTime::fromSecsSinceEpoch(msg->header()->date() == -1 ? msg->header()->receivedDate() : msg->header()->date())}
-    , m_syncedAt{QDateTime::fromSecsSinceEpoch(syncTimestamp)}
-    , m_remoteUid{QString::number(msg->uid())}
-    , m_labels{}
-    , m_snippet{}
-    , m_plaintext{}
-{
-    if (msg == nullptr) {
-        return;
-    }
-    
-    if (msg->header()->to()) {
-        for (unsigned int i = 0; i < msg->header()->to()->count(); ++i) {
-            auto addr = static_cast<mailcore::Address *>(msg->header()->to()->objectAtIndex(i));
-            m_to.push_back(new MessageContact((QObject *) this, addr));
-        }
-    }
+// Message::Message(QObject *parent, mailcore::IMAPMessage *msg, const Folder &folder, time_t syncTimestamp)
+//     : QObject{parent}
+//     , m_id{QUuid::createUuid().toString(QUuid::Id128)}
+//     , m_folderId{folder.id()}
+//     , m_accountId{folder.accountId()}
+//     , m_threadId{}
+//     , m_to{}
+//     , m_cc{}
+//     , m_bcc{}
+//     , m_replyTo{}
+//     , m_from{}
+//     , m_headerMessageId{msg->header()->messageID() ? QString::fromUtf8(msg->header()->messageID()->UTF8Characters()) : QStringLiteral("no-header-message-id")}
+//     , m_gmailMessageId{QString::number(msg->gmailMessageID())}
+//     , m_gmailThreadId{} // TODO NOT IMPLEMENTED
+//     , m_subject{QString::fromStdString(msg->header()->subject() ? msg->header()->subject()->UTF8Characters() : "")}
+//     , m_draft{}
+//     , m_unread{}
+//     , m_starred{}
+//     , m_date{QDateTime::fromSecsSinceEpoch(msg->header()->date() == -1 ? msg->header()->receivedDate() : msg->header()->date())}
+//     , m_syncedAt{QDateTime::fromSecsSinceEpoch(syncTimestamp)}
+//     , m_remoteUid{QString::number(msg->uid())}
+//     , m_labels{}
+//     , m_snippet{}
+//     , m_plaintext{}
+// {
+//     if (msg == nullptr) {
+//         return;
+//     }
 
-    if (msg->header()->cc()) {
-        for (unsigned int i = 0; i < msg->header()->cc()->count(); ++i) {
-            auto addr = static_cast<mailcore::Address *>(msg->header()->cc()->objectAtIndex(i));
-            m_cc.push_back(new MessageContact((QObject *) this, addr));
-        }
-    }
+//     if (msg->header()->to()) {
+//         for (unsigned int i = 0; i < msg->header()->to()->count(); ++i) {
+//             auto addr = static_cast<mailcore::Address *>(msg->header()->to()->objectAtIndex(i));
+//             m_to.push_back(new MessageContact((QObject *) this, addr));
+//         }
+//     }
 
-    if (msg->header()->bcc()) {
-        for (unsigned int i = 0; i < msg->header()->bcc()->count(); ++i) {
-            auto addr = static_cast<mailcore::Address *>(msg->header()->bcc()->objectAtIndex(i));
-            m_bcc.push_back(new MessageContact((QObject *) this, addr));
-        }
-    }
+//     if (msg->header()->cc()) {
+//         for (unsigned int i = 0; i < msg->header()->cc()->count(); ++i) {
+//             auto addr = static_cast<mailcore::Address *>(msg->header()->cc()->objectAtIndex(i));
+//             m_cc.push_back(new MessageContact((QObject *) this, addr));
+//         }
+//     }
 
-    if (msg->header()->replyTo()) {
-        for (unsigned int i = 0; i < msg->header()->replyTo()->count(); ++i) {
-            auto addr = static_cast<mailcore::Address *>(msg->header()->replyTo()->objectAtIndex(i));
-            m_replyTo.push_back(new MessageContact((QObject *) this, addr));
-        }
-    }
+//     if (msg->header()->bcc()) {
+//         for (unsigned int i = 0; i < msg->header()->bcc()->count(); ++i) {
+//             auto addr = static_cast<mailcore::Address *>(msg->header()->bcc()->objectAtIndex(i));
+//             m_bcc.push_back(new MessageContact((QObject *) this, addr));
+//         }
+//     }
 
-    m_from = new MessageContact((QObject *) this, msg->header()->from());
+//     if (msg->header()->replyTo()) {
+//         for (unsigned int i = 0; i < msg->header()->replyTo()->count(); ++i) {
+//             auto addr = static_cast<mailcore::Address *>(msg->header()->replyTo()->objectAtIndex(i));
+//             m_replyTo.push_back(new MessageContact((QObject *) this, addr));
+//         }
+//     }
 
-    auto attrs = Utils::messageAttributesForMessage(msg);
-    m_draft = attrs.draft || folder.role() == QStringLiteral("drafts");
-    m_unread = attrs.unread;
-    m_starred = attrs.starred;
-    m_labels = attrs.labels;
-    
-    createSnapshot();
-}
+//     m_from = new MessageContact((QObject *) this, msg->header()->from());
+
+//     auto attrs = Utils::messageAttributesForMessage(msg);
+//     m_draft = attrs.draft || folder.role() == QStringLiteral("drafts");
+//     m_unread = attrs.unread;
+//     m_starred = attrs.starred;
+//     m_labels = attrs.labels;
+
+//     createSnapshot();
+// }
 
 Message::Message(QObject *parent, const QSqlQuery &query)
     : QObject{parent}
@@ -131,7 +131,7 @@ Message::Message(QObject *parent, const QSqlQuery &query)
 
     m_snippet = json[QStringLiteral("snippet")].toString();
     m_plaintext = json[QStringLiteral("plaintext")].toBool();
-    
+
     createSnapshot();
 }
 
@@ -188,21 +188,21 @@ void Message::saveToDb(QSqlDatabase &db)
     query.bindValue(QStringLiteral(":date"), m_date);
     query.bindValue(QStringLiteral(":remoteUID"), m_remoteUid);
     query.exec();
-    
+
     // update thread details
     if (!threadId().isEmpty()) {
         QSqlQuery threadQuery{db};
         query.prepare(QStringLiteral("SELECT * FROM ") + THREAD_TABLE + QStringLiteral(" WHERE id = ?"));
         query.addBindValue(threadId());
         query.exec();
-        
+
         if (query.next()) {
             auto thread = std::make_shared<Thread>(nullptr, query);
             thread->updateAfterMessageChanges(m_snapshot, this);
             thread->saveToDb(db);
-        }        
+        }
     }
-    
+
     createSnapshot();
 }
 
@@ -211,17 +211,17 @@ void Message::deleteFromDb(QSqlDatabase &db)
     QSqlQuery query{db};
     query.prepare(QStringLiteral("DELETE FROM ") + MESSAGE_TABLE + QStringLiteral(" WHERE id = ") + m_id);
     query.exec();
-    
+
     // update thread details
     if (!threadId().isEmpty()) {
         QSqlQuery threadQuery{db};
         query.prepare(QStringLiteral("SELECT * FROM ") + THREAD_TABLE + QStringLiteral(" WHERE id = ") + threadId());
         query.exec();
-        
+
         if (query.next()) {
             auto thread = std::make_shared<Thread>(nullptr, query);
             thread->updateAfterMessageChanges(m_snapshot, nullptr);
-            
+
             // delete if there are no folders left that reference it
             if (thread->folderIds().isEmpty()) {
                 thread->deleteFromDb(db);

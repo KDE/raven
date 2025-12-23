@@ -25,12 +25,13 @@ target_link_libraries(ravend
     Qt::Xml
     Qt::Sql
     Qt::DBus
-    KF5::I18n
-    KF5::CoreAddons
-    KF5::KIOCore
-    KF5::Wallet
-    KF5::Mime
-    KF5::DBusAddons
+    KF6::I18n
+    KF6::CoreAddons
+    KF6::KIOCore
+    KF6::Wallet
+    KF6::DBusAddons
+    KF6::ConfigCore
+    KPim6::Mime
 
     ${LIBXML2_LIBRARIES}
     OpenSSL::Crypto
@@ -44,7 +45,7 @@ target_link_libraries(ravend
     ${ETPAN_LIB}
     ${TIDY_LIB}
     MailCore
-    
+
     libraven
 )
 

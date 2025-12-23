@@ -15,7 +15,7 @@ set(libraven_SRCS
 )
 
 add_library(libraven STATIC ${libraven_SRCS})
-target_link_libraries(libraven 
+target_link_libraries(libraven
     Qt::Core
     Qt::Gui
     Qt::Qml
@@ -25,23 +25,24 @@ target_link_libraries(libraven
     Qt::Svg
     Qt::Xml
     Qt::Sql
-    KF5::I18n
-    KF5::CoreAddons
-    KF5::KIOCore
-    KF5::Wallet
-    KF5::Mime
+    KF6::I18n
+    KF6::CoreAddons
+    KF6::KIOCore
+    KF6::Wallet
+    KF6::ConfigCore
+    KPim6::Mime
 
-    ${LIBXML2_LIBRARIES}
-    OpenSSL::Crypto
-    ICU::i18n
-    ICU::uc
-    PkgConfig::GLIB
+    # ${LIBXML2_LIBRARIES}
+    # OpenSSL::Crypto
+    # ICU::i18n
+    # ICU::uc
+    # PkgConfig::GLIB
     PkgConfig::UUID
-    LibLZMA::LibLZMA
-    ZLIB::ZLIB
-    ${CTEMPLATE_LIB}
-    ${ETPAN_LIB}
-    ${TIDY_LIB}
-    MailCore
+    # LibLZMA::LibLZMA
+    # ZLIB::ZLIB
+    # ${CTEMPLATE_LIB}
+    # ${ETPAN_LIB}
+    # ${TIDY_LIB}
+    # MailCore
 )
 
