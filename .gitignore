@@ -1,4 +1,13 @@
+<<<<<<< HEAD
+=======
+# SPDX-FileCopyrightText: None
+# SPDX-License-Identifier: CC0-1.0
+
+>>>>>>> work/devinlin/newnew
 build*
 .kdev4
 *.kdev4
 .clang-format
+.flatpak-builder
+
+src/rs/ravend/target

@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: 2025 Devin Lin <devin@kde.org>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+File=ravensettings.kcfg
+ClassName=RavenSettings
+DefaultValueGetters=true
+GenerateProperties=true
+Singleton=true
+Mutators=true
+GlobalEnums=true

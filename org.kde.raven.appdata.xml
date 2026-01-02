@@ -67,6 +67,7 @@
   <summary xml:lang="tr">E-posta gönderin ve alın</summary>
   <summary xml:lang="uk">Надсилання та одержання пошти</summary>
   <summary xml:lang="zh-TW">傳送和接收文字電子郵件</summary>
+<<<<<<< HEAD
   <metadata_license>A permissive license for this metadata, e.g. "FSFAP"</metadata_license>
   <project_license>The license of this software as SPDX string, e.g. "GPL-3+"</project_license>
   <developer_name>KDE Community</developer_name>
@@ -100,6 +101,13 @@
   <developer_name xml:lang="tr">KDE Topluluğu</developer_name>
   <developer_name xml:lang="uk">Спільнота KDE</developer_name>
   <developer_name xml:lang="zh-TW">KDE 社群</developer_name>
+=======
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <developer id="kde.org">
+    <name translate="no">KDE</name>
+  </developer>
+>>>>>>> work/devinlin/newnew
   <description>
     <p>An email client for Plasma, based on Akonadi.</p>
     <p xml:lang="ar">عميل بريد إلكتروني لبلازما يعتمد على أكونادي.</p>
@@ -149,6 +157,8 @@
   </categories>
   <provides>
     <binary>raven</binary>
+    <binary>ravend</binary>
+    <dbus type="user">org.kde.raven.daemon</dbus>
   </provides>
-  <url type="homepage">https://invent.kde.org/devinlin/raven</url>
+  <url type="homepage">https://invent.kde.org/plasma-mobile/raven</url>
 </component>

@@ -1,0 +1,69 @@
+{
+    "id": "org.kde.raven",
+    "runtime": "org.kde.Platform",
+    "runtime-version": "6.10",
+    "sdk": "org.kde.Sdk",
+    "base": "io.qt.qtwebengine.BaseApp",
+    "base-version": "6.10",
+    "command": "raven",
+    "tags": ["nightly"],
+    "desktop-file-name-suffix": " (Nightly)",
+    "finish-args": [
+        "--share=ipc",
+        "--share=network",
+        "--socket=fallback-x11",
+        "--socket=wayland",
+        "--device=dri",
+        "--talk-name=org.freedesktop.Notifications",
+        "--talk-name=org.freedesktop.portal.Background",
+        "--own-name=org.kde.raven.daemon"
+    ],
+    "separate-locales": false,
+    "sdk-extensions": [
+        "org.freedesktop.Sdk.Extension.rust-stable"
+    ],
+    "build-options": {
+        "append-path": "/usr/lib/sdk/rust-stable/bin",
+        "env": {
+            "RUST_BACKTRACE": "1",
+            "CARGO_NET_OFFLINE": "true",
+            "RUSTFLAGS": "--remap-path-prefix =../"
+        }
+    },
+    "cleanup": [
+        "/include",
+        "/lib/*.a",
+        "/lib/cmake",
+        "/lib/include",
+        "/lib/pkgconfig",
+        "/lib/*/cmake",
+        "/lib/*/include",
+        "/share/cmake"
+    ],
+
+    "modules": [
+        "flatpak/corrosion.json",
+        {
+            "name": "raven",
+            "buildsystem": "cmake-ninja",
+            "builddir": true,
+            "config-opts": [ "" ],
+            "build-options": {
+                "env": {
+                    "CARGO_HOME": "/run/build/raven/cargo"
+                }
+            },
+            "sources": [
+                {
+                    "type": "dir",
+                    "path": ".",
+                    "skip": [
+                        ".git"
+                    ]
+                },
+                "flatpak/generated-sources.json"
+            ]
+
+        }
+    ]
+}

@@ -62,10 +62,14 @@ Comment[sv]=Skicka och ta emot e-post
 Comment[tr]=E-posta gönderin ve alın
 Comment[uk]=Надсилання та одержання пошти
 Comment[zh_TW]=傳送和接收電子郵件
+<<<<<<< HEAD
 Version=1.0
+=======
+>>>>>>> work/devinlin/newnew
 Exec=raven
 Icon=org.kde.raven
 Type=Application
 Terminal=false
+SingleMainWindow=true
 Categories=Qt;KDE;Utility;
 X-KDE-FormFactor=desktop;tablet;handset;

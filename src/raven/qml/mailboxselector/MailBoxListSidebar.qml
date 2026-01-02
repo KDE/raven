@@ -1,0 +1,76 @@
+// SPDX-FileCopyrightText: 2022 Carl Schwan <carl@carlschwan.eu>
+// SPDX-FileCopyrightText: 2022-2025 Devin Lin <devin@kde.org>
+// SPDX-License-Identifier: LGPL-2.0-or-later
+
+import QtQuick
+import QtQuick.Controls as QQC2
+import QtQuick.Layouts
+
+import org.kde.kirigami as Kirigami
+
+Kirigami.GlobalDrawer {
+    id: root
+    title: i18n("Mail")
+    modal: !applicationWindow().isWidescreen || !pinSidebarButton.checked
+
+    Kirigami.Theme.colorSet: Kirigami.Theme.Window
+    Kirigami.Theme.inherit: false
+
+    topPadding: 0
+    leftPadding: 0
+    rightPadding: 0
+    bottomPadding: 0
+
+    contentItem: ColumnLayout {
+        spacing: 0
+
+        QQC2.ToolBar {
+            Layout.fillWidth: true
+            implicitHeight: applicationWindow().pageStack.globalToolBar.preferredHeight
+
+            RowLayout {
+                anchors.fill: parent
+
+                Kirigami.Heading {
+                    level: 1
+                    text: i18n("Mail")
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.leftMargin: Kirigami.Units.largeSpacing + Kirigami.Units.smallSpacing
+                }
+
+                QQC2.ToolButton {
+                    id: pinSidebarButton
+                    visible: applicationWindow().isWidescreen
+                    display: QQC2.ToolButton.IconOnly
+                    text: i18n("Pin Sidebar")
+                    icon.name: "pin"
+                    checkable: true
+                    checked: true
+                }
+                QQC2.ToolButton {
+                    display: QQC2.ToolButton.IconOnly
+                    text: i18n("Settings")
+                    icon.name: "settings-configure"
+                    onClicked: {
+                        if (applicationWindow().pageStack.layers.depth === 1) {
+                            applicationWindow().pageStack.layers.push(applicationWindow().getPage("SettingsPage"));
+                        }
+                    }
+                }
+            }
+        }
+
+        QQC2.ScrollView {
+            id: folderListView
+            implicitWidth: Kirigami.Units.gridUnit * 16
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            QQC2.ScrollBar.horizontal.policy: QQC2.ScrollBar.AlwaysOff
+            contentWidth: availableWidth
+            clip: true
+
+            contentItem: MailBoxList {}
+        }
+    }
+}

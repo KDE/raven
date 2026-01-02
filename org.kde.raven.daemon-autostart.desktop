@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: 2023 Devin Lin <devin@kde.org>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[Desktop Entry]
+Name=Raven
+Comment=Read and write email
+Exec=ravend
+Icon=org.kde.raven
+Type=Application
+Terminal=false
+Categories=Qt;KDE;Utility;

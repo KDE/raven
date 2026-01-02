@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: 2025 Devin Lin <devin@kde.org>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[Global]
+IconName=mail-unread
+Comment=Raven Mail Client
+Name=Raven
+
+[Event/newMail]
+Name=New Email
+Comment=A new email has arrived
+Action=Popup|Sound
+Sound=message-new-email
