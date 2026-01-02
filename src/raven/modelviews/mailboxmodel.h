@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 Devin Lin <devin@kde.org>
+// SPDX-FileCopyrightText: 2023-2025 Devin Lin <devin@kde.org>
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #pragma once
@@ -6,8 +6,11 @@
 #include <QObject>
 #include <QAbstractListModel>
 #include <QHash>
+#include <QSqlDatabase>
 
-#include "../libraven/models/folder.h"
+#include "../models/folder.h"
+
+#include <qqmlintegration.h>
 
 struct MailBoxEntry
 {
@@ -29,6 +32,8 @@ struct MailBoxNode
 class MailBoxModel : public QAbstractListModel
 {
     Q_OBJECT
+    QML_ELEMENT
+    QML_UNCREATABLE("MailBoxModel not creatable in QML")
 
 public:
     MailBoxModel(QObject *parent = nullptr);
@@ -43,6 +48,9 @@ public:
     };
 
     static MailBoxModel *self();
+
+    // Set the database connection to use for operations
+    void setDatabase(const QSqlDatabase &db);
 
     void load();
 
@@ -61,5 +69,6 @@ private:
     void flattenMailBoxTree(const MailBoxNode &node, QList<MailBoxEntry> &list);
     void insertMailBoxIntoTree(MailBoxNode &node, MailBoxEntry &entry, QStringList &ancestors, int level);
 
+    QSqlDatabase m_db;
     QList<MailBoxEntry> m_mailBoxes;
 };

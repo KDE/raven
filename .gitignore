@@ -5,3 +5,6 @@ build*
 .kdev4
 *.kdev4
 .clang-format
+.flatpak-builder
+
+src/rs/ravend/target

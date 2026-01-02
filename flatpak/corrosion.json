@@ -1,0 +1,30 @@
+{
+    "build-options": {
+        "env": {
+            "CARGO_HOME": "/run/build/corrosion/cargo"
+        }
+    },
+    "buildsystem": "cmake-ninja",
+    "cleanup": [
+        "/app"
+    ],
+    "config-opts": [
+        "-DCORROSION_INSTALL_EXECUTABLE=OFF",
+        "-DCORROSION_BUILD_TESTS=OFF",
+        "-DCORROSION_DEV_MODE=OFF"
+    ],
+    "name": "corrosion",
+    "sources": [
+        {
+            "sha256": "6bc02411e29183a896aa60c58db6819ec6cf57c08997481d0b0da9029356b529",
+            "type": "archive",
+            "url": "https://github.com/corrosion-rs/corrosion/archive/refs/tags/v0.5.2.tar.gz",
+            "x-checker-data": {
+                "type": "anitya",
+                "project-id": 242799,
+                "stable-only": true,
+                "url-template": "https://github.com/corrosion-rs/corrosion/archive/refs/tags/v0.5.2.tar.gz"
+            }
+        }
+    ]
+}

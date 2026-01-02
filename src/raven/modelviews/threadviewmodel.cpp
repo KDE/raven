@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "threadviewmodel.h"
-#include "../libraven/constants.h"
-#include "../libraven/accountmodel.h"
-#include "../libraven/utils.h"
+#include "constants.h"
+#include "accountmodel.h"
+#include "utils.h"
 
 #include <QDebug>
 #include <QSqlError>
@@ -20,6 +20,11 @@ ThreadViewModel *ThreadViewModel::self()
     return instance;
 }
 
+void ThreadViewModel::setDatabase(const QSqlDatabase &db)
+{
+    m_db = db;
+}
+
 void ThreadViewModel::loadThread(Thread *thread)
 {
     beginResetModel();
@@ -29,34 +34,85 @@ void ThreadViewModel::loadThread(Thread *thread)
     }
     m_messages.clear();
     m_messageContents.clear();
+    m_messageTo.clear();
+    m_messageCc.clear();
+    m_messageBcc.clear();
 
-    QSqlDatabase db = QSqlDatabase::database();
-    
-    QSqlQuery query{db};
-    
-    query.prepare(QStringLiteral("SELECT * FROM message LEFT JOIN message_body ON message.id = message_body.id WHERE message.threadId = ? AND message.accountId = ?"));
-    query.addBindValue(thread->id());
-    query.addBindValue(thread->accountId());
-    
-    if (!Utils::execWithLog(query, "fetching thread message list:")) {
-        qDebug() << query.executedQuery();
+    // Store current thread for refresh
+    m_currentThread = thread;
+
+    if (!thread) {
+        qWarning() << "ThreadViewModel::loadThread() - thread is null";
         endResetModel();
         return;
     }
 
-    // loop over folders fetched from db
-    while (query.next()) {
-        auto message = new Message(this, query);
-        m_messages.push_back(message);
-        QString content = query.value(QStringLiteral("message_body.value")).toString();
-        m_messageContents.push_back(content);
-        
-        m_messageTo.push_back(getContactsStr(message->to()));
-        m_messageCc.push_back(getContactsStr(message->cc()));
-        m_messageBcc.push_back(getContactsStr(message->bcc()));
+    if (!m_db.isOpen()) {
+        qWarning() << "ThreadViewModel::loadThread() - Database not open";
+        endResetModel();
+        return;
+    }
+
+    auto messagesWithBody = Message::fetchByThreadWithBody(m_db, thread->id(), thread->accountId(), this);
+
+    for (const auto &mwb : messagesWithBody) {
+        m_messages.push_back(mwb.message);
+        m_messageContents.push_back(mwb.bodyContent);
+
+        m_messageTo.push_back(getContactsStr(mwb.message->to()));
+        m_messageCc.push_back(getContactsStr(mwb.message->cc()));
+        m_messageBcc.push_back(getContactsStr(mwb.message->bcc()));
     }
 
     endResetModel();
+}
+
+void ThreadViewModel::refresh()
+{
+    if (m_currentThread) {
+        qDebug() << "ThreadViewModel: Refreshing current thread";
+        loadThread(m_currentThread);
+    }
+}
+
+void ThreadViewModel::updateMessages(const QStringList &messageIds)
+{
+    if (messageIds.isEmpty() || !m_db.isOpen() || m_messages.isEmpty()) {
+        return;
+    }
+
+    // Convert to set for faster lookup
+    QSet<QString> messageIdSet(messageIds.begin(), messageIds.end());
+
+    qDebug() << "ThreadViewModel: Checking" << messageIds.size() << "messages for updates";
+
+    // Check each message in our current view
+    for (int row = 0; row < m_messages.size(); ++row) {
+        Message *currentMsg = m_messages[row];
+        if (messageIdSet.contains(currentMsg->id())) {
+            // This message was updated, reload it from the database
+            Message *updatedMsg = Message::fetchById(m_db, currentMsg->id(), this);
+            if (updatedMsg) {
+                // Replace the message in our list
+                m_messages[row]->deleteLater();
+                m_messages[row] = updatedMsg;
+
+                // Update cached contact strings
+                m_messageTo[row] = getContactsStr(updatedMsg->to());
+                m_messageCc[row] = getContactsStr(updatedMsg->cc());
+                m_messageBcc[row] = getContactsStr(updatedMsg->bcc());
+
+                // Note: We don't update m_messageContents as body content rarely changes
+                // and fetching it would require a separate query
+
+                // Emit dataChanged for this specific row
+                QModelIndex idx = index(row, 0);
+                Q_EMIT dataChanged(idx, idx, {UnreadRole, StarredRole});
+
+                qDebug() << "ThreadViewModel: Updated message at row" << row << "(" << updatedMsg->subject() << ")";
+            }
+        }
+    }
 }
 
 int ThreadViewModel::rowCount(const QModelIndex &parent) const
@@ -74,6 +130,8 @@ QVariant ThreadViewModel::data(const QModelIndex &index, int role) const
 
     auto message = m_messages[index.row()];
     switch (role) {
+        case MessageRole:
+            return QVariant::fromValue(message);
         case SubjectRole:
             return message->subject();
         case FromRole:
@@ -106,7 +164,7 @@ Qt::ItemFlags ThreadViewModel::flags(const QModelIndex &index) const
 
 QHash<int, QByteArray> ThreadViewModel::roleNames() const
 {
-    return {{SubjectRole, "subject"}, {FromRole, "from"}, {ToRole, "to"}, {CcRole, "cc"}, {BccRole, "bcc"}, {IsPlaintextRole, "isPlaintext"}, {ContentRole, "content"}, {SnippetRole, "snippet"}, {UnreadRole, "unread"}, {DateRole, "date"}};
+    return {{MessageRole, "message"}, {SubjectRole, "subject"}, {FromRole, "from"}, {ToRole, "to"}, {CcRole, "cc"}, {BccRole, "bcc"}, {IsPlaintextRole, "isPlaintext"}, {ContentRole, "content"}, {SnippetRole, "snippet"}, {UnreadRole, "unread"}, {DateRole, "date"}};
 }
 
 QString ThreadViewModel::getContactsStr(QList<MessageContact *> contacts)
@@ -114,7 +172,7 @@ QString ThreadViewModel::getContactsStr(QList<MessageContact *> contacts)
     QString ret;
     for (int i = 0; i < contacts.count(); ++i) {
         auto contact = contacts[i];
-        
+
         if (i != 0) {
             ret += QStringLiteral(", ");
         }

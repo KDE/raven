@@ -1,0 +1,94 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+    "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<!--
+    SPDX-FileCopyrightText: 2025 Devin Lin <devin@kde.org>
+    SPDX-License-Identifier: GPL-3.0-or-later
+
+    D-Bus interface definition for the Raven email daemon.
+    This file is the single source of truth for the D-Bus API.
+
+    Code is generated from this file for both:
+    - Rust daemon (server): using zbus_xmlgen
+    - Qt client: using qt_add_dbus_interface
+-->
+<node name="/org/kde/raven/daemon">
+    <interface name="org.kde.raven.daemon">
+        <!-- Signals -->
+
+        <!-- Emitted when a database table is changed (for full UI reload) -->
+        <signal name="TableChanged">
+            <arg name="tableName" type="s" direction="out"/>
+        </signal>
+
+        <!-- Emitted when specific messages are updated (for targeted UI refresh) -->
+        <signal name="MessagesChanged">
+            <arg name="messageIds" type="as" direction="out"/>
+        </signal>
+
+        <!-- Account Management Methods -->
+
+        <!-- Delete an account and all its associated data -->
+        <method name="DeleteAccount">
+            <arg name="accountId" type="s" direction="in"/>
+            <arg name="success" type="b" direction="out"/>
+        </method>
+
+        <!-- Trigger a sync for a specific account (empty string for all) -->
+        <method name="TriggerSync">
+            <arg name="accountId" type="s" direction="in"/>
+            <arg name="success" type="b" direction="out"/>
+        </method>
+
+        <!-- Reload accounts list from filesystem -->
+        <method name="ReloadAccounts">
+            <arg name="success" type="b" direction="out"/>
+        </method>
+
+        <!-- Attachment Methods -->
+
+        <!-- Get the file path for a downloaded attachment -->
+        <method name="GetAttachmentPath">
+            <arg name="fileId" type="s" direction="in"/>
+            <arg name="path" type="s" direction="out"/>
+        </method>
+
+        <!-- Get all attachments for a message as JSON array -->
+        <method name="GetMessageAttachments">
+            <arg name="messageId" type="s" direction="in"/>
+            <arg name="attachmentsJson" type="s" direction="out"/>
+        </method>
+
+        <!-- Fetch an attachment from server and save to disk -->
+        <method name="FetchAttachment">
+            <arg name="fileId" type="s" direction="in"/>
+            <arg name="path" type="s" direction="out"/>
+        </method>
+
+        <!-- Message Action Methods -->
+
+        <!-- Mark messages as read -->
+        <method name="MarkAsRead">
+            <arg name="messageIds" type="as" direction="in"/>
+            <arg name="resultJson" type="s" direction="out"/>
+        </method>
+
+        <!-- Mark messages as unread -->
+        <method name="MarkAsUnread">
+            <arg name="messageIds" type="as" direction="in"/>
+            <arg name="resultJson" type="s" direction="out"/>
+        </method>
+
+        <!-- Set or unset the flagged (starred) status -->
+        <method name="SetFlagged">
+            <arg name="messageIds" type="as" direction="in"/>
+            <arg name="flagged" type="b" direction="in"/>
+            <arg name="resultJson" type="s" direction="out"/>
+        </method>
+
+        <!-- Move messages to trash -->
+        <method name="MoveToTrash">
+            <arg name="messageIds" type="as" direction="in"/>
+            <arg name="resultJson" type="s" direction="out"/>
+        </method>
+    </interface>
+</node>

@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "mailboxmodel.h"
-#include "../libraven/constants.h"
-#include "../libraven/accountmodel.h"
-#include "../libraven/utils.h"
+#include "constants.h"
+#include "accountmodel.h"
+#include "utils.h"
 
 #include <QDebug>
 #include <QSqlError>
@@ -12,13 +12,17 @@
 MailBoxModel::MailBoxModel(QObject *parent)
     : QAbstractListModel{parent}
 {
-    load();
 }
 
 MailBoxModel *MailBoxModel::self()
 {
     static MailBoxModel *instance = new MailBoxModel;
     return instance;
+}
+
+void MailBoxModel::setDatabase(const QSqlDatabase &db)
+{
+    m_db = db;
 }
 
 std::pair<MailBoxEntry, QStringList> MailBoxModel::folderToMailbox(Folder *folder)
@@ -140,28 +144,22 @@ QList<MailBoxEntry> MailBoxModel::initMailBoxes(const QList<Folder *> &folders)
 void MailBoxModel::load()
 {
     beginResetModel();
+    qDebug() << "MailBoxModel::load() - reloading";
 
     for (auto mailbox : m_mailBoxes) {
-        mailbox.folder->deleteLater();
+        if (mailbox.folder) {
+            mailbox.folder->deleteLater();
+        }
     }
     m_mailBoxes.clear();
 
-    QSqlDatabase db = QSqlDatabase::database();
-
-    QSqlQuery query;
-    query.prepare(QStringLiteral("SELECT * FROM ") + FOLDER_TABLE);
-
-    if (!Utils::execWithLog(query, "fetching folders")) {
+    if (!m_db.isOpen()) {
+        qWarning() << "MailBoxModel::load() - Database not open";
         endResetModel();
         return;
     }
 
-    // loop over folders fetched from db
-    QList<Folder *> folders;
-    while (query.next()) {
-        folders.push_back(new Folder(this, query));
-    }
-
+    QList<Folder *> folders = Folder::fetchAll(m_db, this);
     m_mailBoxes = initMailBoxes(folders);
 
     endResetModel();

@@ -1,0 +1,174 @@
+// SPDX-FileCopyrightText: 2023 Devin Lin <devin@kde.org>
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+#include "folder.h"
+#include "../constants.h"
+#include "../utils.h"
+
+#include <QUuid>
+#include <QJsonDocument>
+#include <QSqlError>
+
+Folder::Folder(QObject *parent, QString id, QString accountId)
+    : QObject{parent}
+    , m_id{id}
+    , m_accountId{accountId}
+    , m_createdAt{QDateTime::currentDateTime()}
+{}
+
+Folder::Folder(QObject *parent, const QSqlQuery &query)
+    : QObject{parent}
+    , m_id{query.value(QStringLiteral("id")).toString()}
+    , m_accountId{query.value(QStringLiteral("accountId")).toString()}
+    , m_path{query.value(QStringLiteral("path")).toString()}
+    , m_role{query.value(QStringLiteral("role")).toString()}
+    , m_createdAt{query.value(QStringLiteral("createdAt")).toDateTime()}
+    , m_localStatus{}
+    , m_status{}
+{
+    QJsonObject data = QJsonDocument::fromJson(query.value(QStringLiteral("data")).toString().toUtf8()).object();
+
+    m_localStatus = data[QStringLiteral("localStatus")].toObject();
+}
+
+QList<Folder*> Folder::fetchAll(QSqlDatabase &db, QObject *parent)
+{
+    QList<Folder*> folders;
+    QSqlQuery query{db};
+    query.prepare(QStringLiteral("SELECT * FROM ") + FOLDER_TABLE);
+
+    if (!Utils::execWithLog(query, "fetching all folders")) {
+        return folders;
+    }
+
+    while (query.next()) {
+        folders.push_back(new Folder(parent, query));
+    }
+    return folders;
+}
+
+QList<Folder*> Folder::fetchByAccountId(QSqlDatabase &db, const QString &accountId, QObject *parent)
+{
+    QList<Folder*> folders;
+    QSqlQuery query{db};
+    query.prepare(QStringLiteral("SELECT * FROM ") + FOLDER_TABLE + QStringLiteral(" WHERE accountId = :accountId"));
+    query.bindValue(QStringLiteral(":accountId"), accountId);
+
+    if (!Utils::execWithLog(query, "fetching folders by account")) {
+        return folders;
+    }
+
+    while (query.next()) {
+        folders.push_back(new Folder(parent, query));
+    }
+    return folders;
+}
+
+Folder* Folder::fetchById(QSqlDatabase &db, const QString &id, QObject *parent)
+{
+    QSqlQuery query{db};
+    query.prepare(QStringLiteral("SELECT * FROM ") + FOLDER_TABLE + QStringLiteral(" WHERE id = :id"));
+    query.bindValue(QStringLiteral(":id"), id);
+
+    if (!Utils::execWithLog(query, "fetching folder by id")) {
+        return nullptr;
+    }
+
+    if (query.next()) {
+        return new Folder(parent, query);
+    }
+    return nullptr;
+}
+
+void Folder::saveToDb(QSqlDatabase &db) const
+{
+    QJsonObject object;
+    object[QStringLiteral("localStatus")] = m_localStatus;
+
+    QSqlQuery query{db};
+    query.prepare(QStringLiteral("INSERT OR REPLACE INTO ") + FOLDER_TABLE +
+        QStringLiteral(" (id, accountId, data, path, role, createdAt)") +
+        QStringLiteral(" VALUES (:id, :accountId, :data, :path, :role, :createdAt)"));
+
+    query.bindValue(QStringLiteral(":id"), m_id);
+    query.bindValue(QStringLiteral(":accountId"), m_accountId);
+    query.bindValue(QStringLiteral(":data"), QString::fromUtf8(QJsonDocument(object).toJson(QJsonDocument::Compact)));
+    query.bindValue(QStringLiteral(":path"), m_path);
+    query.bindValue(QStringLiteral(":role"), m_role);
+    query.bindValue(QStringLiteral(":createdAt"), m_createdAt);
+    query.exec();
+}
+
+void Folder::deleteFromDb(QSqlDatabase &db) const
+{
+    db.transaction();
+
+    QSqlQuery query{db};
+
+    query.prepare(QStringLiteral("DELETE FROM ") + THREAD_FOLDER_TABLE + QStringLiteral(" WHERE folderId = ") + m_id);
+    Utils::execWithLog(query, "removing folder <-> thread connections");
+
+    query.prepare(QStringLiteral("DELETE FROM ") + FOLDER_TABLE + QStringLiteral(" WHERE id = ") + m_id);
+    Utils::execWithLog(query, "removing folder");
+
+    db.commit();
+}
+
+QString Folder::id() const
+{
+    return m_id;
+}
+
+QString Folder::accountId() const
+{
+    return m_accountId;
+}
+
+QString Folder::path() const
+{
+    return m_path;
+}
+
+void Folder::setPath(const QString &path)
+{
+    if (m_path != path) {
+        m_path = path;
+        Q_EMIT pathChanged();
+    }
+}
+
+QString Folder::role() const
+{
+    return m_role;
+}
+
+void Folder::setRole(const QString &role)
+{
+    if (m_role != role) {
+        m_role = role;
+        Q_EMIT roleChanged();
+    }
+}
+
+QDateTime Folder::createdAt() const
+{
+    return m_createdAt;
+}
+
+QString Folder::status() const
+{
+    return m_status;
+}
+
+void Folder::setStatus(const QString &status)
+{
+    if (m_status != status) {
+        m_status = status;
+        Q_EMIT statusChanged();
+    }
+}
+
+QJsonObject &Folder::localStatus()
+{
+    return m_localStatus;
+}

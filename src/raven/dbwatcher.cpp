@@ -1,12 +1,10 @@
-// SPDX-FileCopyrightText: 2023 Devin Lin <devin@kde.org>
+// SPDX-FileCopyrightText: 2023-2025 Devin Lin <devin@kde.org>
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "dbwatcher.h"
-#include "modelviews/mailboxmodel.h"
-#include "../libraven/constants.h"
+#include "constants.h"
 
-#include <QSqlDatabase>
-#include <QSqlDriver>
+#include <QDBusConnection>
 #include <QDebug>
 
 DBWatcher::DBWatcher(QObject *parent)
@@ -14,34 +12,48 @@ DBWatcher::DBWatcher(QObject *parent)
 {
 }
 
-DBWatcher *DBWatcher::self()
-{
-    static DBWatcher *instance = new DBWatcher;
-    return instance;
-}
-
 void DBWatcher::initWatcher()
 {
-    QSqlDatabase db = QSqlDatabase::database();
-    QSqlDriver *driver = db.driver();
+    m_interface = new OrgKdeRavenDaemonInterface(DBUS_SERVICE, DBUS_PATH, QDBusConnection::sessionBus());
 
-    connect(driver, QOverload<const QString &, QSqlDriver::NotificationSource, const QVariant &>::of(&QSqlDriver::notification), this, &DBWatcher::notificationSlot);
-
-    driver->subscribeToNotification(FOLDER_TABLE);
-    driver->subscribeToNotification(LABEL_TABLE);
-    driver->subscribeToNotification(MESSAGE_TABLE);
+    connect(m_interface, &OrgKdeRavenDaemonInterface::TableChanged, this, &DBWatcher::onTableChanged);
+    connect(m_interface, &OrgKdeRavenDaemonInterface::MessagesChanged, this, &DBWatcher::onMessagesChanged);
 }
 
-void DBWatcher::notificationSlot(const QString &name, QSqlDriver::NotificationSource source, const QVariant &payload)
+void DBWatcher::onTableChanged(const QString &tableName)
 {
-    qDebug() << "dbwatcher: event received:" << name << source << payload;
+    qDebug() << "DBWatcher: D-Bus signal received for table:" << tableName;
+    handleTableChange(tableName);
+}
 
-    if (name == FOLDER_TABLE) {
-        // reload folders
-        MailBoxModel::self()->load();
-    } else if (name == LABEL_TABLE) {
+void DBWatcher::onMessagesChanged(const QStringList &messageIds)
+{
+    qDebug() << "DBWatcher: MessagesChanged D-Bus signal received for" << messageIds.size() << "messages";
+    Q_EMIT specificMessagesChanged(messageIds);
 
-    } else if (name == MESSAGE_TABLE) {
-        // TODO
+    // Note: We intentionally do NOT emit messagesChanged() here.
+    // MessagesChanged with specific IDs is for flag updates (read/unread, starred),
+    // which don't add or remove threads. The specificMessagesChanged signal
+    // triggers targeted updateMessages() calls which handle flag updates properly.
+    // Emitting messagesChanged() would trigger smartRefresh() which is unnecessary
+    // and can cause issues if the DB query races with pending transactions.
+}
+
+void DBWatcher::handleTableChange(const QString &tableName)
+{
+    // Emit generic signal
+    Q_EMIT tableChanged(tableName);
+
+    // Emit specific signals
+    if (tableName == QStringLiteral("folder")) {
+        Q_EMIT foldersChanged();
+    } else if (tableName == QStringLiteral("thread")) {
+        Q_EMIT threadsChanged();
+    } else if (tableName == QStringLiteral("message")) {
+        Q_EMIT messagesChanged();
+    } else if (tableName == QStringLiteral("label")) {
+        Q_EMIT labelsChanged();
+    } else if (tableName == QStringLiteral("file")) {
+        Q_EMIT filesChanged();
     }
 }

@@ -1,3 +1,0 @@
-[D-BUS Service]
-Name=org.kde.ravend
-Exec=@CMAKE_INSTALL_PREFIX@/bin/ravend

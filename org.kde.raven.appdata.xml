@@ -6,84 +6,104 @@
 <component type="desktop-application">
   <id>org.kde.raven</id>
   <name>Mail</name>
+  <name xml:lang="ar">البريد</name>
   <name xml:lang="ca">Correu</name>
   <name xml:lang="ca-valencia">Correu</name>
+  <name xml:lang="cs">Pošta</name>
+  <name xml:lang="de">E-Mail</name>
   <name xml:lang="en-GB">Mail</name>
+  <name xml:lang="eo">Poŝto</name>
   <name xml:lang="es">Correo</name>
   <name xml:lang="eu">Posta</name>
   <name xml:lang="fi">Sähköposti</name>
   <name xml:lang="fr">Courriel</name>
+  <name xml:lang="gl">Correo</name>
+  <name xml:lang="he">דוא״ל</name>
   <name xml:lang="id">Mail</name>
+  <name xml:lang="is">Póstur</name>
   <name xml:lang="it">Posta</name>
   <name xml:lang="ka">ფოსტა</name>
+  <name xml:lang="ko">메일</name>
   <name xml:lang="nl">E-mail</name>
+  <name xml:lang="nn">E-post</name>
+  <name xml:lang="pl">Poczta</name>
   <name xml:lang="pt">E-mail</name>
   <name xml:lang="pt-BR">E-mail</name>
+  <name xml:lang="ro">Poștă</name>
   <name xml:lang="sk">Pošta</name>
   <name xml:lang="sl">Mail</name>
+  <name xml:lang="sv">E-post</name>
   <name xml:lang="tr">Posta</name>
   <name xml:lang="uk">Пошта</name>
-  <name xml:lang="x-test">xxMailxx</name>
+  <name xml:lang="zh-TW">郵件</name>
   <summary>Send and receive email</summary>
+  <summary xml:lang="ar">إرسال واستقبال البريد الإلكتروني</summary>
   <summary xml:lang="ca">Envia i rep correu electrònic</summary>
   <summary xml:lang="ca-valencia">Envia i rep correu electrònic</summary>
+  <summary xml:lang="cs">Posílat a přijímat e-maily</summary>
+  <summary xml:lang="de">E-Mails senden und empfangen</summary>
   <summary xml:lang="en-GB">Send and receive email</summary>
+  <summary xml:lang="eo">Sendi kaj ricevi retpoŝton</summary>
   <summary xml:lang="es">Enviar y recibir correo electrónico</summary>
   <summary xml:lang="eu">E-posta bidaltzea eta jasotzea</summary>
   <summary xml:lang="fi">Lähetä ja vastaanota sähköpostia		</summary>
   <summary xml:lang="fr">Envoyer et recevoir un courriel</summary>
+  <summary xml:lang="gl">Enviar e recibir correo electrónico</summary>
+  <summary xml:lang="he">שליחה וקבלה של הודעות דוא״ל</summary>
   <summary xml:lang="id">Kirim dan terima surat email</summary>
+  <summary xml:lang="is">Senda og taka við pósti</summary>
   <summary xml:lang="it">Invia e ricevi messaggi di posta elettronica</summary>
   <summary xml:lang="ka">ელფოსტის გაგზავნა და მიღება</summary>
+  <summary xml:lang="ko">이메일 주고받기</summary>
   <summary xml:lang="nl">E-mail verzenden en ontvangen</summary>
+  <summary xml:lang="nn">Send og ta imot e-post</summary>
+  <summary xml:lang="pl">Wysyłaj i odbieraj pocztę</summary>
   <summary xml:lang="pt">Enviar e receber e-mail</summary>
   <summary xml:lang="pt-BR">Enviar e receber e-mails</summary>
+  <summary xml:lang="ro">Trimite și primește poștă electronică</summary>
   <summary xml:lang="sk">Prijať a odoslať mail</summary>
   <summary xml:lang="sl">Pošiljaj in sprejemaj pošto</summary>
+  <summary xml:lang="sv">Skicka och ta emot e-post</summary>
   <summary xml:lang="tr">E-posta gönderin ve alın</summary>
   <summary xml:lang="uk">Надсилання та одержання пошти</summary>
-  <summary xml:lang="x-test">xxSend and receive emailxx</summary>
-  <metadata_license>A permissive license for this metadata, e.g. "FSFAP"</metadata_license>
-  <project_license>The license of this software as SPDX string, e.g. "GPL-3+"</project_license>
-  <developer_name>KDE Community</developer_name>
-  <developer_name xml:lang="ca">La comunitat KDE</developer_name>
-  <developer_name xml:lang="ca-valencia">La comunitat KDE</developer_name>
-  <developer_name xml:lang="en-GB">KDE Community</developer_name>
-  <developer_name xml:lang="es">La Comunidad KDE</developer_name>
-  <developer_name xml:lang="eu">KDE komunitatea</developer_name>
-  <developer_name xml:lang="fi">KDE-yhteisö</developer_name>
-  <developer_name xml:lang="fr">Communauté KDE</developer_name>
-  <developer_name xml:lang="id">KDE Community</developer_name>
-  <developer_name xml:lang="it">Comunità KDE</developer_name>
-  <developer_name xml:lang="ka">KDE-ის საზოგადოება</developer_name>
-  <developer_name xml:lang="nl">KDE-gemeenschap</developer_name>
-  <developer_name xml:lang="pt">Comunidade do KDE</developer_name>
-  <developer_name xml:lang="pt-BR">Comunidade KDE</developer_name>
-  <developer_name xml:lang="sk">KDE komunita</developer_name>
-  <developer_name xml:lang="sl">Skupnost KDE</developer_name>
-  <developer_name xml:lang="tr">KDE Topluluğu</developer_name>
-  <developer_name xml:lang="uk">Спільнота KDE</developer_name>
-  <developer_name xml:lang="x-test">xxKDE Communityxx</developer_name>
+  <summary xml:lang="zh-TW">傳送和接收文字電子郵件</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <developer id="kde.org">
+    <name translate="no">KDE</name>
+  </developer>
   <description>
     <p>An email client for Plasma, based on Akonadi.</p>
+    <p xml:lang="ar">عميل بريد إلكتروني لبلازما يعتمد على أكونادي.</p>
     <p xml:lang="ca">Un client de correu electrònic per al Plasma, basat en l'Akonadi.</p>
     <p xml:lang="ca-valencia">Un client de correu electrònic per a Plasma, basat en Akonadi.</p>
+    <p xml:lang="cs">Poštovní klient pro Plasma založený na Akonadi.</p>
+    <p xml:lang="de">Ein E-Mail-Programm für Plasma, basierend auf Akonadi.</p>
     <p xml:lang="en-GB">An email client for Plasma, based on Akonadi.</p>
+    <p xml:lang="eo">Retpoŝta kliento por Plasma, bazita sur Akonadi.</p>
     <p xml:lang="es">Un cliente de correo electrónico para Plasma basado en Akonadi.</p>
     <p xml:lang="eu">Akonadin oinarritutako Plasmarako e-posta bezero bat.</p>
     <p xml:lang="fi">Akonadiin perustuva sähköpostiohjelma Plasmaan.</p>
     <p xml:lang="fr">Un client de courriels pour Plasma, conçu à partir de Akonadi.</p>
+    <p xml:lang="gl">Un cliente de correo electrónico para Plasma, baseado en Akonadi.</p>
+    <p xml:lang="he">לקוח דוא״ל לפלזמה, מבוסס על Akonadi.</p>
     <p xml:lang="id">Sebuah klien untuk Plasma, berdasarkan pada Akonadi.</p>
+    <p xml:lang="is">Tölvupóstforrit fyrir Plasma, byggt á Akonadi.</p>
     <p xml:lang="it">Un client di posta per Plasma, basato su Akonadi.</p>
     <p xml:lang="ka">ელფოსტის კლიენტი Plasma-სთვის, დაფუძნებული Akonadi-ზე.</p>
+    <p xml:lang="ko">Akonadi를 사용하는 Plasma용 이메일 클라이언트입니다.</p>
     <p xml:lang="nl">Een e-mailclient voor Plasma, gebaseerd op Akonadi.</p>
+    <p xml:lang="nn">E-postprogram for Plasma, bygd på Akonadi.</p>
+    <p xml:lang="pl">Program pocztowy dla Plazmy, oparty na Akonadi.</p>
     <p xml:lang="pt">Um cliente de e-mail para o Plasma, baseado no Akonadi.</p>
     <p xml:lang="pt-BR">Um cliente de e-mail para o Plasma, baseado no Akonadi.</p>
+    <p xml:lang="ro">Client de poștă pentru Plasma, bazat pe Akonadi.</p>
     <p xml:lang="sk">E-mailový klient pre Plasmu, založený na Akonadi.</p>
     <p xml:lang="sl">Odjemalec e-pošte na osnovi Akonadi.</p>
+    <p xml:lang="sv">En e-postklient för Plasma, baserad på Akonadi.</p>
     <p xml:lang="tr">Akonadi tabanlı, Plasma için bir e-posta istemcisi.</p>
     <p xml:lang="uk">Клієнт електронної пошти для Плазми, засновано на Akonadi.</p>
-    <p xml:lang="x-test">xxAn email client for Plasma, based on Akonadi.xx</p>
+    <p xml:lang="zh-TW">一個 Plasma 用的電子郵件用戶端，基於 Akonadi。</p>
   </description>
   <launchable type="desktop-id">org.kde.raven.desktop</launchable>
   <recommends>
@@ -101,6 +121,8 @@
   </categories>
   <provides>
     <binary>raven</binary>
+    <binary>ravend</binary>
+    <dbus type="user">org.kde.raven.daemon</dbus>
   </provides>
-  <url type="homepage">https://invent.kde.org/devinlin/raven</url>
+  <url type="homepage">https://invent.kde.org/plasma-mobile/raven</url>
 </component>

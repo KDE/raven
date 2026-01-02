@@ -59,10 +59,9 @@ find_package(KF6 ${KF_MIN_VERSION} REQUIRED COMPONENTS
     KIO
     Wallet
     DBusAddons
+    Crash
     Config
 )
-
-find_package(KPim6Mime REQUIRED)
 
 find_package(QCoro${QT_MAJOR_VERSION} COMPONENTS Core DBus REQUIRED)
 qcoro_enable_coroutines()
@@ -91,14 +90,19 @@ add_definitions(-DQT_STRICT_ITERATORS)
 add_subdirectory(src)
 
 install(PROGRAMS org.kde.raven.desktop DESTINATION ${KDE_INSTALL_APPDIR})
-install(PROGRAMS org.kde.ravend-autostart.desktop DESTINATION ${KDE_INSTALL_AUTOSTARTDIR})
+install(PROGRAMS org.kde.raven.daemon-autostart.desktop DESTINATION ${KDE_INSTALL_AUTOSTARTDIR})
 install(FILES org.kde.raven.appdata.xml DESTINATION ${KDE_INSTALL_METAINFODIR})
 install(FILES org.kde.raven.svg DESTINATION ${KDE_INSTALL_FULL_ICONDIR}/hicolor/scalable/apps/)
 
-ecm_install_configured_files(INPUT org.kde.ravend.service.in DESTINATION ${KDE_INSTALL_DBUSSERVICEDIR} @ONLY)
+ecm_install_configured_files(INPUT org.kde.raven.daemon.service.in DESTINATION ${KDE_INSTALL_DBUSSERVICEDIR} @ONLY)
 
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
 
-file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES src/*.cpp src/*.h)
+file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES
+    src/*.cpp src/*.h
+)
+# Filter out Rust build artifacts
+list(FILTER ALL_CLANG_FORMAT_SOURCE_FILES EXCLUDE REGEX ".*/rs/.*target/.*")
+list(FILTER ALL_CLANG_FORMAT_SOURCE_FILES EXCLUDE REGEX ".*\\.cargo/.*")
 kde_clang_format(${ALL_CLANG_FORMAT_SOURCE_FILES})
 

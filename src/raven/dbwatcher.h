@@ -3,20 +3,41 @@
 
 #pragma once
 
+#include <QDBusConnection>
 #include <QObject>
-#include <QSqlDriver>
 
-// The static instance watches over database events to trigger updates in the UI.
+#include "ravendaemoninterface.h"
+
+// Watches for database change signals from the ravend daemon via D-Bus.
 class DBWatcher : public QObject
 {
     Q_OBJECT
-public:
-    DBWatcher(QObject *parent = nullptr);
 
-    static DBWatcher *self();
+public:
+    explicit DBWatcher(QObject *parent = nullptr);
 
     void initWatcher();
 
+Q_SIGNALS:
+    // Emitted when any table changes
+    void tableChanged(const QString &tableName);
+
+    // Specific database tables
+    void foldersChanged();
+    void threadsChanged();
+    void messagesChanged();
+    void labelsChanged();
+    void filesChanged();
+
+    // Emitted when specific messages are updated
+    void specificMessagesChanged(const QStringList &messageIds);
+
 public Q_SLOTS:
-    void notificationSlot(const QString &name, QSqlDriver::NotificationSource source, const QVariant &payload);
+    void onTableChanged(const QString &tableName);
+    void onMessagesChanged(const QStringList &messageIds);
+
+private:
+    void handleTableChange(const QString &tableName);
+
+    OrgKdeRavenDaemonInterface *m_interface = nullptr;
 };

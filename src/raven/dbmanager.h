@@ -5,21 +5,27 @@
 
 #include <QObject>
 #include <QSqlDatabase>
-#include <QSqlTableModel>
-#include <QHash>
+#include <QString>
 
-#include "../libraven/models/folder.h"
-#include "../libraven/utils.h"
-
+// Database manager for libraven.
+// Provides static methods to open and close database connections.
+// Does not use a singleton pattern - callers manage their own connections.
 class DBManager : public QObject
 {
     Q_OBJECT
 
 public:
-    DBManager(QObject *parent = nullptr);
+    explicit DBManager(QObject *parent = nullptr);
+    ~DBManager();
 
-    static DBManager *self();
+    // Open a database connection and return it.
+    // If connectionName is empty, a unique name will be generated.
+    // Caller is responsible for managing the connection lifecycle.
+    static QSqlDatabase openDatabase(const QString &connectionName = QString());
 
-    static void exec(QSqlQuery &query);
+    // Close a specific database connection.
+    static void closeDatabase(const QString &connectionName);
+
+    // Get the default database path.
+    static QString defaultDatabasePath();
 };
-

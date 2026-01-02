@@ -12,8 +12,25 @@
 #include <QObject>
 
 #include <KIO/Job>
-#include <KMime/HeaderParsing>
 #include <QUrl>
+
+// Simple email address parser
+struct EmailAddress {
+    QString localPart;
+    QString domain;
+
+    void parse(const QString &address) {
+        int atPos = address.indexOf(QLatin1Char('@'));
+        if (atPos > 0) {
+            localPart = address.left(atPos);
+            domain = address.mid(atPos + 1);
+        }
+    }
+
+    QString asString() const {
+        return localPart + QLatin1Char('@') + domain;
+    }
+};
 
 class QDomElement;
 class QDomDocument;
@@ -146,7 +163,7 @@ protected Q_SLOTS:
     void dataArrived(KIO::Job *, const QByteArray &data);
 
 private:
-    KMime::Types::AddrSpec mAddr; // emailaddress
+    EmailAddress mAddr; // emailaddress
     QString mPassword;
 
     // storage of the results

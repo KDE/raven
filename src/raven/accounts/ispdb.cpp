@@ -26,9 +26,7 @@ Ispdb::~Ispdb() = default;
 
 void Ispdb::setEmail(const QString &address)
 {
-    KMime::Types::Mailbox box;
-    box.fromUnicodeString(address);
-    mAddr = box.addrSpec();
+    mAddr.parse(address);
 }
 
 void Ispdb::setPassword(const QString &password)

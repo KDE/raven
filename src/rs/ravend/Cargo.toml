@@ -1,1 +1,76 @@
+# Copyright 2025 Devin Lin <devin@kde.org>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+[package]
+name = "ravend"
+version = "0.1.0"
+edition = "2021"
+authors = ["Devin Lin <devin@kde.org>"]
+description = "Raven mail daemon - background email sync service"
+license = "GPL-3.0-or-later"
+
+[[bin]]
+name = "ravend"
+path = "src/main.rs"
+
 [dependencies]
+# Database
+rusqlite = { version = "0.32", features = ["bundled"] }
+
+# IMAP - use sync version with native-tls
+imap = "2"
+imap-proto = "0.10"
+native-tls = "0.2"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Configuration
+dirs = "5"
+configparser = "3.1"
+
+# Logging
+log = "0.4"
+env_logger = "0.11"
+
+# Date/time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Unique IDs
+uuid = { version = "1", features = ["v4"] }
+
+# Error handling
+thiserror = "2"
+anyhow = "1"
+
+# C++/Rust FFI bridge
+cxx = "1.0"
+
+# Mail parsing
+mail-parser = "0.9"
+rfc2047-decoder = "1.0"
+
+# Base64 encoding/decoding
+base64 = "0.22"
+
+# OAuth2 support
+oauth2 = "4"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "blocking"] }
+
+# D-Bus support for IPC
+zbus = { version = "4", default-features = false, features = ["tokio"] }
+tokio = { version = "1", features = ["rt", "rt-multi-thread", "sync", "macros", "time"] }
+
+# Async stream utilities
+futures-util = "0.3"
+
+# System calls for thread priority
+libc = "0.2"
+
+[build-dependencies]
+cxx-build = "1.0"
+
+[profile.release]
+lto = true
+opt-level = 3
