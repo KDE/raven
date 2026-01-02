@@ -5,14 +5,13 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls as QQC2
+import QtWebEngine
+import QtWebChannel
 
 import org.kde.raven
 import org.kde.kirigami as Kirigami
-import org.kde.kitemmodels as KItemModels
 
-import './mailpartview'
-
-Kirigami.ScrollablePage {
+Kirigami.Page {
     id: root
 
     property string subject
@@ -25,8 +24,46 @@ Kirigami.ScrollablePage {
     topPadding: 0
     bottomPadding: 0
 
-    Kirigami.Theme.colorSet: Kirigami.Theme.Window
+    Kirigami.Theme.colorSet: Kirigami.Theme.View
     Kirigami.Theme.inherit: false
+
+    // Build CSS variables from Kirigami theme colors
+    function buildThemeCSS() {
+        return ":root {" +
+            " --background-color: " + Kirigami.Theme.backgroundColor + ";" +
+            " --alt-background-color: " + windowColorProxy.Kirigami.Theme.backgroundColor + ";" +
+            " --text-color: " + Kirigami.Theme.textColor + ";" +
+            " --secondary-text-color: " + Kirigami.Theme.disabledTextColor + ";" +
+            " --border-color: " + Qt.darker(Kirigami.Theme.backgroundColor, 1.2) + ";" +
+            " --accent-color: " + Kirigami.Theme.highlightColor + ";" +
+            " --link-color: " + Kirigami.Theme.linkColor + ";" +
+            " --hover-background: " + Qt.darker(Kirigami.Theme.backgroundColor, 1.2) + ";" +
+            "}";
+    }
+
+    Item {
+        id: windowColorProxy
+        Kirigami.Theme.colorSet: Kirigami.Theme.Window
+        Kirigami.Theme.inherit: false
+    }
+
+    // Update theme CSS on bridge
+    function updateTheme() {
+        threadBridge.themeCSS = buildThemeCSS();
+    }
+
+    // Update theme when Kirigami colors change
+    Connections {
+        target: Kirigami.Theme
+        function onBackgroundColorChanged() { updateTheme(); }
+        function onTextColorChanged() { updateTheme(); }
+        function onHighlightColorChanged() { updateTheme(); }
+        function onLinkColorChanged() { updateTheme(); }
+    }
+
+    Component.onCompleted: {
+        updateTheme();
+    }
 
     actions: [
         Kirigami.Action {
@@ -67,46 +104,66 @@ Kirigami.ScrollablePage {
         }
     ]
 
-    ColumnLayout {
-        spacing: 0
+    // Bridge for WebChannel communication
+    ThreadViewBridge {
+        id: threadBridge
+        WebChannel.id: "threadBridge"
+    }
 
-        QQC2.Label {
-            id: mailSubject
-            Layout.fillWidth: true
-            Layout.leftMargin: Kirigami.Units.largeSpacing * 2
-            Layout.rightMargin: Kirigami.Units.largeSpacing * 2
-            Layout.topMargin: Kirigami.Units.gridUnit
-            Layout.bottomMargin: Kirigami.Units.gridUnit
+    // WebChannel to expose bridge to JavaScript
+    WebChannel {
+        id: webChannel
+        registeredObjects: [threadBridge]
+    }
 
-            text: root.subject
-            maximumLineCount: 2
-            wrapMode: Text.Wrap
-            elide: Text.ElideRight
+    // WebEngineView fills the page
+    WebEngineView {
+        id: webView
+        anchors.fill: parent
 
-            font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.2
-        }
+        url: "qrc:///threadview/index.html"
+        webChannel: webChannel
 
+        settings.javascriptEnabled: true
+        settings.localContentCanAccessFileUrls: true
+        settings.localContentCanAccessRemoteUrls: false
+        settings.autoLoadImages: true
+        settings.pluginsEnabled: false
 
-        Repeater {
-            id: messageList
-            model: Raven.threadViewModel
+        backgroundColor: Kirigami.Theme.backgroundColor
 
-            delegate: MailViewer {
-                Layout.fillWidth: true
-                Layout.bottomMargin: Kirigami.Units.gridUnit * 2
-                message: model.message  // Pass message for attachment loading
-                subject: model.subject
-                from: model.from
-                to: model.to
-                sender: "" // TODO props.sender
-                dateTime: model.date
-                content: model.content
-                isPlaintext: model.isPlaintext
+        onLoadingChanged: function(loadingInfo) {
+            if (loadingInfo.status === WebEngineView.LoadSucceededStatus) {
+                if (root.thread) {
+                    threadBridge.loadThread(root.thread.id, root.thread.accountId)
+                }
             }
         }
 
-        Item {
-            Layout.preferredHeight: Kirigami.Units.gridUnit * 2
+        onNewWindowRequested: function(request) {
+            // Open new window requests in external browser
+            Qt.openUrlExternally(request.requestedUrl)
+        }
+
+        onNavigationRequested: function(request) {
+            // Allow navigation within our app
+            if (request.url.toString().startsWith("qrc:")) {
+                request.action = WebEngineNavigationRequest.AcceptRequest
+            } else if (request.url.toString().startsWith("file:")) {
+                // Allow local file access (for inline images)
+                request.action = WebEngineNavigationRequest.AcceptRequest
+            } else {
+                // Open external URLs in browser
+                request.action = WebEngineNavigationRequest.IgnoreRequest
+                Qt.openUrlExternally(request.url)
+            }
+        }
+    }
+
+    // Reload thread when thread property changes
+    onThreadChanged: {
+        if (thread && webView.loadProgress === 100) {
+            threadBridge.loadThread(thread.id, thread.accountId)
         }
     }
 }

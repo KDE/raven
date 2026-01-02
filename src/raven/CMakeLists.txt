@@ -17,6 +17,7 @@ set(raven_SRCS
     daemonstatus.cpp
     dbmanager.cpp
     dbwatcher.cpp
+    threadviewbridge.cpp
     utils.cpp
 
     modelviews/attachmentmodel.cpp
@@ -39,6 +40,16 @@ qt_add_dbus_interface(raven_SRCS
 
 add_executable(raven ${raven_SRCS})
 
+# Add thread view web resources
+qt_add_resources(raven "threadview"
+    PREFIX "/threadview"
+    BASE "resources/threadview"
+    FILES
+        resources/threadview/index.html
+        resources/threadview/threadview.css
+        resources/threadview/threadview.js
+)
+
 ecm_add_qml_module(raven URI org.kde.raven QML_FILES
     qml/accounts/AddAccountPage.qml
     qml/accounts/FormPasswordInputDelegate.qml
@@ -48,16 +59,10 @@ ecm_add_qml_module(raven URI org.kde.raven QML_FILES
     qml/mailboxselector/MailBoxList.qml
     qml/mailboxselector/MailBoxListSidebar.qml
 
-    qml/mailpartview/HtmlPart.qml
-    qml/mailpartview/TextPart.qml
-
-    qml/private/AttachmentDelegate.qml
-
     qml/AboutPage.qml
     qml/ConversationViewer.qml
     qml/FolderView.qml
     qml/MailDelegate.qml
-    qml/MailViewer.qml
     qml/Main.qml
     qml/SettingsPage.qml
 )
@@ -74,6 +79,8 @@ target_link_libraries(raven PRIVATE
     Qt::Sql
     Qt::Network
     Qt::DBus
+    Qt::WebChannel
+    Qt::WebEngineQuick
     KF6::I18n
     KF6::CoreAddons
     KF6::KIOCore

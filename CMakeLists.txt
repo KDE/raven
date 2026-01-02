@@ -46,7 +46,8 @@ find_package(Qt6 ${QT_MIN_VERSION} REQUIRED COMPONENTS
     QuickControls2
     Svg
     Sql
-    WebEngineWidgets
+    WebChannel
+    WebEngineQuick
 )
 
 find_package(KF6 ${KF_MIN_VERSION} REQUIRED COMPONENTS
@@ -101,7 +102,7 @@ file(GLOB_RECURSE ALL_CLANG_FORMAT_SOURCE_FILES
     src/*.cpp src/*.h
 )
 # Filter out Rust build artifacts
-list(FILTER ALL_CLANG_FORMAT_SOURCE_FILES EXCLUDE REGEX ".*/rs/.*target/.*")
+list(FILTER ALL_CLANG_FORMAT_SOURCE_FILES EXCLUDE REGEX ".*/target/.*")
 list(FILTER ALL_CLANG_FORMAT_SOURCE_FILES EXCLUDE REGEX ".*\\.cargo/.*")
 kde_clang_format(${ALL_CLANG_FORMAT_SOURCE_FILES})
 

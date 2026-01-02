@@ -10,6 +10,7 @@
 #include <QDebug>
 #include <QIcon>
 #include <QQuickStyle>
+#include <QtWebEngineQuick>
 
 #include <KCrash>
 #include <KLocalizedContext>
@@ -35,6 +36,9 @@
 
 Q_DECL_EXPORT int main(int argc, char *argv[])
 {
+    // Initialize QtWebEngine before QApplication
+    QtWebEngineQuick::initialize();
+
     // set default style
     if (qEnvironmentVariableIsEmpty("QT_QUICK_CONTROLS_STYLE")) {
         QQuickStyle::setStyle(QStringLiteral("org.kde.desktop"));

@@ -1,0 +1,317 @@
+/*
+ * SPDX-FileCopyrightText: 2025 Devin Lin <devin@kde.org>
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ * Thread View Styles - matches Kirigami/MailViewer appearance
+ * CSS variables (--background-color, etc.) are injected from Qt via themeCSS property
+ */
+
+* {
+    box-sizing: border-box;
+}
+
+/* Scrollbar styling to match system appearance */
+::-webkit-scrollbar {
+    width: 14px;
+    height: 14px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--background-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border: 3px solid var(--background-color);
+    border-radius: 7px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary-text-color);
+}
+
+::-webkit-scrollbar-corner {
+    background: var(--background-color);
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-color);
+    background-color: var(--background-color);
+}
+
+#thread-container {
+    max-width: 100%;
+    padding: 0;
+}
+
+#subject {
+    font-size: 1.4em;
+    font-weight: normal;
+    margin: 0;
+    padding: 16px 24px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+#messages {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* Message Card */
+.message-card {
+    background-color: var(--background-color);
+}
+
+/* Message Header */
+.message-header {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 24px;
+    background-color: var(--alt-background-color);
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+/* Allow text selection on header text content */
+.message-from,
+.message-date,
+.recipients-value,
+.message-snippet {
+    user-select: text;
+    cursor: text;
+}
+
+/* Keep collapse indicator non-selectable */
+.collapse-indicator,
+.recipients-label {
+    user-select: none;
+}
+
+/* Collapse double borders when a collapsed card precedes any card */
+.message-card.collapsed + .message-card .message-header {
+    border-top: none;
+}
+
+.message-header:hover {
+    background-color: var(--hover-background);
+}
+
+.message-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.message-from {
+    flex: 1;
+    font-weight: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.message-date {
+    color: var(--secondary-text-color);
+    font-size: 0.9em;
+    white-space: nowrap;
+}
+
+.message-recipients {
+    margin-top: 8px;
+    font-size: 0.9em;
+}
+
+.message-recipients-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.message-recipients-row:first-child {
+    margin-top: 0;
+}
+
+.recipients-label {
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.recipients-value {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Collapse indicator */
+.collapse-indicator {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--secondary-text-color);
+    transition: transform 0.2s ease;
+}
+
+.message-card:not(.collapsed) .collapse-indicator {
+    transform: rotate(90deg);
+}
+
+/* Collapsed state - only show snippet */
+.message-card.collapsed .message-recipients,
+.message-card.collapsed .message-content {
+    display: none;
+}
+
+.message-snippet {
+    display: none;
+    margin-top: 8px;
+    font-size: 0.9em;
+    color: var(--secondary-text-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.message-card.collapsed .message-snippet {
+    display: block;
+}
+
+/* Message Content */
+.message-content {
+    padding: 16px 24px;
+}
+
+.message-content-frame {
+    width: 100%;
+    border: none;
+    overflow: hidden;
+    display: block;
+}
+
+/* Plain text content */
+.message-plaintext {
+    white-space: pre-wrap;
+    font-family: inherit;
+    margin: 0;
+}
+
+/* Attachment Bar */
+.attachment-bar {
+    padding: 12px 24px;
+    background-color: var(--alt-background-color);
+    border-top: 1px solid var(--border-color);
+}
+
+.attachment-bar-header {
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.attachment-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.attachment-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.attachment-item:hover {
+    background-color: var(--hover-background);
+}
+
+.attachment-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.attachment-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.attachment-name {
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.attachment-size {
+    font-size: 0.8em;
+    color: var(--secondary-text-color);
+}
+
+.attachment-actions {
+    display: flex;
+    gap: 4px;
+    margin-left: 8px;
+}
+
+.attachment-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: var(--text-color);
+    opacity: 0.7;
+    transition: opacity 0.15s ease;
+}
+
+.attachment-btn:hover {
+    opacity: 1;
+}
+
+/* Links */
+a {
+    color: var(--link-color);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Loading state */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 48px;
+    color: var(--secondary-text-color);
+}
+
+/* Empty state */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    color: var(--secondary-text-color);
+    text-align: center;
+}
