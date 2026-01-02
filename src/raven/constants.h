@@ -10,11 +10,9 @@
 #include <QHash>
 #include <QMap>
 
-static const QString JOB_TABLE = QStringLiteral("job");
 static const QString MESSAGE_TABLE = QStringLiteral("message");
 static const QString THREAD_TABLE = QStringLiteral("thread");
 static const QString FOLDER_TABLE = QStringLiteral("folder");
-static const QString LABEL_TABLE = QStringLiteral("label");
 static const QString THREAD_REFERENCE_TABLE = QStringLiteral("thread_reference");
 static const QString THREAD_FOLDER_TABLE = QStringLiteral("thread_folder");
 static const QString MESSAGE_BODY_TABLE = QStringLiteral("message_body");

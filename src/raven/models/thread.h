@@ -31,7 +31,7 @@ class Thread : public QObject
     Q_PROPERTY(QList<MessageContact *> participants READ participants CONSTANT)
 
 public:
-    Thread(QObject *parent = nullptr, QString accountId = {}, QString subject = {}, QString gmailThreadId = {});
+    Thread(QObject *parent = nullptr, QString accountId = {}, QString subject = {});
     Thread(QObject *parent, const QSqlQuery &query);
 
     // Static fetch methods
@@ -49,9 +49,6 @@ public:
 
     QString accountId() const;
     void setAccountId(const QString &accountId);
-
-    QString gmailThreadId() const;
-    void setGmailThreadId(const QString &gmailThreadId);
 
     QString subject() const;
     void setSubject(const QString &subject);
@@ -80,7 +77,6 @@ private:
 
     QString m_id;
     QString m_accountId;
-    QString m_gmailThreadId;
 
     QString m_subject;
     QString m_snippet;

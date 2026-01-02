@@ -8,10 +8,7 @@
 #include <QtQml/qqmlregistration.h>
 
 #include <KConfigGroup>
-#include <KWallet>
 #include <KSharedConfig>
-
-using namespace KWallet;
 
 class Account : public QObject
 {
@@ -138,9 +135,11 @@ Q_SIGNALS:
     void smtpAuthenticationTypeChanged();
 
 private:
-    void setupWallet();
+    // D-Bus password helpers
+    QString readPasswordFromDaemon(const QString &key);
+    bool writePasswordToDaemon(const QString &key, const QString &password);
+
     KConfig *m_config = nullptr;
-    Wallet *m_wallet = nullptr;
 
     bool m_valid;
 

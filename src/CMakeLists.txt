@@ -5,6 +5,8 @@ add_subdirectory(liboauthproviders)
 add_subdirectory(raven)
 
 # Rust daemon (requires Corrosion)
-if(Corrosion_FOUND)
-    add_subdirectory(rs)
-endif()
+# Import the Rust crate using Corrosion
+corrosion_import_crate(MANIFEST_PATH ${CMAKE_CURRENT_SOURCE_DIR}/ravend/Cargo.toml)
+
+# Install the ravend binary
+install(PROGRAMS $<TARGET_FILE:ravend> DESTINATION ${KDE_INSTALL_BINDIR})

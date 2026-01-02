@@ -29,8 +29,6 @@ Message::Message(QObject *parent, const QSqlQuery &query)
     , m_replyTo{}
     , m_from{}
     , m_headerMessageId{query.value(QStringLiteral("headerMessageId")).toString()}
-    , m_gmailMessageId{query.value(QStringLiteral("gmailMessageId")).toString()}
-    , m_gmailThreadId{query.value(QStringLiteral("gmailThreadId")).toString()}
     , m_subject{query.value(QStringLiteral("subject")).toString()}
     , m_draft{query.value(QStringLiteral("draft")).toBool()}
     , m_unread{query.value(QStringLiteral("unread")).toBool()}
@@ -38,7 +36,6 @@ Message::Message(QObject *parent, const QSqlQuery &query)
     , m_date{query.value(QStringLiteral("date")).toDateTime()}
     , m_syncedAt{}
     , m_remoteUid{query.value(QStringLiteral("remoteUID")).toString()}
-    , m_labels{}
     , m_snippet{}
     , m_plaintext{}
 {
@@ -46,7 +43,6 @@ Message::Message(QObject *parent, const QSqlQuery &query)
 
     m_syncedAt = QDateTime::fromSecsSinceEpoch(json[QStringLiteral("syncedAt")].toDouble());
     m_from = new MessageContact{(QObject *) this, json[QStringLiteral("from")].toObject()};
-    m_labels = json[QStringLiteral("labels")].toVariant().toStringList();
 
     for (auto contact : json[QStringLiteral("to")].toArray()) {
         m_to.push_back(new MessageContact{(QObject *) this, contact.toObject()});
@@ -159,7 +155,6 @@ void Message::saveToDb(QSqlDatabase &db)
     QJsonObject json;
     json[QStringLiteral("syncedAt")] = m_syncedAt.toSecsSinceEpoch();
     json[QStringLiteral("from")] = m_from->toJson();
-    json[QStringLiteral("labels")] = QJsonArray::fromStringList(m_labels);
     json[QStringLiteral("to")] = to;
     json[QStringLiteral("cc")] = cc;
     json[QStringLiteral("bcc")] = bcc;
@@ -169,16 +164,14 @@ void Message::saveToDb(QSqlDatabase &db)
 
     QSqlQuery query{db};
     query.prepare(QStringLiteral("INSERT OR REPLACE INTO ") + MESSAGE_TABLE +
-        QStringLiteral(" (id, accountId, data, folderId, threadId, headerMessageId, gmailMessageId, gmailThreadId, subject, draft, unread, starred, date, remoteUID)") +
-        QStringLiteral(" VALUES (:id, :accountId, :data, :folderId, :threadId, :headerMessageId, :gmailMessageId, :gmailThreadId, :subject, :draft, :unread, :starred, :date, :remoteUID)"));
+        QStringLiteral(" (id, accountId, data, folderId, threadId, headerMessageId, subject, draft, unread, starred, date, remoteUID)") +
+        QStringLiteral(" VALUES (:id, :accountId, :data, :folderId, :threadId, :headerMessageId, :subject, :draft, :unread, :starred, :date, :remoteUID)"));
     query.bindValue(QStringLiteral(":id"), m_id);
     query.bindValue(QStringLiteral(":accountId"), m_accountId);
     query.bindValue(QStringLiteral(":data"), QString::fromUtf8(QJsonDocument(json).toJson(QJsonDocument::Compact)));
     query.bindValue(QStringLiteral(":folderId"), m_folderId);
     query.bindValue(QStringLiteral(":threadId"), m_threadId);
     query.bindValue(QStringLiteral(":headerMessageId"), m_headerMessageId);
-    query.bindValue(QStringLiteral(":gmailMessageId"), m_gmailMessageId);
-    query.bindValue(QStringLiteral(":gmailThreadId"), m_gmailThreadId);
     query.bindValue(QStringLiteral(":subject"), m_subject);
     query.bindValue(QStringLiteral(":draft"), m_draft);
     query.bindValue(QStringLiteral(":unread"), m_unread);
@@ -344,11 +337,6 @@ QString Message::remoteUid() const
 void Message::setRemoteUid(const QString &remoteUid)
 {
     m_remoteUid = remoteUid;
-}
-
-QStringList Message::labels() const
-{
-    return m_labels;
 }
 
 QString Message::snippet() const

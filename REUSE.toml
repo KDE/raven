@@ -1,0 +1,10 @@
+version = 1
+SPDX-PackageName = "raven"
+SPDX-PackageSupplier = "Devin Lin <devin@kde.org>"
+SPDX-PackageDownloadLocation = "https://invent.kde.org/plasma-mobile/raven"
+
+[[annotations]]
+path = ["**.json", "**.lock"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "KDE Community"
+SPDX-License-Identifier = "GPL-3.0-or-later"

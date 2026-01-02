@@ -68,7 +68,5 @@ private:
 
     // not SQL field
     QString m_status;
-
-    friend class Label;
 };
 

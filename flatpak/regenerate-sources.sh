@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2026 Devin Lin <devin@kde.org>
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 set -e
 
@@ -12,4 +14,4 @@ else
 	git -C flatpak-builder-tools pull
 fi
 
-./flatpak-builder-tools/cargo/flatpak-cargo-generator.py -o generated-sources.json ../src/rs/ravend/Cargo.lock
+./flatpak-builder-tools/cargo/flatpak-cargo-generator.py -o generated-sources.json ../src/ravend/Cargo.lock

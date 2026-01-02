@@ -83,8 +83,6 @@ public:
     QString remoteUid() const;
     void setRemoteUid(const QString &remoteUid);
 
-    QStringList labels() const;
-
     QString snippet() const;
     void setSnippet(const QString &snippet);
 
@@ -109,8 +107,6 @@ private:
     MessageContact *m_from;
 
     QString m_headerMessageId;
-    QString m_gmailMessageId;
-    QString m_gmailThreadId;
     QString m_subject;
     bool m_draft;
     bool m_unread;
@@ -120,7 +116,6 @@ private:
     QDateTime m_syncedAt;
 
     QString m_remoteUid;
-    QStringList m_labels; // only for GMail
 
     QString m_snippet;
     bool m_plaintext;

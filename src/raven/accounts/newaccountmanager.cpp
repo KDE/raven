@@ -12,10 +12,6 @@
 #include <QDBusConnection>
 #include <QDBusPendingReply>
 
-#include <KWallet>
-
-using KWallet::Wallet;
-
 NewAccountManager::NewAccountManager(QObject* parent)
     : QObject(parent)
     , m_ispdb{nullptr}

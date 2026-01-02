@@ -11,11 +11,10 @@
 #include <QJsonArray>
 #include <QSqlError>
 
-Thread::Thread(QObject *parent, QString accountId, QString subject, QString gmailThreadId)
+Thread::Thread(QObject *parent, QString accountId, QString subject)
     : QObject{parent}
     , m_id{QUuid::createUuid().toString(QUuid::Id128)}
     , m_accountId{accountId}
-    , m_gmailThreadId{gmailThreadId}
     , m_subject{subject}
     , m_snippet{}
     , m_unread{0}
@@ -31,7 +30,6 @@ Thread::Thread(QObject *parent, const QSqlQuery &query)
     : QObject{parent}
     , m_id{query.value(QStringLiteral("id")).toString()}
     , m_accountId{query.value(QStringLiteral("accountId")).toString()}
-    , m_gmailThreadId{query.value(QStringLiteral("gmailThreadId")).toString()}
     , m_subject{query.value(QStringLiteral("subject")).toString()}
     , m_snippet{query.value(QStringLiteral("snippet")).toString()}
     , m_unread{query.value(QStringLiteral("unread")).toInt()}
@@ -112,13 +110,12 @@ void Thread::saveToDb(QSqlDatabase &db) const
 
     QSqlQuery query{db};
     query.prepare(QStringLiteral("INSERT OR REPLACE INTO ") + THREAD_TABLE +
-        QStringLiteral(" (id, accountId, data, gmailThreadId, subject, snippet, unread, starred, firstMessageTimestamp, lastMessageTimestamp)") +
-        QStringLiteral(" VALUES (:id, :accountId, :data, :gmailThreadId, :subject, :snippet, :unread, :starred, :firstMessageTimestamp, :lastMessageTimestamp)"));
-    
+        QStringLiteral(" (id, accountId, data, subject, snippet, unread, starred, firstMessageTimestamp, lastMessageTimestamp)") +
+        QStringLiteral(" VALUES (:id, :accountId, :data, :subject, :snippet, :unread, :starred, :firstMessageTimestamp, :lastMessageTimestamp)"));
+
     query.bindValue(QStringLiteral(":id"), m_id);
     query.bindValue(QStringLiteral(":accountId"), m_accountId);
     query.bindValue(QStringLiteral(":data"), QString::fromUtf8(QJsonDocument(object).toJson(QJsonDocument::Compact)));
-    query.bindValue(QStringLiteral(":gmailThreadId"), m_gmailThreadId);
     query.bindValue(QStringLiteral(":subject"), m_subject);
     query.bindValue(QStringLiteral(":snippet"), m_snippet);
     query.bindValue(QStringLiteral(":unread"), m_unread);
@@ -228,16 +225,6 @@ QString Thread::accountId() const
 void Thread::setAccountId(const QString &accountId)
 {
     m_accountId = accountId;
-}
-
-QString Thread::gmailThreadId() const
-{
-    return m_gmailThreadId;
-}
-
-void Thread::setGmailThreadId(const QString &gmailThreadId)
-{
-    m_gmailThreadId = gmailThreadId;
 }
 
 QString Thread::subject() const

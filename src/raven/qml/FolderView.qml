@@ -43,7 +43,7 @@ Kirigami.ScrollablePage {
             anchors.centerIn: parent
             visible: Raven.selectedFolderName === ""
             text: i18n("No mailbox selected")
-            explanation: i18n("Select a mailbox from the sidebar.")
+            explanation: i18n("Select a mailbox from the sidebar")
             icon.name: "mail-unread"
         }
 

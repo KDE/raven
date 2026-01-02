@@ -4,28 +4,25 @@
 #include "account.h"
 #include "constants.h"
 #include "loggingsqlquery.h"
+#include "ravendaemoninterface.h"
 
+#include <QDBusConnection>
+#include <QDBusPendingReply>
 #include <QDir>
-
-#include <KWallet>
 
 const QString ACCOUNT_CONFIG_GROUP = QStringLiteral("Account");
 const QString METADATA_CONFIG_GROUP = QStringLiteral("Metadata");
 
 Account::Account(QObject *parent)
     : QObject{parent}
-    , m_wallet{Wallet::openWallet(Wallet::NetworkWallet(), 0)}
     , m_id{QUuid::createUuid().toString(QUuid::Id128)}
 {
-    setupWallet();
 }
 
 Account::Account(QObject *parent, KConfig *config)
     : QObject{parent}
     , m_config{config}
 {
-    setupWallet();
-
     auto metadata = KConfigGroup{config, METADATA_CONFIG_GROUP};
     m_valid = metadata.readEntry("valid", false);
     m_id = metadata.readEntry("id");
@@ -37,28 +34,50 @@ Account::Account(QObject *parent, KConfig *config)
     m_imapHost = group.readEntry("imapHost");
     m_imapPort = group.readEntry("imapPort", 0);
     m_imapUsername = group.readEntry("imapUsername");
-    m_wallet->readPassword(m_id + QStringLiteral("-imapPassword"), m_imapPassword);
+    m_imapPassword = readPasswordFromDaemon(m_id + QStringLiteral("-imapPassword"));
     m_imapAuthenticationType = (AuthenticationType) group.readEntry("imapAuthenticationType", 0);
     m_imapConnectionType = (ConnectionType) group.readEntry("imapConnectionType", 0);
 
     m_smtpHost = group.readEntry("smtpHost");
     m_smtpPort = group.readEntry("smtpPort", 0);
     m_smtpUsername = group.readEntry("smtpUsername");
-    m_wallet->readPassword(m_id + QStringLiteral("-smtpPassword"), m_smtpPassword);
+    m_smtpPassword = readPasswordFromDaemon(m_id + QStringLiteral("-smtpPassword"));
     m_smtpAuthenticationType = (AuthenticationType) group.readEntry("smtpAuthenticationType", 0);
     m_smtpConnectionType = (ConnectionType) group.readEntry("smtpConnectionType", 0);
 }
 
-void Account::setupWallet()
+QString Account::readPasswordFromDaemon(const QString &key)
 {
-    m_wallet = Wallet::openWallet(Wallet::NetworkWallet(), 0);
-
-    const QString folder = QStringLiteral("raven");
-
-    if (!m_wallet->hasFolder(folder)) {
-        m_wallet->createFolder(folder);
+    OrgKdeRavenDaemonInterface iface(DBUS_SERVICE, DBUS_PATH, QDBusConnection::sessionBus());
+    if (!iface.isValid()) {
+        qWarning() << "Failed to connect to daemon for password read";
+        return QString();
     }
-    m_wallet->setFolder(folder);
+
+    QDBusPendingReply<QString> reply = iface.ReadPassword(key);
+    reply.waitForFinished();
+    if (!reply.isValid()) {
+        qWarning() << "Failed to read password from daemon:" << reply.error().message();
+        return QString();
+    }
+    return reply.value();
+}
+
+bool Account::writePasswordToDaemon(const QString &key, const QString &password)
+{
+    OrgKdeRavenDaemonInterface iface(DBUS_SERVICE, DBUS_PATH, QDBusConnection::sessionBus());
+    if (!iface.isValid()) {
+        qWarning() << "Failed to connect to daemon for password write";
+        return false;
+    }
+
+    QDBusPendingReply<bool> reply = iface.WritePassword(key, password);
+    reply.waitForFinished();
+    if (!reply.isValid()) {
+        qWarning() << "Failed to write password to daemon:" << reply.error().message();
+        return false;
+    }
+    return reply.value();
 }
 
 QString Account::id() const
@@ -283,10 +302,8 @@ void Account::setOAuthTokenExpiry(qint64 expiry)
 
 void Account::setOAuthTokens(const QString &accessToken, const QString &refreshToken)
 {
-    if (m_wallet) {
-        m_wallet->writePassword(m_id + QStringLiteral("-oauthAccessToken"), accessToken);
-        m_wallet->writePassword(m_id + QStringLiteral("-oauthRefreshToken"), refreshToken);
-    }
+    writePasswordToDaemon(m_id + QStringLiteral("-oauthAccessToken"), accessToken);
+    writePasswordToDaemon(m_id + QStringLiteral("-oauthRefreshToken"), refreshToken);
 }
 
 bool Account::save(QString *errorOut)
@@ -346,15 +363,15 @@ bool Account::save(QString *errorOut)
 
     // IMAP password
     if (!m_imapPassword.isEmpty()) {
-        if (!m_wallet->writePassword(m_id + QStringLiteral("-imapPassword"), m_imapPassword)) {
-            qWarning() << "Failed to save IMAP password to KWallet for account" << m_id;
+        if (!writePasswordToDaemon(m_id + QStringLiteral("-imapPassword"), m_imapPassword)) {
+            qWarning() << "Failed to save IMAP password for account" << m_id;
         }
     }
 
     // SMTP password
     if (!m_smtpPassword.isEmpty()) {
-        if (!m_wallet->writePassword(m_id + QStringLiteral("-smtpPassword"), m_smtpPassword)) {
-            qWarning() << "Failed to save SMTP password to KWallet for account" << m_id;
+        if (!writePasswordToDaemon(m_id + QStringLiteral("-smtpPassword"), m_smtpPassword)) {
+            qWarning() << "Failed to save SMTP password for account" << m_id;
         }
     }
 
@@ -362,13 +379,11 @@ bool Account::save(QString *errorOut)
     // Just verify they exist if OAuth2 is enabled
     if (m_imapAuthenticationType == AuthenticationType::OAuth2 ||
         m_smtpAuthenticationType == AuthenticationType::OAuth2) {
-        QString oauthAccessToken;
-        QString oauthRefreshToken;
-        m_wallet->readPassword(m_id + QStringLiteral("-oauthAccessToken"), oauthAccessToken);
-        m_wallet->readPassword(m_id + QStringLiteral("-oauthRefreshToken"), oauthRefreshToken);
+        QString oauthAccessToken = readPasswordFromDaemon(m_id + QStringLiteral("-oauthAccessToken"));
+        QString oauthRefreshToken = readPasswordFromDaemon(m_id + QStringLiteral("-oauthRefreshToken"));
 
         if (oauthAccessToken.isEmpty() || oauthRefreshToken.isEmpty()) {
-            qWarning() << "OAuth2 authentication enabled but tokens not found in KWallet for account" << m_id;
+            qWarning() << "OAuth2 authentication enabled but tokens not found for account" << m_id;
         }
     }
 

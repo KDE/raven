@@ -57,7 +57,6 @@ find_package(KF6 ${KF_MIN_VERSION} REQUIRED COMPONENTS
     ItemModels
     KCMUtils
     KIO
-    Wallet
     DBusAddons
     Crash
     Config
@@ -71,7 +70,7 @@ find_package(KF6KirigamiAddons 0.6 REQUIRED)
 # For daemon
 find_package(Corrosion)
 set_package_properties(Corrosion PROPERTIES
-    TYPE RECOMMENDED
+    TYPE REQUIRED
     PURPOSE "Required to build the daemon"
     DESCRIPTION "CMake scripts to seamlessly build and link to targets using cargo"
     URL https://github.com/AndrewGaspar/corrosion

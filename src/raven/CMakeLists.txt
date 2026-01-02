@@ -9,7 +9,6 @@ set(raven_SRCS
     models/account.cpp
     models/file.cpp
     models/folder.cpp
-    models/label.cpp
     models/message.cpp
     models/messagecontact.cpp
     models/thread.cpp
@@ -78,7 +77,6 @@ target_link_libraries(raven PRIVATE
     KF6::I18n
     KF6::CoreAddons
     KF6::KIOCore
-    KF6::Wallet
     KF6::Crash
     KF6::ConfigCore
 

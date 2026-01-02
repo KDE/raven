@@ -67,47 +67,11 @@
   <summary xml:lang="tr">E-posta gönderin ve alın</summary>
   <summary xml:lang="uk">Надсилання та одержання пошти</summary>
   <summary xml:lang="zh-TW">傳送和接收文字電子郵件</summary>
-<<<<<<< HEAD
-  <metadata_license>A permissive license for this metadata, e.g. "FSFAP"</metadata_license>
-  <project_license>The license of this software as SPDX string, e.g. "GPL-3+"</project_license>
-  <developer_name>KDE Community</developer_name>
-  <developer_name xml:lang="ar">مجتمع كِيدِي</developer_name>
-  <developer_name xml:lang="ca">La comunitat KDE</developer_name>
-  <developer_name xml:lang="ca-valencia">La comunitat KDE</developer_name>
-  <developer_name xml:lang="cs">Komunita KDE</developer_name>
-  <developer_name xml:lang="de">KDE-Gemeinschaft</developer_name>
-  <developer_name xml:lang="en-GB">KDE Community</developer_name>
-  <developer_name xml:lang="eo">Komunumo de KDE</developer_name>
-  <developer_name xml:lang="es">La Comunidad KDE</developer_name>
-  <developer_name xml:lang="eu">KDE komunitatea</developer_name>
-  <developer_name xml:lang="fi">KDE-yhteisö</developer_name>
-  <developer_name xml:lang="fr">Communauté KDE</developer_name>
-  <developer_name xml:lang="gl">Comunidade KDE</developer_name>
-  <developer_name xml:lang="he">קהילת KDE</developer_name>
-  <developer_name xml:lang="id">KDE Community</developer_name>
-  <developer_name xml:lang="is">KDE-samfélagið</developer_name>
-  <developer_name xml:lang="it">Comunità KDE</developer_name>
-  <developer_name xml:lang="ka">KDE-ის საზოგადოება</developer_name>
-  <developer_name xml:lang="ko">KDE Community</developer_name>
-  <developer_name xml:lang="nl">KDE-gemeenschap</developer_name>
-  <developer_name xml:lang="nn">KDE-fellesskapet</developer_name>
-  <developer_name xml:lang="pl">Społeczność KDE</developer_name>
-  <developer_name xml:lang="pt">Comunidade do KDE</developer_name>
-  <developer_name xml:lang="pt-BR">Comunidade KDE</developer_name>
-  <developer_name xml:lang="ro">Comunitatea KDE</developer_name>
-  <developer_name xml:lang="sk">KDE komunita</developer_name>
-  <developer_name xml:lang="sl">Skupnost KDE</developer_name>
-  <developer_name xml:lang="sv">KDE-gemenskapen</developer_name>
-  <developer_name xml:lang="tr">KDE Topluluğu</developer_name>
-  <developer_name xml:lang="uk">Спільнота KDE</developer_name>
-  <developer_name xml:lang="zh-TW">KDE 社群</developer_name>
-=======
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
   <developer id="kde.org">
     <name translate="no">KDE</name>
   </developer>
->>>>>>> work/devinlin/newnew
   <description>
     <p>An email client for Plasma, based on Akonadi.</p>
     <p xml:lang="ar">عميل بريد إلكتروني لبلازما يعتمد على أكونادي.</p>

@@ -21,6 +21,23 @@ ListView {
 
     signal folderChosen()
 
+    Kirigami.PlaceholderMessage {
+        id: mailboxSelected
+        anchors.centerIn: parent
+        visible: mailList.count === 0
+        text: i18n("No folders")
+        icon.name: "mail-folder-inbox"
+        helpfulAction: Kirigami.Action {
+            text: i18n("Add Account")
+            icon.name: "list-add"
+            onTriggered: {
+                if (applicationWindow().pageStack.layers.depth === 1) {
+                    applicationWindow().pageStack.layers.push(applicationWindow().getPage("SettingsPage"));
+                }
+            }
+        }
+    }
+
     delegate: DelegateChooser {
         role: 'isCollapsible'
 

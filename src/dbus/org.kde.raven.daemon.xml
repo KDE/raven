@@ -90,5 +90,26 @@
             <arg name="messageIds" type="as" direction="in"/>
             <arg name="resultJson" type="s" direction="out"/>
         </method>
+
+        <!-- Secret Storage Methods -->
+
+        <!-- Read a password from the secure credential store -->
+        <method name="ReadPassword">
+            <arg name="key" type="s" direction="in"/>
+            <arg name="password" type="s" direction="out"/>
+        </method>
+
+        <!-- Write a password to the secure credential store -->
+        <method name="WritePassword">
+            <arg name="key" type="s" direction="in"/>
+            <arg name="password" type="s" direction="in"/>
+            <arg name="success" type="b" direction="out"/>
+        </method>
+
+        <!-- Delete a password from the secure credential store -->
+        <method name="DeletePassword">
+            <arg name="key" type="s" direction="in"/>
+            <arg name="success" type="b" direction="out"/>
+        </method>
     </interface>
 </node>
