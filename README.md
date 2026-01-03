@@ -21,6 +21,7 @@ For a full Akonadi based mail client, see [KMail](https://invent.kde.org/pim/kma
 ## Features
 * Fetching emails with IMAP (SSL/STARTTLS)
 * Viewing both plain text and HTML emails
+* View emails in a thread
 * IMAP IDLE for power-efficient push notifications
 * Incremental sync (only fetches new messages)
 * OAuth2 for Gmail/Outlook/Yahoo login
@@ -70,5 +71,7 @@ This project was created as a stopgap solution until KDE PIM is ready for mobile
 The backend architecture is heavily inspired by [Mailspring-Sync](https://github.com/Foundry376/Mailspring-Sync).
 
 ## TODO
+* Mailbox search
+* Infinite scroll (fetch more from inbox as you scroll down)
 * SMTP support
 * Other enterprise logins (Kerberos, GTLM, NSSAPI)

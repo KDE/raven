@@ -795,6 +795,19 @@
     {
         "type": "archive",
         "archive-type": "tar-gzip",
+        "url": "https://static.crates.io/crates/dbus-secret-service/dbus-secret-service-4.1.0.crate",
+        "sha256": "708b509edf7889e53d7efb0ffadd994cc6c2345ccb62f55cfd6b0682165e4fa6",
+        "dest": "cargo/vendor/dbus-secret-service-4.1.0"
+    },
+    {
+        "type": "inline",
+        "contents": "{\"package\": \"708b509edf7889e53d7efb0ffadd994cc6c2345ccb62f55cfd6b0682165e4fa6\", \"files\": {}}",
+        "dest": "cargo/vendor/dbus-secret-service-4.1.0",
+        "dest-filename": ".cargo-checksum.json"
+    },
+    {
+        "type": "archive",
+        "archive-type": "tar-gzip",
         "url": "https://static.crates.io/crates/dbus-tree/dbus-tree-0.9.2.crate",
         "sha256": "f456e698ae8e54575e19ddb1f9b7bce2298568524f215496b248eb9498b4f508",
         "dest": "cargo/vendor/dbus-tree-0.9.2"
@@ -1770,6 +1783,19 @@
     {
         "type": "archive",
         "archive-type": "tar-gzip",
+        "url": "https://static.crates.io/crates/keyring/keyring-3.6.3.crate",
+        "sha256": "eebcc3aff044e5944a8fbaf69eb277d11986064cba30c468730e8b9909fb551c",
+        "dest": "cargo/vendor/keyring-3.6.3"
+    },
+    {
+        "type": "inline",
+        "contents": "{\"package\": \"eebcc3aff044e5944a8fbaf69eb277d11986064cba30c468730e8b9909fb551c\", \"files\": {}}",
+        "dest": "cargo/vendor/keyring-3.6.3",
+        "dest-filename": ".cargo-checksum.json"
+    },
+    {
+        "type": "archive",
+        "archive-type": "tar-gzip",
         "url": "https://static.crates.io/crates/ksni/ksni-0.2.2.crate",
         "sha256": "4934310bdd016e55725482b8d35ac0c16fd058c1b955d8959aa2d953b918c85b",
         "dest": "cargo/vendor/ksni-0.2.2"
@@ -1869,6 +1895,19 @@
         "type": "inline",
         "contents": "{\"package\": \"7f78c730aaa7d0b9336a299029ea49f9ee53b0ed06e9202e8cb7db9bae7b8c82\", \"files\": {}}",
         "dest": "cargo/vendor/link-cplusplus-1.0.12",
+        "dest-filename": ".cargo-checksum.json"
+    },
+    {
+        "type": "archive",
+        "archive-type": "tar-gzip",
+        "url": "https://static.crates.io/crates/linux-keyutils/linux-keyutils-0.2.4.crate",
+        "sha256": "761e49ec5fd8a5a463f9b84e877c373d888935b71c6be78f3767fe2ae6bed18e",
+        "dest": "cargo/vendor/linux-keyutils-0.2.4"
+    },
+    {
+        "type": "inline",
+        "contents": "{\"package\": \"761e49ec5fd8a5a463f9b84e877c373d888935b71c6be78f3767fe2ae6bed18e\", \"files\": {}}",
+        "dest": "cargo/vendor/linux-keyutils-0.2.4",
         "dest-filename": ".cargo-checksum.json"
     },
     {
@@ -4573,6 +4612,19 @@
         "type": "inline",
         "contents": "{\"package\": \"b97154e67e32c85465826e8bcc1c59429aaaf107c1e4a9e53c8d8ccd5eff88d0\", \"files\": {}}",
         "dest": "cargo/vendor/zeroize-1.8.2",
+        "dest-filename": ".cargo-checksum.json"
+    },
+    {
+        "type": "archive",
+        "archive-type": "tar-gzip",
+        "url": "https://static.crates.io/crates/zeroize_derive/zeroize_derive-1.4.3.crate",
+        "sha256": "85a5b4158499876c763cb03bc4e49185d3cccbabb15b33c627f7884f43db852e",
+        "dest": "cargo/vendor/zeroize_derive-1.4.3"
+    },
+    {
+        "type": "inline",
+        "contents": "{\"package\": \"85a5b4158499876c763cb03bc4e49185d3cccbabb15b33c627f7884f43db852e\", \"files\": {}}",
+        "dest": "cargo/vendor/zeroize_derive-1.4.3",
         "dest-filename": ".cargo-checksum.json"
     },
     {

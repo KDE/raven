@@ -49,25 +49,6 @@ function updateTheme() {
     if (themeStyle) {
         themeStyle.textContent = themeCSS;
     }
-
-    // Update all message iframes with new theme
-    const iframes = document.querySelectorAll('.message-content-frame');
-    iframes.forEach(iframe => {
-        try {
-            const doc = iframe.contentDocument || iframe.contentWindow.document;
-            if (doc) {
-                let styleEl = doc.getElementById('theme-style');
-                if (!styleEl) {
-                    styleEl = doc.createElement('style');
-                    styleEl.id = 'theme-style';
-                    doc.head.appendChild(styleEl);
-                }
-                styleEl.textContent = themeCSS;
-            }
-        } catch (e) {
-            console.error('Failed to update iframe theme:', e);
-        }
-    });
 }
 
 // Render the thread with all messages
@@ -262,32 +243,20 @@ function createIframeContent(html) {
 <html>
 <head>
     <meta charset="UTF-8">
-    <style id="theme-style">${themeCSS}</style>
     <style>
         html, body {
             margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            font-size: 14px;
-            line-height: 1.5;
-            color: var(--text-color);
-            background-color: var(--background-color);
-            overflow: hidden;
+            padding: 16px 16px;
+            overflow-x: auto;
+            overflow-y: hidden;
         }
         img {
             max-width: 100%;
             height: auto;
         }
-        a {
-            color: var(--link-color);
-        }
         pre, code {
             white-space: pre-wrap;
             word-wrap: break-word;
-        }
-        /* Prevent any element from causing scrollbars */
-        * {
-            max-width: 100%;
         }
     </style>
 </head>
@@ -300,19 +269,34 @@ function resizeIframe(iframe) {
     try {
         const doc = iframe.contentDocument || iframe.contentWindow.document;
         if (doc && doc.body) {
-            // Get content height using multiple methods to ensure accuracy
+            // Temporarily set overflow visible to get accurate measurements
+            doc.body.style.overflowY = 'visible';
+            doc.documentElement.style.overflowY = 'visible';
+
+            // Get content dimensions using multiple methods to ensure accuracy
             const bodyHeight = doc.body.scrollHeight;
             const docHeight = doc.documentElement.scrollHeight;
             const bodyOffset = doc.body.offsetHeight;
             const docOffset = doc.documentElement.offsetHeight;
 
-            // Use the maximum of all measurements and add a small buffer
-            // to prevent any potential scrollbar from appearing
+            // Use the maximum of all measurements and add buffer for safety
             const height = Math.max(bodyHeight, docHeight, bodyOffset, docOffset);
-            iframe.style.height = Math.max(height + 2, 100) + 'px';
+            iframe.style.height = Math.max(height + 10, 100) + 'px';
+
+            // Restore overflow-y to hidden (overflow-x stays auto for horizontal scroll)
+            doc.body.style.overflowY = 'hidden';
+            doc.documentElement.style.overflowY = 'hidden';
 
             // Intercept link clicks
             interceptLinks(doc);
+
+            // Re-measure after images load
+            const images = doc.querySelectorAll('img');
+            images.forEach(img => {
+                if (!img.complete) {
+                    img.onload = () => resizeIframe(iframe);
+                }
+            });
         }
     } catch (e) {
         console.error('Failed to resize iframe:', e);

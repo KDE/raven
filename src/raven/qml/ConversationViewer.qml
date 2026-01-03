@@ -27,8 +27,14 @@ Kirigami.Page {
     Kirigami.Theme.colorSet: Kirigami.Theme.View
     Kirigami.Theme.inherit: false
 
+    // Check if current theme is dark based on background color luminance
+    function isDarkTheme() {
+        return Kirigami.ColorUtils.brightnessForColor(Kirigami.Theme.backgroundColor) === Kirigami.ColorUtils.Dark;
+    }
+
     // Build CSS variables from Kirigami theme colors
     function buildThemeCSS() {
+        let colorScheme = isDarkTheme() ? "dark" : "light"
         return ":root {" +
             " --background-color: " + Kirigami.Theme.backgroundColor + ";" +
             " --alt-background-color: " + windowColorProxy.Kirigami.Theme.backgroundColor + ";" +
@@ -37,7 +43,9 @@ Kirigami.Page {
             " --border-color: " + Qt.darker(Kirigami.Theme.backgroundColor, 1.2) + ";" +
             " --accent-color: " + Kirigami.Theme.highlightColor + ";" +
             " --link-color: " + Kirigami.Theme.linkColor + ";" +
-            " --hover-background: " + Qt.darker(Kirigami.Theme.backgroundColor, 1.2) + ";" +
+            " --hover-background: " + (colorScheme === "dark" ? Qt.lighter(windowColorProxy.Kirigami.Theme.backgroundColor, 1.2) : Qt.darker(windowColorProxy.Kirigami.Theme.backgroundColor, 1.1)) + ";" +
+            " --color-scheme: " + colorScheme + ";" +
+            " color-scheme: " + colorScheme + ";" +
             "}";
     }
 
@@ -129,6 +137,7 @@ Kirigami.Page {
         settings.localContentCanAccessRemoteUrls: false
         settings.autoLoadImages: true
         settings.pluginsEnabled: false
+        settings.forceDarkMode: isDarkTheme()
 
         backgroundColor: Kirigami.Theme.backgroundColor
 

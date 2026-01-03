@@ -6,11 +6,15 @@
  * CSS variables (--background-color, etc.) are injected from Qt via themeCSS property
  */
 
+:root {
+    color-scheme: var(--color-scheme, light dark);
+}
+
 * {
     box-sizing: border-box;
 }
 
-/* Scrollbar styling to match system appearance */
+/* Scrollbar styling to look somewhat more like the system */
 ::-webkit-scrollbar {
     width: 14px;
     height: 14px;
@@ -191,13 +195,14 @@ html, body {
 
 /* Message Content */
 .message-content {
-    padding: 16px 24px;
+    padding: 0;
 }
 
 .message-content-frame {
     width: 100%;
     border: none;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
     display: block;
 }
 
@@ -206,6 +211,7 @@ html, body {
     white-space: pre-wrap;
     font-family: inherit;
     margin: 0;
+    padding: 16px 16px;
 }
 
 /* Attachment Bar */
