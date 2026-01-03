@@ -86,7 +86,7 @@ void OAuthProviderRegistry::registerProviders() {
     m_providers.append({
         QStringLiteral("yahoo"),
         QStringLiteral("Yahoo"),
-        QStringLiteral(""), // TODO: Register app in Yahoo Developer Network and add client ID
+        QStringLiteral("dj0yJmk9ZFY5ZlZjYmV5YVI5JmQ9WVdrOWNVbHVZV1ZZUVhZbWNHbzlNQT09JnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PTQx"), // Client ID in Yahoo Developer Network
         QStringLiteral("https://api.login.yahoo.com/oauth2/request_auth"),
         QStringLiteral("https://api.login.yahoo.com/oauth2/get_token"),
         QStringLiteral("mail-w"),
