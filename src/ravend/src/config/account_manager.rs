@@ -5,6 +5,8 @@
 //!
 //! Reads account configurations from ~/.config/raven/accounts/{account_id}/account.ini
 //! Uses native Rust INI parsing. Passwords are stored via the secrets module.
+//!
+//! This module provides a global singleton AccountManager with atomic reloads.
 
 use crate::secrets;
 use crate::models::{Account, AuthenticationType, ConnectionType};
@@ -13,17 +15,52 @@ use configparser::ini::Ini;
 use log::{debug, info, warn};
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::sync::{Arc, OnceLock, RwLock};
+
+/// Global singleton instance
+static INSTANCE: OnceLock<AccountManager> = OnceLock::new();
 
 /// Account configuration manager
+///
+/// Provides thread-safe access to account configurations with atomic reloads.
+/// Use `AccountManager::global()` to access the singleton instance.
 pub struct AccountManager {
     config_dir: PathBuf,
+    /// Cached accounts list - atomically swapped on reload
+    accounts: Arc<RwLock<Vec<Account>>>,
 }
 
 impl AccountManager {
-    /// Create a new account manager
-    pub fn new(config_dir: &Path) -> Result<Self> {
+    /// Initialize the global account manager singleton
+    ///
+    /// Must be called once at startup before using `global()`.
+    /// Panics if called more than once.
+    pub fn init(config_dir: &Path) -> Result<()> {
+        let manager = Self {
+            config_dir: config_dir.to_path_buf(),
+            accounts: Arc::new(RwLock::new(Vec::new())),
+        };
+
+        INSTANCE.set(manager).map_err(|_| {
+            anyhow::anyhow!("AccountManager already initialized")
+        })?;
+
         info!("Initialized account manager with config dir: {}", config_dir.display());
-        Ok(Self { config_dir: config_dir.to_path_buf() })
+        Ok(())
+    }
+
+    /// Get the global account manager instance
+    ///
+    /// Panics if `init()` has not been called.
+    pub fn global() -> &'static AccountManager {
+        INSTANCE.get().expect("AccountManager not initialized - call init() first")
+    }
+
+    /// Get a clone of the current accounts list
+    ///
+    /// This is a cheap operation as Account is cloneable.
+    pub fn accounts(&self) -> Vec<Account> {
+        self.accounts.read().unwrap().clone()
     }
 
     /// Get the path to an account's config file
@@ -34,8 +71,26 @@ impl AccountManager {
             .join("account.ini")
     }
 
-    /// Load all configured accounts
-    pub fn load_accounts(&self) -> Result<Vec<Account>> {
+    /// Reload accounts from disk and atomically swap the cached list
+    ///
+    /// Returns the new list of accounts after the reload.
+    /// This operation is atomic - other threads will either see the old
+    /// list or the new list, never a partial state.
+    pub fn reload(&self) -> Result<Vec<Account>> {
+        let new_accounts = self.load_accounts_from_disk()?;
+
+        // Atomic swap - hold write lock only for the swap
+        {
+            let mut accounts = self.accounts.write().unwrap();
+            *accounts = new_accounts.clone();
+        }
+
+        info!("Reloaded {} accounts", new_accounts.len());
+        Ok(new_accounts)
+    }
+
+    /// Load all configured accounts from disk (internal, does not update cache)
+    fn load_accounts_from_disk(&self) -> Result<Vec<Account>> {
         let account_ids = self.list_accounts()?;
         let mut accounts = Vec::new();
 

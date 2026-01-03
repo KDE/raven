@@ -58,15 +58,13 @@ impl TableChange {
 /// D-Bus interface implementation for Raven daemon
 pub struct RavenDaemonDBus {
     db: Arc<Mutex<Database>>,
-    config_dir: PathBuf,
     notifier: DBusNotifier,
 }
 
 impl RavenDaemonDBus {
-    pub fn new(db: Arc<Mutex<Database>>, config_dir: PathBuf, notifier: DBusNotifier) -> Self {
+    pub fn new(db: Arc<Mutex<Database>>, notifier: DBusNotifier) -> Self {
         Self {
             db,
-            config_dir,
             notifier,
         }
     }
@@ -117,15 +115,7 @@ impl RavenDaemonDBus {
         }
 
         // Delete account config and secrets entries
-        let account_manager = match AccountManager::new(&self.config_dir) {
-            Ok(am) => am,
-            Err(e) => {
-                error!("Failed to create account manager: {}", e);
-                return false;
-            }
-        };
-
-        if let Err(e) = account_manager.delete_account(account_id) {
+        if let Err(e) = AccountManager::global().delete_account(account_id) {
             error!("Failed to delete account config: {}", e);
             return false;
         }
@@ -324,23 +314,8 @@ impl RavenDaemonDBus {
             }
         };
 
-        // Load account config
-        let account_manager = match AccountManager::new(&self.config_dir) {
-            Ok(am) => am,
-            Err(e) => {
-                error!("Failed to create account manager: {}", e);
-                return String::new();
-            }
-        };
-
-        let accounts = match account_manager.load_accounts() {
-            Ok(a) => a,
-            Err(e) => {
-                error!("Failed to load accounts: {}", e);
-                return String::new();
-            }
-        };
-
+        // Get account from cached list
+        let accounts = AccountManager::global().accounts();
         let account = match accounts.iter().find(|a| a.id == file.account_id) {
             Some(a) => a.clone(),
             None => {
@@ -404,11 +379,10 @@ impl RavenDaemonDBus {
     async fn mark_as_read(&self, message_ids: Vec<String>) -> String {
         info!("D-Bus: MarkAsRead called for {} messages", message_ids.len());
         let db = Arc::clone(&self.db);
-        let config_dir = self.config_dir.clone();
         let notifier = self.notifier.clone();
 
         let result = tokio::task::spawn_blocking(move || {
-            let result = imap::perform_flag_action(&db, &config_dir, &message_ids, FlagAction::MarkRead);
+            let result = imap::perform_flag_action(&db, &message_ids, FlagAction::MarkRead);
             if !result.succeeded.is_empty() {
                 notifier.notify_message_change();
             }
@@ -432,11 +406,10 @@ impl RavenDaemonDBus {
     async fn mark_as_unread(&self, message_ids: Vec<String>) -> String {
         info!("D-Bus: MarkAsUnread called for {} messages", message_ids.len());
         let db = Arc::clone(&self.db);
-        let config_dir = self.config_dir.clone();
         let notifier = self.notifier.clone();
 
         let result = tokio::task::spawn_blocking(move || {
-            let result = imap::perform_flag_action(&db, &config_dir, &message_ids, FlagAction::MarkUnread);
+            let result = imap::perform_flag_action(&db, &message_ids, FlagAction::MarkUnread);
             if !result.succeeded.is_empty() {
                 notifier.notify_message_change();
             }
@@ -462,11 +435,10 @@ impl RavenDaemonDBus {
         info!("D-Bus: SetFlagged({}) called for {} messages", flagged, message_ids.len());
         let action = if flagged { FlagAction::Flag } else { FlagAction::Unflag };
         let db = Arc::clone(&self.db);
-        let config_dir = self.config_dir.clone();
         let notifier = self.notifier.clone();
 
         let result = tokio::task::spawn_blocking(move || {
-            let result = imap::perform_flag_action(&db, &config_dir, &message_ids, action);
+            let result = imap::perform_flag_action(&db, &message_ids, action);
             if !result.succeeded.is_empty() {
                 notifier.notify_message_change();
             }
@@ -490,11 +462,10 @@ impl RavenDaemonDBus {
     async fn move_to_trash(&self, message_ids: Vec<String>) -> String {
         info!("D-Bus: MoveToTrash called for {} messages", message_ids.len());
         let db = Arc::clone(&self.db);
-        let config_dir = self.config_dir.clone();
         let notifier = self.notifier.clone();
 
         let result = tokio::task::spawn_blocking(move || {
-            let result = imap::move_to_trash(&db, &config_dir, &message_ids);
+            let result = imap::move_to_trash(&db, &message_ids);
             if !result.succeeded.is_empty() {
                 notifier.notify_message_change();
             }
@@ -651,7 +622,6 @@ impl From<zbus::Error> for DbusInitError {
 pub async fn run_dbus_service(
     mut receiver: mpsc::UnboundedReceiver<NotificationEvent>,
     db: Arc<Mutex<Database>>,
-    config_dir: PathBuf,
     notifier: DBusNotifier,
     reload_tx: mpsc::UnboundedSender<()>,
     sync_trigger_tx: mpsc::UnboundedSender<String>,
@@ -702,7 +672,7 @@ pub async fn run_dbus_service(
     }
 
     // Create and register the interface with database access
-    let dbus_iface = RavenDaemonDBus::new(db, config_dir, notifier);
+    let dbus_iface = RavenDaemonDBus::new(db, notifier);
     conn.object_server().at(DBUS_PATH, dbus_iface).await?;
 
     info!("D-Bus interface registered at {}", DBUS_PATH);

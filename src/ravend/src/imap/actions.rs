@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
 use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
 // ============================================================================
@@ -119,7 +119,6 @@ impl FlagAction {
 /// ActionResult with lists of succeeded and failed message IDs
 pub fn perform_flag_action(
     db: &Arc<Mutex<Database>>,
-    config_dir: &Path,
     message_ids: &[String],
     action: FlagAction,
 ) -> ActionResult {
@@ -159,28 +158,8 @@ pub fn perform_flag_action(
         grouped
     };
 
-    // Load accounts
-    let account_manager = match AccountManager::new(config_dir) {
-        Ok(am) => am,
-        Err(e) => {
-            let mut result = ActionResult::new();
-            for id in message_ids {
-                result.add_failure(id.clone(), format!("Failed to load accounts: {}", e));
-            }
-            return result;
-        }
-    };
-
-    let accounts = match account_manager.load_accounts() {
-        Ok(a) => a,
-        Err(e) => {
-            let mut result = ActionResult::new();
-            for id in message_ids {
-                result.add_failure(id.clone(), format!("Failed to load accounts: {}", e));
-            }
-            return result;
-        }
-    };
+    // Get accounts from cached list
+    let accounts = AccountManager::global().accounts();
 
     let mut result = ActionResult::new();
 
@@ -298,14 +277,12 @@ pub fn perform_flag_action(
 ///
 /// # Arguments
 /// * `db` - Database connection
-/// * `config_dir` - Path to configuration directory
 /// * `message_ids` - List of message IDs to move to trash
 ///
 /// # Returns
 /// ActionResult with lists of succeeded and failed message IDs
 pub fn move_to_trash(
     db: &Arc<Mutex<Database>>,
-    config_dir: &Path,
     message_ids: &[String],
 ) -> ActionResult {
     if message_ids.is_empty() {
@@ -354,28 +331,8 @@ pub fn move_to_trash(
         (grouped, trash_map)
     };
 
-    // Load accounts
-    let account_manager = match AccountManager::new(config_dir) {
-        Ok(am) => am,
-        Err(e) => {
-            let mut result = ActionResult::new();
-            for id in message_ids {
-                result.add_failure(id.clone(), format!("Failed to load accounts: {}", e));
-            }
-            return result;
-        }
-    };
-
-    let accounts = match account_manager.load_accounts() {
-        Ok(a) => a,
-        Err(e) => {
-            let mut result = ActionResult::new();
-            for id in message_ids {
-                result.add_failure(id.clone(), format!("Failed to load accounts: {}", e));
-            }
-            return result;
-        }
-    };
+    // Get accounts from cached list
+    let accounts = AccountManager::global().accounts();
 
     let mut result = ActionResult::new();
 

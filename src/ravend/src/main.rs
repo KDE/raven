@@ -80,7 +80,6 @@ async fn run_daemon() -> Result<()> {
     init_dbus_service(
         dbus_receiver,
         Arc::clone(&db),
-        config_dir.clone(),
         dbus_notifier.clone(),
         reload_tx,
         sync_trigger_tx,
@@ -91,12 +90,13 @@ async fn run_daemon() -> Result<()> {
 
     // Initialize tray (may fail if StatusNotifierWatcher is not available)
     let mut tray_quit_rx = tray::init();
-    let account_manager = AccountManager::new(&config_dir)?;
+
+    // Initialize global account manager
+    AccountManager::init(&config_dir)?;
     let mut workers: HashMap<String, WorkerHandle> = HashMap::new();
 
     info!("Loading initial accounts...");
     reload_accounts(
-        &account_manager,
         &mut workers,
         &db,
         &files_dir,
@@ -108,7 +108,7 @@ async fn run_daemon() -> Result<()> {
         tokio::select! {
             Some(_) = reload_rx.recv() => {
                 info!("Received account reload signal");
-                reload_accounts(&account_manager, &mut workers, &db, &files_dir, &dbus_notifier);
+                reload_accounts(&mut workers, &db, &files_dir, &dbus_notifier);
             }
             Some(account_id) = sync_trigger_rx.recv() => {
                 trigger_sync(&workers, &account_id);
@@ -136,7 +136,6 @@ async fn run_daemon() -> Result<()> {
 async fn init_dbus_service(
     dbus_receiver: tokio::sync::mpsc::UnboundedReceiver<dbus::NotificationEvent>,
     db: Arc<Mutex<Database>>,
-    config_dir: PathBuf,
     notifier: DBusNotifier,
     reload_tx: tokio::sync::mpsc::UnboundedSender<()>,
     sync_trigger_tx: tokio::sync::mpsc::UnboundedSender<String>,
@@ -147,7 +146,6 @@ async fn init_dbus_service(
         if let Err(e) = dbus::run_dbus_service(
             dbus_receiver,
             db,
-            config_dir,
             notifier,
             reload_tx,
             sync_trigger_tx,
@@ -189,13 +187,13 @@ async fn request_background_permission() {
 }
 
 fn reload_accounts(
-    account_manager: &AccountManager,
     workers: &mut HashMap<String, WorkerHandle>,
     db: &Arc<Mutex<Database>>,
     files_dir: &PathBuf,
     dbus_notifier: &DBusNotifier,
 ) {
-    let accounts = match account_manager.load_accounts() {
+    // Atomically reload accounts from disk
+    let accounts = match AccountManager::global().reload() {
         Ok(accounts) => accounts,
         Err(e) => {
             error!("Failed to load accounts: {}", e);

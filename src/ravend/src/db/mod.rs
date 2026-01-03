@@ -28,6 +28,10 @@ impl Database {
         // Enable WAL mode for better concurrency
         conn.execute_batch("PRAGMA journal_mode = WAL")?;
 
+        // Set busy timeout to wait up to 5 seconds if database is locked
+        // This prevents failures when the frontend is reading
+        conn.execute_batch("PRAGMA busy_timeout = 5000")?;
+
         Ok(Self { conn })
     }
 
