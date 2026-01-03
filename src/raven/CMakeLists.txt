@@ -86,6 +86,7 @@ target_link_libraries(raven PRIVATE
     KF6::KIOCore
     KF6::Crash
     KF6::ConfigCore
+    KF6::DBusAddons
 
     PkgConfig::UUID
 

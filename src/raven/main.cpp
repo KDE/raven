@@ -13,6 +13,7 @@
 #include <QtWebEngineQuick>
 
 #include <KCrash>
+#include <KDBusService>
 #include <KLocalizedContext>
 #include <KLocalizedString>
 
@@ -62,6 +63,8 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     KAboutData::setApplicationData(aboutData);
     KCrash::initialize();
 
+    KDBusService service(KDBusService::Unique);
+
     QQmlApplicationEngine engine;
 
     // Initialize models and set database connection
@@ -69,6 +72,18 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
     engine.loadFromModule(QStringLiteral("org.kde.raven"), QStringLiteral("Main"));
+
+    QQuickWindow *mainWindow = qobject_cast<QQuickWindow *>(engine.rootObjects().first());
+    Q_ASSERT(mainWindow);
+
+    QObject::connect(&service,
+                         &KDBusService::activateRequested,
+                         mainWindow,
+                         [mainWindow](const QStringList &arguments, const QString &workingDirectory) {
+                            Q_UNUSED(arguments);
+                            Q_UNUSED(workingDirectory);
+                            mainWindow->requestActivate();
+                         });
 
     // required for X11
     app.setWindowIcon(QIcon::fromTheme(QStringLiteral("org.kde.raven")));
