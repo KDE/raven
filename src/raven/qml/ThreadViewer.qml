@@ -88,6 +88,7 @@ Kirigami.Page {
             text: thread && thread.unread ? i18n("Mark as read") : i18n("Mark as unread")
             icon.name: thread && thread.unread ? "mail-mark-read" : "mail-mark-unread"
             enabled: Raven.daemonStatus.available
+            displayHint: Kirigami.DisplayHint.AlwaysHide
             onTriggered: {
                 if (thread) {
                     if (thread.unread) {
@@ -102,6 +103,7 @@ Kirigami.Page {
             text: i18n("Move to trash")
             icon.name: "albumfolder-user-trash"
             enabled: Raven.daemonStatus.available
+            displayHint: Kirigami.DisplayHint.AlwaysHide
             onTriggered: {
                 if (thread) {
                     Raven.mailListModel.moveThreadToTrash(thread)

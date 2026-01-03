@@ -104,6 +104,15 @@ void MailListModel::smartRefresh()
     // Fetch current threads from database
     auto dbThreads = Thread::fetchByFolder(m_db, m_currentFolder->id(), m_currentFolder->accountId(), this, 100);
 
+    // Safeguard: If database returns empty but we have threads, this is likely
+    // a transient database issue (lock, transaction conflict). Skip the refresh
+    // to avoid clearing the list incorrectly.
+    if (dbThreads.isEmpty() && !m_threads.isEmpty()) {
+        qWarning() << "MailListModel: Database returned empty but model has"
+                   << m_threads.size() << "threads - skipping refresh (possible DB lock)";
+        return;
+    }
+
     // Build sets for comparison
     QSet<QString> modelThreadIds;
     for (const auto *thread : m_threads) {
@@ -371,6 +380,10 @@ void MailListModel::markThreadAsRead(Thread *thread)
     if (!thread) {
         return;
     }
+
+    // Optimistically update UI immediately
+    optimisticMarkThreadRead(thread, true);
+
     auto messageIds = getMessageIdsForThread(thread);
     markAsRead(messageIds);
 }
@@ -380,6 +393,10 @@ void MailListModel::markThreadAsUnread(Thread *thread)
     if (!thread) {
         return;
     }
+
+    // Optimistically update UI immediately
+    optimisticMarkThreadRead(thread, false);
+
     auto messageIds = getMessageIdsForThread(thread);
     markAsUnread(messageIds);
 }
@@ -389,6 +406,10 @@ void MailListModel::setThreadFlagged(Thread *thread, bool flagged)
     if (!thread) {
         return;
     }
+
+    // Optimistically update UI immediately
+    optimisticSetThreadFlagged(thread, flagged);
+
     auto messageIds = getMessageIdsForThread(thread);
     setFlagged(messageIds, flagged);
 }
@@ -398,10 +419,15 @@ void MailListModel::moveThreadToTrash(Thread *thread)
     if (!thread) {
         return;
     }
-    auto messageIds = getMessageIdsForThread(thread);
 
-    // Send the D-Bus request - smartRefresh will handle removal when
-    // the daemon confirms the move via TableChanged signal
+    // Get message IDs before optimistic removal (thread will be deleted)
+    auto messageIds = getMessageIdsForThread(thread);
+    QString threadId = thread->id();
+
+    // Optimistically remove from UI immediately
+    removeThreadById(threadId);
+
+    // Send the D-Bus request
     moveToTrash(messageIds);
 }
 
@@ -419,6 +445,76 @@ void MailListModel::removeThreadById(const QString &threadId)
             break;
         }
     }
+}
+
+int MailListModel::findThreadRow(const QString &threadId) const
+{
+    for (int row = 0; row < m_threads.size(); ++row) {
+        if (m_threads[row]->id() == threadId) {
+            return row;
+        }
+    }
+    return -1;
+}
+
+void MailListModel::optimisticMarkThreadRead(Thread *thread, bool read)
+{
+    if (!thread) {
+        return;
+    }
+
+    int row = findThreadRow(thread->id());
+    if (row < 0) {
+        return;
+    }
+
+    // Update the thread's unread count optimistically
+    int oldUnread = thread->unread();
+    int newUnread = read ? 0 : 1; // Simplification: set to 0 if marking read, 1 if unread
+
+    if ((oldUnread > 0) == !read) {
+        // Already in the desired state
+        return;
+    }
+
+    thread->setUnread(newUnread);
+
+    // Emit dataChanged for this row
+    QModelIndex idx = index(row, 0);
+    Q_EMIT dataChanged(idx, idx, {UnreadRole});
+
+    qDebug() << "MailListModel: Optimistically updated thread" << thread->id()
+             << "unread:" << oldUnread << "->" << newUnread;
+}
+
+void MailListModel::optimisticSetThreadFlagged(Thread *thread, bool flagged)
+{
+    if (!thread) {
+        return;
+    }
+
+    int row = findThreadRow(thread->id());
+    if (row < 0) {
+        return;
+    }
+
+    // Update the thread's starred count optimistically
+    int oldStarred = thread->starred();
+    int newStarred = flagged ? 1 : 0;
+
+    if ((oldStarred > 0) == flagged) {
+        // Already in the desired state
+        return;
+    }
+
+    thread->setStarred(newStarred);
+
+    // Emit dataChanged for this row
+    QModelIndex idx = index(row, 0);
+    Q_EMIT dataChanged(idx, idx, {StarredRole});
+
+    qDebug() << "MailListModel: Optimistically updated thread" << thread->id()
+             << "starred:" << oldStarred << "->" << newStarred;
 }
 
 Folder* MailListModel::currentFolder() const

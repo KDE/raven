@@ -68,9 +68,16 @@ Kirigami.ScrollablePage {
             isRead: !model.unread
 
             onOpenMailRequested: {
+                // Mark as read
+                if (!model.unread) {
+                    Raven.mailListModel.markThreadAsRead(model.thread)
+                }
+
+                // Load thread into model
                 Raven.threadViewModel.loadThread(model.thread);
 
-                applicationWindow().pageStack.push(Qt.resolvedUrl('ConversationViewer.qml'), {
+                // Load thread page
+                applicationWindow().pageStack.push(Qt.resolvedUrl('ThreadViewer.qml'), {
                     subject: model.subject,
                     thread: model.thread
                 });

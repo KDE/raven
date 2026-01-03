@@ -84,6 +84,13 @@ private:
     QString getThreadFrom(Thread *thread);
     QStringList getMessageIdsForThread(Thread *thread);
 
+    // Find the row index for a thread ID, returns -1 if not found
+    int findThreadRow(const QString &threadId) const;
+
+    // Optimistic update helpers - update UI immediately, then sync with daemon
+    void optimisticMarkThreadRead(Thread *thread, bool read);
+    void optimisticSetThreadFlagged(Thread *thread, bool flagged);
+
     QSqlDatabase m_db;
     Folder *m_currentFolder = nullptr;
     QList<Thread *> m_threads;

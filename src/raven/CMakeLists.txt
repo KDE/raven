@@ -60,11 +60,11 @@ ecm_add_qml_module(raven URI org.kde.raven QML_FILES
     qml/mailboxselector/MailBoxListSidebar.qml
 
     qml/AboutPage.qml
-    qml/ConversationViewer.qml
     qml/FolderView.qml
     qml/MailDelegate.qml
     qml/Main.qml
     qml/SettingsPage.qml
+    qml/ThreadViewer.qml
 )
 
 target_link_libraries(raven PRIVATE
