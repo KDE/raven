@@ -1,11 +1,10 @@
 // Copyright 2025 Devin Lin <devin@kde.org>
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-//! Desktop notifications via D-Bus (org.freedesktop.Notifications)
+//! Cross-platform desktop notifications using notify-rust
 
 use log::info;
-use std::collections::HashMap;
-use zbus::blocking::Connection;
+use notify_rust::{Notification, Urgency};
 
 const BATCH_THRESHOLD: usize = 5;
 
@@ -15,31 +14,16 @@ pub fn init() {
 }
 
 fn send_notification(title: &str, body: &str) {
-    let conn = match Connection::session() {
-        Ok(c) => c,
-        Err(e) => {
-            log::warn!("Failed to connect to session bus: {}", e);
-            return;
-        }
-    };
-
-    let hints: HashMap<&str, zbus::zvariant::Value> = HashMap::from([
-        ("desktop-entry", zbus::zvariant::Value::from("org.kde.raven")),
-        ("urgency", zbus::zvariant::Value::from(1u8)), // Normal urgency
-        ("category", zbus::zvariant::Value::from("email.arrived")),
-    ]);
-
-    // expire_timeout: 0 means use server default, -1 means never expire
-    let result: Result<u32, _> = conn.call_method(
-        Some("org.freedesktop.Notifications"),
-        "/org/freedesktop/Notifications",
-        Some("org.freedesktop.Notifications"),
-        "Notify",
-        &("Raven Mail", 0u32, "org.kde.raven", title, body, Vec::<&str>::new(), hints, 0i32),
-    ).and_then(|reply| reply.body().deserialize());
+    let result = Notification::new()
+        .appname("Raven Mail")
+        .summary(title)
+        .body(body)
+        .icon("org.kde.raven")
+        .urgency(Urgency::Normal)
+        .show();
 
     match result {
-        Ok(id) => info!("Notification sent (ID: {}): {}", id, title),
+        Ok(handle) => info!("Notification sent (ID: {}): {}", handle.id(), title),
         Err(e) => log::warn!("Failed to send notification: {}", e),
     }
 }

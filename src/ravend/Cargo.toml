@@ -74,6 +74,9 @@ libc = "0.2"
 # Cross-platform secure credential storage
 keyring = { version = "3", features = ["linux-native-sync-persistent"] }
 
+# Cross-platform desktop notifications
+notify-rust = "4"
+
 [build-dependencies]
 cxx-build = "1.0"
 
