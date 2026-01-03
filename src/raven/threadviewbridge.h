@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <QMap>
 #include <QObject>
 #include <QSqlDatabase>
 
@@ -52,7 +53,12 @@ public:
 
 public Q_SLOTS:
     // Load a thread by ID - triggers threadLoaded signal when done
-    void loadThread(const QString &threadId, const QString &accountId);
+    // folderRole is used to determine if we should block attachment downloads (e.g., for spam)
+    void loadThread(const QString &threadId, const QString &accountId, const QString &folderRole = QString());
+
+private Q_SLOTS:
+    // Handle XDG portal file chooser response
+    void handlePortalResponse(uint response, const QVariantMap &results);
 
 Q_SIGNALS:
     // Emitted when thread data is loaded, contains JSON array of messages
@@ -74,10 +80,17 @@ private:
     // Format contacts list to string
     QString formatContacts(const QList<MessageContact*> &contacts) const;
 
+    // Check if current folder blocks attachment auto-download (spam/junk)
+    bool isSpamFolder() const;
+
     mutable QSqlDatabase m_db;
     QString m_themeCSS;
     QString m_currentThreadId;
     QString m_currentAccountId;
+    QString m_currentFolderRole;
     QList<Message*> m_messages;
     QStringList m_messageContents;
+
+    // Map of portal request path -> source file path for pending saves
+    QMap<QString, QString> m_pendingPortalSaves;
 };

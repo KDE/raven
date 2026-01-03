@@ -816,7 +816,9 @@ impl ImapWorker {
         db::upsert_message(db.conn(), &message)?;
 
         // Process and save attachments
-        let cid_replacements = self.process_attachments(db, &message_id, &parsed.attachments)?;
+        // Skip inline attachments for spam folders as a security measure
+        let is_spam_folder = folder.role == crate::models::FolderRole::Spam;
+        let cid_replacements = self.process_attachments(db, &message_id, &parsed.attachments, is_spam_folder)?;
 
         // Replace cid: URLs with file:// URLs in HTML body
         let body_content = if !parsed.html_body.is_empty() {
@@ -868,11 +870,13 @@ impl ImapWorker {
 
     /// Process attachments from a parsed message
     /// Returns a list of (content_id, file_url) pairs for cid: URL replacement
+    /// If is_spam_folder is true, inline attachments are not saved to disk (security measure)
     fn process_attachments(
         &self,
         db: &Database,
         message_id: &str,
         parsed_attachments: &[crate::models::ParsedAttachment],
+        is_spam_folder: bool,
     ) -> Result<Vec<(String, String)>> {
         if parsed_attachments.is_empty() {
             return Ok(Vec::new());
@@ -895,23 +899,37 @@ impl ImapWorker {
             // Convert ParsedAttachment to Attachment for database storage
             let mut attachment = parsed.to_attachment(&self.account.id, message_id);
 
-            // Save to disk if we have the data (small attachments)
-            if let Some(ref data) = parsed.data {
-                match self.save_attachment_to_disk(&attachment, data, &account_files_dir) {
-                    Ok(file_path) => {
-                        attachment.downloaded = true;
+            // Skip saving inline attachments for spam folders (security measure to prevent
+            // tracking pixels and potentially malicious content from being auto-loaded)
+            let should_save = if is_spam_folder && attachment.is_inline {
+                debug!(
+                    "[{}] Skipping inline attachment '{}' in spam folder",
+                    self.account.email, attachment.filename
+                );
+                false
+            } else {
+                true
+            };
 
-                        // If this is an inline attachment with a content ID, add to cid replacements
-                        if let Some(ref content_id) = attachment.content_id {
-                            let file_url = format!("file://{}", file_path.display());
-                            cid_replacements.push((content_id.clone(), file_url));
+            // Save to disk if we have the data (small attachments) and should save
+            if should_save {
+                if let Some(ref data) = parsed.data {
+                    match self.save_attachment_to_disk(&attachment, data, &account_files_dir) {
+                        Ok(file_path) => {
+                            attachment.downloaded = true;
+
+                            // If this is an inline attachment with a content ID, add to cid replacements
+                            if let Some(ref content_id) = attachment.content_id {
+                                let file_url = format!("file://{}", file_path.display());
+                                cid_replacements.push((content_id.clone(), file_url));
+                            }
                         }
-                    }
-                    Err(e) => {
-                        warn!(
-                            "[{}] Failed to save attachment '{}': {}",
-                            self.account.email, attachment.filename, e
-                        );
+                        Err(e) => {
+                            warn!(
+                                "[{}] Failed to save attachment '{}': {}",
+                                self.account.email, attachment.filename, e
+                            );
+                        }
                     }
                 }
             }

@@ -6,12 +6,14 @@
 #include "dbmanager.h"
 #include "ravendaemoninterface.h"
 
+#include <QDateTime>
 #include <QDBusConnection>
+#include <QDBusMessage>
 #include <QDBusPendingReply>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QFile>
-#include <QFileDialog>
+#include <QGuiApplication>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -19,6 +21,7 @@
 #include <QRegularExpression>
 #include <QStandardPaths>
 #include <QUrl>
+#include <QWindow>
 
 ThreadViewBridge::ThreadViewBridge(QObject *parent)
     : QObject(parent)
@@ -44,7 +47,7 @@ QString ThreadViewBridge::currentThreadId() const
     return m_currentThreadId;
 }
 
-void ThreadViewBridge::loadThread(const QString &threadId, const QString &accountId)
+void ThreadViewBridge::loadThread(const QString &threadId, const QString &accountId, const QString &folderRole)
 {
     // Clear previous data
     qDeleteAll(m_messages);
@@ -52,6 +55,7 @@ void ThreadViewBridge::loadThread(const QString &threadId, const QString &accoun
     m_messageContents.clear();
     m_currentThreadId = threadId;
     m_currentAccountId = accountId;
+    m_currentFolderRole = folderRole;
 
     if (threadId.isEmpty()) {
         Q_EMIT threadLoaded(QStringLiteral("[]"));
@@ -183,36 +187,64 @@ void ThreadViewBridge::saveAttachment(const QString &fileId)
         return;
     }
 
-    QString defaultDir = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
     QString fileName = file->fileName();
     delete file;
 
-    // Use non-static QFileDialog for proper portal support in Flatpak
-    // The portal grants write access to the selected location
-    QFileDialog *dialog = new QFileDialog(nullptr, tr("Save Attachment"), defaultDir, QString());
-    dialog->setAcceptMode(QFileDialog::AcceptSave);
-    dialog->selectFile(fileName);
-    dialog->setFileMode(QFileDialog::AnyFile);
-    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    // Get window handle for the portal
+    QString windowHandle;
+    QWindow *activeWindow = QGuiApplication::focusWindow();
+    if (activeWindow) {
+        // Wayland: use wayland handle, X11: use X11 window id
+        windowHandle = QStringLiteral("wayland:") + activeWindow->property("_q_waylandHandle").toString();
+        if (windowHandle == QStringLiteral("wayland:")) {
+            // Fallback for X11
+            windowHandle = QStringLiteral("x11:") + QString::number(activeWindow->winId());
+        }
+    }
 
-    // Connect to handle the result asynchronously (required for portal dialogs)
-    connect(dialog, &QFileDialog::fileSelected, this, [this, sourcePath](const QString &destPath) {
-        if (destPath.isEmpty()) {
+    // Use XDG Desktop Portal SaveFile via D-Bus
+    QDBusMessage msg = QDBusMessage::createMethodCall(
+        QStringLiteral("org.freedesktop.portal.Desktop"),
+        QStringLiteral("/org/freedesktop/portal/desktop"),
+        QStringLiteral("org.freedesktop.portal.FileChooser"),
+        QStringLiteral("SaveFile")
+    );
+
+    // Build options map
+    QVariantMap options;
+    options[QStringLiteral("handle_token")] = QStringLiteral("raven_save_%1").arg(QDateTime::currentMSecsSinceEpoch());
+    options[QStringLiteral("current_name")] = fileName;
+    options[QStringLiteral("current_folder")] = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation).toUtf8();
+
+    msg << windowHandle << tr("Save Attachment") << options;
+
+    QDBusPendingCall pendingCall = QDBusConnection::sessionBus().asyncCall(msg);
+    auto *watcher = new QDBusPendingCallWatcher(pendingCall, this);
+
+    connect(watcher, &QDBusPendingCallWatcher::finished, this, [this, sourcePath](QDBusPendingCallWatcher *w) {
+        QDBusPendingReply<QDBusObjectPath> reply = *w;
+        w->deleteLater();
+
+        if (reply.isError()) {
+            qWarning() << "Portal SaveFile call failed:" << reply.error().message();
             return;
         }
 
-        if (QFile::exists(destPath)) {
-            QFile::remove(destPath);
-        }
+        QString requestPath = reply.value().path();
 
-        if (!QFile::copy(sourcePath, destPath)) {
-            qWarning() << "Failed to save attachment to:" << destPath;
-        } else {
-            qDebug() << "Saved attachment to:" << destPath;
-        }
+        // Connect to the Response signal on the request object
+        QDBusConnection::sessionBus().connect(
+            QStringLiteral("org.freedesktop.portal.Desktop"),
+            requestPath,
+            QStringLiteral("org.freedesktop.portal.Request"),
+            QStringLiteral("Response"),
+            this,
+            SLOT(handlePortalResponse(uint, QVariantMap))
+        );
+
+        // Store the source path for when the response comes back
+        m_pendingPortalSaves[requestPath] = sourcePath;
     });
-
-    dialog->open();
 }
 
 QString ThreadViewBridge::downloadAttachment(const QString &fileId)
@@ -248,6 +280,12 @@ void ThreadViewBridge::openExternalUrl(const QString &url)
 
 QString ThreadViewBridge::processInlineImages(const QString &html, const QString &messageId) const
 {
+    // Don't auto-load inline images for spam folders as a security measure
+    // This prevents tracking pixels and potentially malicious content
+    if (isSpamFolder()) {
+        return html;
+    }
+
     QString processed = html;
 
     // Get attachments for this message
@@ -295,4 +333,74 @@ QString ThreadViewBridge::formatContacts(const QList<MessageContact*> &contacts)
         result += QStringLiteral("%1 <%2>").arg(contact->name(), contact->email());
     }
     return result;
+}
+
+bool ThreadViewBridge::isSpamFolder() const
+{
+    // Block auto-downloads for spam/junk folders as a security measure
+    return m_currentFolderRole == QStringLiteral("spam");
+}
+
+void ThreadViewBridge::handlePortalResponse(uint response, const QVariantMap &results)
+{
+    // Find the source path for the first pending save (signals come in order)
+    if (m_pendingPortalSaves.isEmpty()) {
+        return;
+    }
+
+    // Get the first pending save
+    auto it = m_pendingPortalSaves.begin();
+    QString requestPath = it.key();
+    QString sourcePath = it.value();
+    m_pendingPortalSaves.erase(it);
+
+    // Disconnect the signal for this request
+    QDBusConnection::sessionBus().disconnect(
+        QStringLiteral("org.freedesktop.portal.Desktop"),
+        requestPath,
+        QStringLiteral("org.freedesktop.portal.Request"),
+        QStringLiteral("Response"),
+        this,
+        SLOT(handlePortalResponse(uint, QVariantMap))
+    );
+
+    // Response 0 = success, 1 = user cancelled, 2 = other error
+    if (response != 0) {
+        if (response == 1) {
+            qDebug() << "User cancelled save dialog";
+        } else {
+            qWarning() << "Portal save failed with response:" << response;
+        }
+        return;
+    }
+
+    // Get the selected URIs
+    QStringList uris = results.value(QStringLiteral("uris")).toStringList();
+    if (uris.isEmpty()) {
+        qWarning() << "Portal returned no URIs";
+        return;
+    }
+
+    QString destUri = uris.first();
+    qDebug() << "Portal save destination:" << destUri;
+
+    // The portal returns a file:// URI - copy the file
+    QUrl destUrl(destUri);
+    if (!destUrl.isLocalFile()) {
+        qWarning() << "Portal returned non-local URI:" << destUri;
+        return;
+    }
+
+    QString destPath = destUrl.toLocalFile();
+
+    // Copy the file
+    if (QFile::exists(destPath)) {
+        QFile::remove(destPath);
+    }
+
+    if (!QFile::copy(sourcePath, destPath)) {
+        qWarning() << "Failed to copy attachment to:" << destPath;
+    } else {
+        qDebug() << "Saved attachment to:" << destPath;
+    }
 }

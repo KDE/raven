@@ -69,7 +69,7 @@ Kirigami.ScrollablePage {
 
             onOpenMailRequested: {
                 // Mark as read
-                if (!model.unread) {
+                if (model.unread) {
                     Raven.mailListModel.markThreadAsRead(model.thread)
                 }
 
@@ -79,7 +79,8 @@ Kirigami.ScrollablePage {
                 // Load thread page
                 applicationWindow().pageStack.push(Qt.resolvedUrl('ThreadViewer.qml'), {
                     subject: model.subject,
-                    thread: model.thread
+                    thread: model.thread,
+                    folderRole: Raven.mailListModel.currentFolder ? Raven.mailListModel.currentFolder.role : ""
                 });
             }
 

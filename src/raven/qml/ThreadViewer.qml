@@ -16,6 +16,7 @@ Kirigami.Page {
 
     property string subject
     property var thread
+    property string folderRole: ""
 
     Kirigami.ColumnView.interactiveResizeEnabled: true
 
@@ -146,7 +147,7 @@ Kirigami.Page {
         onLoadingChanged: function(loadingInfo) {
             if (loadingInfo.status === WebEngineView.LoadSucceededStatus) {
                 if (root.thread) {
-                    threadBridge.loadThread(root.thread.id, root.thread.accountId)
+                    threadBridge.loadThread(root.thread.id, root.thread.accountId, root.folderRole)
                 }
             }
         }
@@ -174,7 +175,7 @@ Kirigami.Page {
     // Reload thread when thread property changes
     onThreadChanged: {
         if (thread && webView.loadProgress === 100) {
-            threadBridge.loadThread(thread.id, thread.accountId)
+            threadBridge.loadThread(thread.id, thread.accountId, root.folderRole)
         }
     }
 }
