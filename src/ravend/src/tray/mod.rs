@@ -8,7 +8,7 @@
 //! - Right click: Shows a menu with Quit option
 
 use ksni::{menu::StandardItem, MenuItem, Tray, TrayService};
-use log::{error, info};
+use log::{error, info, warn};
 use std::process::Command;
 use tokio::sync::mpsc;
 
@@ -73,9 +73,45 @@ fn open_raven_client() {
     }
 }
 
+/// Check if StatusNotifierWatcher is available on D-Bus
+/// Uses dbus-send command to avoid blocking runtime issues with zbus
+fn is_status_notifier_watcher_available() -> bool {
+    let output = Command::new("dbus-send")
+        .args([
+            "--session",
+            "--dest=org.freedesktop.DBus",
+            "--type=method_call",
+            "--print-reply",
+            "/org/freedesktop/DBus",
+            "org.freedesktop.DBus.NameHasOwner",
+            "string:org.kde.StatusNotifierWatcher",
+        ])
+        .output();
+
+    match output {
+        Ok(output) => {
+            // Check if the response contains "boolean true"
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            stdout.contains("boolean true")
+        }
+        Err(e) => {
+            warn!("Failed to check StatusNotifierWatcher availability: {}", e);
+            false
+        }
+    }
+}
+
 /// Initialize the system tray icon
 /// Returns a receiver that signals when quit is requested
-pub fn init() -> mpsc::UnboundedReceiver<()> {
+/// Returns None if the tray could not be initialized (e.g., no StatusNotifierWatcher)
+pub fn init() -> Option<mpsc::UnboundedReceiver<()>> {
+    // Check if StatusNotifierWatcher is available before trying to use ksni
+    if !is_status_notifier_watcher_available() {
+        warn!("StatusNotifierWatcher not available, skipping system tray initialization");
+        warn!("On GNOME, install the AppIndicator extension for tray icon support");
+        return None;
+    }
+
     let (quit_tx, quit_rx) = mpsc::unbounded_channel();
 
     let tray = RavenTray { quit_tx };
@@ -84,5 +120,5 @@ pub fn init() -> mpsc::UnboundedReceiver<()> {
     TrayService::new(tray).spawn();
 
     info!("System tray icon initialized");
-    quit_rx
+    Some(quit_rx)
 }

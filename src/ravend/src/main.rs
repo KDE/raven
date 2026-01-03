@@ -89,6 +89,7 @@ async fn run_daemon() -> Result<()> {
 
     request_background_permission().await;
 
+    // Initialize tray (may fail if StatusNotifierWatcher is not available)
     let mut tray_quit_rx = tray::init();
     let account_manager = AccountManager::new(&config_dir)?;
     let mut workers: HashMap<String, WorkerHandle> = HashMap::new();
@@ -112,7 +113,12 @@ async fn run_daemon() -> Result<()> {
             Some(account_id) = sync_trigger_rx.recv() => {
                 trigger_sync(&workers, &account_id);
             }
-            _ = tray_quit_rx.recv() => {
+            Some(_) = async {
+                match &mut tray_quit_rx {
+                    Some(rx) => rx.recv().await,
+                    None => std::future::pending().await,
+                }
+            } => {
                 info!("Quit requested via system tray");
                 break;
             }
