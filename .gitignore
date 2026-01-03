@@ -6,6 +6,7 @@ build*
 *.kdev4
 .clang-format
 .flatpak-builder
+cmake-build
 flatpak/flatpak-builder-tools
 
 src/ravend/target
