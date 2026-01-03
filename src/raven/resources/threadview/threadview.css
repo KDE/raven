@@ -321,3 +321,29 @@ a:hover {
     color: var(--secondary-text-color);
     text-align: center;
 }
+
+/* Link tooltip at bottom of screen */
+#link-tooltip {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 6px 12px;
+    background-color: var(--alt-background-color);
+    border-top: 1px solid var(--border-color);
+    color: var(--secondary-text-color);
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0;
+    transform: translateY(100%);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+#link-tooltip.visible {
+    opacity: 1;
+    transform: translateY(0);
+}

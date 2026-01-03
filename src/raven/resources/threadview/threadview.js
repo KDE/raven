@@ -303,6 +303,23 @@ function resizeIframe(iframe) {
     }
 }
 
+// Show link tooltip at bottom of screen
+function showLinkTooltip(url) {
+    const tooltip = document.getElementById('link-tooltip');
+    if (tooltip && url) {
+        tooltip.textContent = url;
+        tooltip.classList.add('visible');
+    }
+}
+
+// Hide link tooltip
+function hideLinkTooltip() {
+    const tooltip = document.getElementById('link-tooltip');
+    if (tooltip) {
+        tooltip.classList.remove('visible');
+    }
+}
+
 // Intercept link clicks to open in external browser
 function interceptLinks(doc) {
     const links = doc.querySelectorAll('a[href]');
@@ -313,6 +330,18 @@ function interceptLinks(doc) {
             if (href && bridge) {
                 bridge.openExternalUrl(href);
             }
+        };
+
+        // Show tooltip on hover
+        link.onmouseenter = function() {
+            const href = link.getAttribute('href');
+            if (href) {
+                showLinkTooltip(href);
+            }
+        };
+
+        link.onmouseleave = function() {
+            hideLinkTooltip();
         };
     });
 }
