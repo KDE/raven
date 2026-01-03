@@ -184,22 +184,35 @@ void ThreadViewBridge::saveAttachment(const QString &fileId)
     }
 
     QString defaultDir = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
-    QString suggestedPath = defaultDir + QStringLiteral("/") + file->fileName();
-
-    QString destPath = QFileDialog::getSaveFileName(nullptr, QStringLiteral("Save Attachment"), suggestedPath);
+    QString fileName = file->fileName();
     delete file;
 
-    if (destPath.isEmpty()) {
-        return;
-    }
+    // Use non-static QFileDialog for proper portal support in Flatpak
+    // The portal grants write access to the selected location
+    QFileDialog *dialog = new QFileDialog(nullptr, tr("Save Attachment"), defaultDir, QString());
+    dialog->setAcceptMode(QFileDialog::AcceptSave);
+    dialog->selectFile(fileName);
+    dialog->setFileMode(QFileDialog::AnyFile);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
 
-    if (QFile::exists(destPath)) {
-        QFile::remove(destPath);
-    }
+    // Connect to handle the result asynchronously (required for portal dialogs)
+    connect(dialog, &QFileDialog::fileSelected, this, [this, sourcePath](const QString &destPath) {
+        if (destPath.isEmpty()) {
+            return;
+        }
 
-    if (!QFile::copy(sourcePath, destPath)) {
-        qWarning() << "Failed to save attachment to:" << destPath;
-    }
+        if (QFile::exists(destPath)) {
+            QFile::remove(destPath);
+        }
+
+        if (!QFile::copy(sourcePath, destPath)) {
+            qWarning() << "Failed to save attachment to:" << destPath;
+        } else {
+            qDebug() << "Saved attachment to:" << destPath;
+        }
+    });
+
+    dialog->open();
 }
 
 QString ThreadViewBridge::downloadAttachment(const QString &fileId)

@@ -1952,19 +1952,6 @@
     {
         "type": "archive",
         "archive-type": "tar-gzip",
-        "url": "https://static.crates.io/crates/linux-keyutils/linux-keyutils-0.2.4.crate",
-        "sha256": "761e49ec5fd8a5a463f9b84e877c373d888935b71c6be78f3767fe2ae6bed18e",
-        "dest": "cargo/vendor/linux-keyutils-0.2.4"
-    },
-    {
-        "type": "inline",
-        "contents": "{\"package\": \"761e49ec5fd8a5a463f9b84e877c373d888935b71c6be78f3767fe2ae6bed18e\", \"files\": {}}",
-        "dest": "cargo/vendor/linux-keyutils-0.2.4",
-        "dest-filename": ".cargo-checksum.json"
-    },
-    {
-        "type": "archive",
-        "archive-type": "tar-gzip",
         "url": "https://static.crates.io/crates/linux-raw-sys/linux-raw-sys-0.11.0.crate",
         "sha256": "df1d3c3b53da64cf5760482273a98e575c651a67eec7f77df96b5b642de8f039",
         "dest": "cargo/vendor/linux-raw-sys-0.11.0"

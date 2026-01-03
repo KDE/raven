@@ -15,7 +15,10 @@
         "--socket=wayland",
         "--device=dri",
         "--talk-name=org.freedesktop.Notifications",
+        "--talk-name=org.freedesktop.secrets",
         "--talk-name=org.freedesktop.portal.Background",
+        "--talk-name=org.kde.StatusNotifierWatcher",
+        "--own-name=org.kde.StatusNotifierItem-2-1",
         "--own-name=org.kde.raven.daemon"
     ],
     "separate-locales": false,
