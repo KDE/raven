@@ -4,6 +4,11 @@
 [Global]
 IconName=mail-unread
 Comment=Raven Mail Client
+Comment[ca]=Client de correu Raven
+Comment[he]=לקוח דוא״ל Raven
+Comment[ka]=ელფოსტის კლიენტი Raven
+Comment[pt_BR]=Cliente de e-mail Raven
+Comment[sl]=Poštni odjemalec Raven
 Name=Raven
 Name[ar]=الغراف
 Name[ca]=Raven
@@ -37,6 +42,16 @@ Name[zh_TW]=Raven
 
 [Event/newMail]
 Name=New Email
+Name[ca]=Correu nou
+Name[he]=דוא״ל חדש
+Name[ka]=ახალი ელფოსტა
+Name[pt_BR]=Novo e-mail
+Name[sl]=Nova e-pošta
 Comment=A new email has arrived
+Comment[ca]=Ha arribat un correu electrònic nou
+Comment[he]=הודעת דוא״ל חדשה הגיעה
+Comment[ka]=შემოსულია ახალი ელფოსტა
+Comment[pt_BR]=Um novo e-mail chegou
+Comment[sl]=Prišla je nova e-pošta
 Action=Popup|Sound
 Sound=message-new-email
