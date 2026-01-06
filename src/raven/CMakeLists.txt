@@ -28,6 +28,8 @@ set(raven_SRCS
     accounts/ispdb.cpp
     accounts/newaccountmanager.cpp
     accounts/oauthmanager.cpp
+
+    oauthprovider.cpp
 )
 
 # Generate D-Bus interface from shared XML definition
@@ -48,6 +50,14 @@ qt_add_resources(raven "threadview"
         resources/threadview/index.html
         resources/threadview/threadview.css
         resources/threadview/threadview.js
+)
+
+# Embed OAuth providers JSON as Qt resource
+qt_add_resources(raven "oauth_providers"
+    PREFIX "/oauth"
+    BASE "${CMAKE_CURRENT_SOURCE_DIR}/.."
+    FILES
+        ../oauth_providers.json
 )
 
 ecm_add_qml_module(raven URI org.kde.raven QML_FILES
@@ -89,8 +99,6 @@ target_link_libraries(raven PRIVATE
     KF6::DBusAddons
 
     PkgConfig::UUID
-
-    liboauthproviders
 )
 
 target_include_directories(raven PRIVATE

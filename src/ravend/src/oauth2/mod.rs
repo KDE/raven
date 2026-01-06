@@ -13,7 +13,7 @@
 //! - Outlook (Microsoft)
 //! - Yahoo
 //!
-//! Provider configurations are sourced from the shared liboauthproviders C++ library
+//! Provider configurations are loaded from a shared JSON configuration file
 //! to avoid duplication between the Qt frontend and Rust backend.
 //!
 //! ## XOAUTH2 for IMAP/SMTP
@@ -25,10 +25,10 @@
 //! ```
 
 mod gmail;
-mod provider_bridge;
+mod providers;
 
 pub use gmail::RefreshedToken;
-pub use provider_bridge::{find_provider_by_id, find_provider_by_email};
+pub use providers::{find_provider_by_id, find_provider_by_email};
 
 use anyhow::{Context, Result};
 use log::{debug, info};

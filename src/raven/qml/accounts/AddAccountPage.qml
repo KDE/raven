@@ -125,7 +125,7 @@ Kirigami.ScrollablePage {
 
             FormCard.AbstractFormDelegate {
                 id: oauthDelegate
-                visible: newAccount.usesOAuth && newAccount.oauthProviderName.length > 0
+                visible: root.settingsDetected && newAccount.usesOAuth && newAccount.oauthProviderName.length > 0
                 background: null
                 Layout.fillWidth: true
                 contentItem: ColumnLayout {

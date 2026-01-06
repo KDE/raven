@@ -44,9 +44,6 @@ uuid = { version = "1", features = ["v4"] }
 thiserror = "2"
 anyhow = "1"
 
-# C++/Rust FFI bridge
-cxx = "1.0"
-
 # Mail parsing
 mail-parser = "0.9"
 rfc2047-decoder = "1.0"
@@ -77,9 +74,6 @@ keyring = { version = "3", features = ["sync-secret-service"] }
 
 # Cross-platform desktop notifications
 notify-rust = "4"
-
-[build-dependencies]
-cxx-build = "1.0"
 
 [profile.release]
 lto = true
