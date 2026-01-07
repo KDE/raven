@@ -11,11 +11,13 @@
 #include <QIcon>
 #include <QQuickStyle>
 #include <QtWebEngineQuick>
+#include <QCommandLineParser>
 
 #include <KCrash>
 #include <KDBusService>
 #include <KLocalizedContext>
 #include <KLocalizedString>
+#include <KWindowSystem>
 
 #include "models/account.h"
 #include "models/folder.h"
@@ -63,12 +65,28 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     KAboutData::setApplicationData(aboutData);
     KCrash::initialize();
 
+    // Parse command line arguments
+    QCommandLineParser parser;
+    aboutData.setupCommandLine(&parser);
+
+    QCommandLineOption openMessageOption(
+        QStringLiteral("open-message"),
+        i18n("Open a specific message by ID"),
+        QStringLiteral("message-id")
+    );
+    parser.addOption(openMessageOption);
+
+    parser.process(app);
+    aboutData.processCommandLine(&parser);
+
+    QString messageIdToOpen;
+    if (parser.isSet(openMessageOption)) {
+        messageIdToOpen = parser.value(openMessageOption);
+    }
+
     KDBusService service(KDBusService::Unique);
 
     QQmlApplicationEngine engine;
-
-    // Initialize models and set database connection
-    Raven::self();
 
     engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
     engine.loadFromModule(QStringLiteral("org.kde.raven"), QStringLiteral("Main"));
@@ -76,14 +94,39 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     QQuickWindow *mainWindow = qobject_cast<QQuickWindow *>(engine.rootObjects().first());
     Q_ASSERT(mainWindow);
 
+    Raven* ravenInstance = engine.singletonInstance<Raven *>("org.kde.raven", "Raven");
+
     QObject::connect(&service,
                          &KDBusService::activateRequested,
                          mainWindow,
-                         [mainWindow](const QStringList &arguments, const QString &workingDirectory) {
-                            Q_UNUSED(arguments);
+                         [mainWindow, ravenInstance](const QStringList &arguments, const QString &workingDirectory) {
                             Q_UNUSED(workingDirectory);
+
+                            // Parse arguments for second instance activation
+                            QCommandLineParser parser;
+                            QCommandLineOption openMessageOption(
+                                QStringLiteral("open-message"),
+                                QStringLiteral("Open a specific message by ID"),
+                                QStringLiteral("message-id")
+                            );
+                            parser.addOption(openMessageOption);
+                            parser.parse(arguments);
+
+                            if (parser.isSet(openMessageOption)) {
+                                QString messageId = parser.value(openMessageOption);
+                                qDebug() << "Secondary instance requested to open message:" << messageId;
+                                ravenInstance->openMessage(messageId);
+                            }
+
+                            // Raise and activate window
                             mainWindow->requestActivate();
+                            KWindowSystem::activateWindow(mainWindow);
                          });
+
+    // If we have a message to open, set it
+    if (!messageIdToOpen.isEmpty()) {
+        ravenInstance->openMessage(messageIdToOpen);
+    }
 
     // required for X11
     app.setWindowIcon(QIcon::fromTheme(QStringLiteral("org.kde.raven")));

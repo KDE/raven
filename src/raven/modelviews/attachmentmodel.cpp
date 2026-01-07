@@ -4,6 +4,7 @@
 #include "attachmentmodel.h"
 #include "ravendaemoninterface.h"
 #include "constants.h"
+#include "dbmanager.h"
 
 #include <QDBusConnection>
 #include <QDBusPendingReply>
@@ -16,6 +17,7 @@
 
 AttachmentModel::AttachmentModel(QObject *parent)
     : QAbstractListModel{parent}
+    , m_db{DBManager::openDatabase(QStringLiteral("attachmentModel"))}
 {
 }
 

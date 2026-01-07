@@ -46,11 +46,14 @@ void NewAccountManager::setEmail(const QString& email)
         Q_EMIT emailChanged();
         Q_EMIT oauthProviderNameChanged();  // Provider name depends on email
 
-        // Check if we have an OAuth provider for this email
-        bool hasOAuthProvider = OAuthManager::hasProviderForEmail(email);
-        if (m_usesOAuth != hasOAuthProvider) {
-            m_usesOAuth = hasOAuthProvider;
-            Q_EMIT usesOAuthChanged();
+        // Only check for OAuth provider if email is not empty
+        // This avoids accessing the singleton during early initialization
+        if (!email.isEmpty()) {
+            bool hasOAuthProvider = OAuthManager::hasProviderForEmail(email);
+            if (m_usesOAuth != hasOAuthProvider) {
+                m_usesOAuth = hasOAuthProvider;
+                Q_EMIT usesOAuthChanged();
+            }
         }
     }
 }

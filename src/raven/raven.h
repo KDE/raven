@@ -40,7 +40,8 @@ class Raven : public QObject
 public:
     Raven(QObject *parent = nullptr);
 
-    static Raven *self();
+    static Raven *instance();
+    static Raven *create(QQmlEngine *qmlEngine, QJSEngine *jsEngine);
 
     QString selectedFolderName() const;
     void setSelectedFolderName(QString folderName);
@@ -48,8 +49,11 @@ public:
     // Sync action (triggers daemon to sync with server)
     Q_INVOKABLE void triggerSyncForAccount(const QString &accountId = QString());
 
+    void openMessage(const QString &messageId);
+
 Q_SIGNALS:
     void selectedFolderNameChanged();
+    void openThreadRequested(Folder *folder, Thread *thread);
 
 private:
     AccountModel *m_accountModel = nullptr;
@@ -58,6 +62,8 @@ private:
     MailBoxModel *m_mailBoxModel = nullptr;
     MailListModel *m_mailListModel = nullptr;
     ThreadViewModel *m_threadViewModel = nullptr;
+
+    QSqlDatabase m_db;
 
     QString m_selectedFolderName;
 };

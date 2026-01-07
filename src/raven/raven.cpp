@@ -14,6 +14,7 @@ Raven::Raven(QObject *parent)
     , m_mailBoxModel{MailBoxModel::self()}
     , m_mailListModel{MailListModel::self()}
     , m_threadViewModel{ThreadViewModel::self()}
+    , m_db{DBManager::openDatabase(QStringLiteral("main"))}
 {
     // Try to activate daemon if not already running
     // D-Bus activation will auto-start it via the .service file
@@ -21,18 +22,9 @@ Raven::Raven(QObject *parent)
         m_daemonStatus->activateDaemon();
     }
 
-    // Open main database connection
-    QSqlDatabase db = DBManager::openDatabase(QStringLiteral("main"));
-
     // Create DBWatcher and connect signals
     auto dbWatcher = new DBWatcher(this);
     dbWatcher->initWatcher();
-
-    // Setup models with database
-    AttachmentModel::self()->setDatabase(db);
-    MailBoxModel::self()->setDatabase(db);
-    MailListModel::self()->setDatabase(db);
-    ThreadViewModel::self()->setDatabase(db);
 
     // Connect DBWatcher signals to reload models
     QObject::connect(dbWatcher, &DBWatcher::foldersChanged, MailBoxModel::self(), &MailBoxModel::load);
@@ -49,11 +41,19 @@ Raven::Raven(QObject *parent)
     MailBoxModel::self()->load();
 }
 
-
-Raven *Raven::self()
+Raven *Raven::instance()
 {
     static Raven *instance = new Raven();
     return instance;
+}
+
+Raven *Raven::create(QQmlEngine *qmlEngine, QJSEngine *jsEngine)
+{
+    Q_UNUSED(qmlEngine);
+    Q_UNUSED(jsEngine);
+    auto *model = instance();
+    QQmlEngine::setObjectOwnership(model, QQmlEngine::CppOwnership);
+    return model;
 }
 
 QString Raven::selectedFolderName() const
@@ -88,4 +88,28 @@ void Raven::triggerSyncForAccount(const QString &accountId)
         }
         w->deleteLater();
     });
+}
+
+void Raven::openMessage(const QString &messageId)
+{
+    Message *message = Message::fetchById(m_db, messageId);
+    if (!message) {
+        qWarning() << "Could not open message: message not found";
+        return;
+    }
+    message->deleteLater();
+
+    Folder *folder = Folder::fetchById(m_db, message->folderId());
+    if (!folder) {
+        qWarning() << "Could not open folder: folder not found";
+        return;
+    }
+
+    Thread *thread = Thread::fetchById(m_db, message->threadId());
+    if (!thread) {
+        qWarning() << "Could not open message: thread not found";
+        return;
+    }
+
+    Q_EMIT openThreadRequested(folder, thread);
 }

@@ -19,6 +19,7 @@ set(raven_SRCS
     dbwatcher.cpp
     threadviewbridge.cpp
     utils.cpp
+    oauthprovider.cpp
 
     modelviews/attachmentmodel.cpp
     modelviews/mailboxmodel.cpp
@@ -28,8 +29,6 @@ set(raven_SRCS
     accounts/ispdb.cpp
     accounts/newaccountmanager.cpp
     accounts/oauthmanager.cpp
-
-    oauthprovider.cpp
 )
 
 # Generate D-Bus interface from shared XML definition
@@ -97,6 +96,7 @@ target_link_libraries(raven PRIVATE
     KF6::Crash
     KF6::ConfigCore
     KF6::DBusAddons
+    KF6::WindowSystem
 
     PkgConfig::UUID
 )

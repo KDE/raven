@@ -14,6 +14,7 @@ class Account : public QObject
 {
     Q_OBJECT
     QML_ELEMENT
+    QML_UNCREATABLE("Account not creatable in QML")
 
     Q_PROPERTY(QString id READ id CONSTANT)
     Q_PROPERTY(QString email READ email WRITE setEmail NOTIFY emailChanged)

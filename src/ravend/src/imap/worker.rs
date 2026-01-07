@@ -833,13 +833,14 @@ impl ImapWorker {
 
         // Save body
         if !body_content.is_empty() {
-            let message_body = MessageBody::new(message_id, body_content);
+            let message_body = MessageBody::new(message_id.clone(), body_content);
             db::upsert_message_body(db.conn(), &message_body)?;
         }
 
         // Add to notification batch (only for unread INBOX messages)
         if folder.path.eq_ignore_ascii_case("INBOX") && message.unread {
             notification_batch.add_email(NewEmailInfo {
+                message_id: message_id.clone(),
                 sender: format_sender(&message.from_contacts),
                 subject: message.subject.clone(),
                 preview: message.snippet.clone(),

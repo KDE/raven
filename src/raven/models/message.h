@@ -35,6 +35,7 @@ class Message : public QObject
 {
     Q_OBJECT
     QML_ELEMENT
+    QML_UNCREATABLE("Message not creatable in QML")
 
 public:
     Message(QObject *parent = nullptr);

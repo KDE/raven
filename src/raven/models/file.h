@@ -13,6 +13,8 @@ class Message;
 class File : public QObject
 {
     Q_OBJECT
+    QML_UNCREATABLE("File not creatable in QML")
+
     Q_PROPERTY(QString id READ id CONSTANT)
     Q_PROPERTY(QString accountId READ accountId CONSTANT)
     Q_PROPERTY(QString messageId READ messageId CONSTANT)

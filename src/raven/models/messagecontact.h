@@ -12,6 +12,7 @@ class MessageContact : public QObject
 {
     Q_OBJECT
     QML_ELEMENT
+    QML_UNCREATABLE("MessageContact not creatable in QML")
 
     Q_PROPERTY(QString name READ name CONSTANT)
     Q_PROPERTY(QString email READ email CONSTANT)

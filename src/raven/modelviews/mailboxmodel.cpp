@@ -5,12 +5,14 @@
 #include "constants.h"
 #include "accountmodel.h"
 #include "utils.h"
+#include "dbmanager.h"
 
 #include <QDebug>
 #include <QSqlError>
 
 MailBoxModel::MailBoxModel(QObject *parent)
     : QAbstractListModel{parent}
+    , m_db{DBManager::openDatabase(QStringLiteral("mailBoxModel"))}
 {
 }
 

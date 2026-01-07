@@ -19,11 +19,13 @@ class Folder : public QObject
 {
     Q_OBJECT
     QML_ELEMENT
+    QML_UNCREATABLE("Folder not creatable in QML")
 
     Q_PROPERTY(QString id READ id CONSTANT)
     Q_PROPERTY(QString accountId READ accountId CONSTANT)
     Q_PROPERTY(QString role READ role NOTIFY roleChanged)
     Q_PROPERTY(QString status READ status NOTIFY statusChanged)
+    Q_PROPERTY(QString path READ path NOTIFY pathChanged)
 
 public:
     Folder(QObject *parent = nullptr, QString id = QString(), QString accountId = QString());

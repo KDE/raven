@@ -20,6 +20,8 @@ class Thread : public QObject
 {
     Q_OBJECT
     QML_ELEMENT
+    QML_UNCREATABLE("Thread not creatable in QML")
+
     Q_PROPERTY(QString id READ id CONSTANT)
     Q_PROPERTY(QString accountId READ accountId CONSTANT)
     Q_PROPERTY(QString subject READ subject CONSTANT)

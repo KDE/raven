@@ -7,6 +7,7 @@
 #include "utils.h"
 #include "../models/message.h"
 #include "ravendaemoninterface.h"
+#include "dbmanager.h"
 
 #include <QDBusConnection>
 #include <QSqlQuery>
@@ -20,6 +21,7 @@
 
 MailListModel::MailListModel(QObject *parent)
     : QAbstractListModel{parent}
+    , m_db{DBManager::openDatabase(QStringLiteral("mailListModel"))}
 {
 }
 

@@ -29,6 +29,7 @@ Kirigami.ApplicationWindow {
         columnView {
             columnResizeMode: isWidescreen ? Kirigami.ColumnView.DynamicColumns : Kirigami.ColumnView.SingleColumn
         }
+        initialPage: Qt.resolvedUrl("FolderView.qml")
     }
 
     property bool isWidescreen: root.width > 800
@@ -45,8 +46,33 @@ Kirigami.ApplicationWindow {
         }
     }
 
-    Component.onCompleted: {
-        root.pageStack.push(Qt.resolvedUrl("FolderView.qml"))
+    Connections {
+        target: Raven
+
+        // Handle opening a specific message from command-line arguments
+        function onOpenThreadRequested(folder: Folder, thread: Thread) {
+            const splitPath = folder.path.split("/")
+            Raven.selectedFolderName = splitPath[splitPath.length - 1];
+            Raven.mailListModel.loadFolder(folder);
+
+            // Mark as read
+            if (thread.unread) {
+                Raven.mailListModel.markThreadAsRead(thread);
+            }
+
+            // Load thread in model
+            Raven.threadViewModel.loadThread(thread);
+
+            while (applicationWindow().pageStack.depth > 1) {
+                applicationWindow().pageStack.pop();
+            }
+
+            applicationWindow().pageStack.push(Qt.resolvedUrl('ThreadViewer.qml'), {
+                subject: thread.subject,
+                thread: thread,
+                folderRole: folder.role || ""
+            });
+        }
     }
 
     globalDrawer: MailBoxListSidebar {}
