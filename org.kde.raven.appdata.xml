@@ -24,6 +24,7 @@
   <name xml:lang="it">Posta</name>
   <name xml:lang="ka">ფოსტა</name>
   <name xml:lang="ko">메일</name>
+  <name xml:lang="lt">Paštas</name>
   <name xml:lang="nl">E-mail</name>
   <name xml:lang="nn">E-post</name>
   <name xml:lang="pl">Poczta</name>
@@ -55,6 +56,7 @@
   <summary xml:lang="it">Invia e ricevi messaggi di posta elettronica</summary>
   <summary xml:lang="ka">ელფოსტის გაგზავნა და მიღება</summary>
   <summary xml:lang="ko">이메일 주고받기</summary>
+  <summary xml:lang="lt">Siųsti ir gauti el. laiškus</summary>
   <summary xml:lang="nl">E-mail verzenden en ontvangen</summary>
   <summary xml:lang="nn">Send og ta imot e-post</summary>
   <summary xml:lang="pl">Wysyłaj i odbieraj pocztę</summary>
@@ -92,6 +94,7 @@
     <p xml:lang="it">Un client di posta per Plasma, basato su Akonadi.</p>
     <p xml:lang="ka">ელფოსტის კლიენტი Plasma-სთვის, დაფუძნებული Akonadi-ზე.</p>
     <p xml:lang="ko">Akonadi를 사용하는 Plasma용 이메일 클라이언트입니다.</p>
+    <p xml:lang="lt">Plasma el. pašto kliento programa, pagrįsta Akonadi.</p>
     <p xml:lang="nl">Een e-mailclient voor Plasma, gebaseerd op Akonadi.</p>
     <p xml:lang="nn">E-postprogram for Plasma, bygd på Akonadi.</p>
     <p xml:lang="pl">Program pocztowy dla Plazmy, oparty na Akonadi.</p>
