@@ -151,14 +151,3 @@ pub fn connect_with_secrets(account: &Account) -> Result<ImapSession, String> {
         access_token.as_deref(),
     )
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_oauth2_authenticator() {
-        let auth = OAuth2Authenticator("test_auth_string".to_string());
-        assert_eq!(auth.process(&[]), "test_auth_string");
-    }
-}

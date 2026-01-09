@@ -26,7 +26,7 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 use std::sync::mpsc::{self, Sender};
 use std::sync::{Arc, Mutex};
-use std::thread::{self, JoinHandle};
+use std::thread;
 use std::time::Duration;
 
 /// Polling interval for email sync when IDLE is not supported
@@ -37,7 +37,6 @@ const WORKER_NICE_VALUE: i32 = 10;
 
 struct WorkerHandle {
     email: String,
-    _handle: JoinHandle<()>,
     shutdown_tx: Sender<()>,
     sync_trigger_tx: Sender<()>,
 }
@@ -237,11 +236,23 @@ fn spawn_worker(
     let files_dir = files_dir.clone();
     let dbus_notifier = dbus_notifier.clone();
     let email = account.email.clone();
+    let account_email = account.email.clone(); // For panic hook
 
     let (shutdown_tx, shutdown_rx) = mpsc::channel();
     let (sync_trigger_tx, sync_trigger_rx) = mpsc::channel();
 
-    let handle = thread::spawn(move || {
+    thread::spawn(move || {
+        // Set up panic hook to log panics before thread dies
+        let default_panic = std::panic::take_hook();
+        std::panic::set_hook(Box::new(move |panic_info| {
+            error!("WORKER THREAD PANIC [{}]: {}", account_email, panic_info);
+            if let Some(location) = panic_info.location() {
+                error!("  at {}:{}:{}", location.file(), location.line(), location.column());
+            }
+            // Call the default panic handler
+            default_panic(panic_info);
+        }));
+
         set_thread_priority();
 
         let mut worker = ImapWorker::new(account, db, files_dir, dbus_notifier);
@@ -274,7 +285,6 @@ fn spawn_worker(
 
     Some(WorkerHandle {
         email,
-        _handle: handle,
         shutdown_tx,
         sync_trigger_tx,
     })

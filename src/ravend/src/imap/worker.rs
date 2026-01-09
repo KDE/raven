@@ -41,8 +41,10 @@ use uuid::Uuid;
 /// Maximum messages to fetch per folder during sync
 const MAX_MESSAGES_PER_BATCH: u32 = 100;
 
+// How much time in between IMAP IDLE checks
+const IDLE_CHECK_INTERVAL_SECS: u64 = 5;
+
 /// IMAP IDLE timeout in seconds (RFC 2177 recommends max 29 minutes)
-/// We use 25 minutes to have some margin before server timeout
 const IDLE_TIMEOUT_SECS: u64 = 25 * 60;
 
 // =============================================================================
@@ -219,9 +221,7 @@ impl ImapWorker {
 
         debug!("[{}] Entering IDLE mode on INBOX", self.account.email);
 
-        // We use a shorter timeout (60s) and loop, checking for shutdown in between
-        // This allows us to respond to shutdown signals while still being power-efficient
-        let idle_check_interval = Duration::from_secs(60);
+        let idle_check_interval = Duration::from_secs(IDLE_CHECK_INTERVAL_SECS);
         let max_idle_time = Duration::from_secs(IDLE_TIMEOUT_SECS);
         let mut total_idle_time = Duration::ZERO;
 
@@ -363,7 +363,8 @@ impl ImapWorker {
     fn sync_folders(&self, session: &mut ImapSession) -> Result<Vec<Folder>> {
         let mailboxes = session.list(Some(""), Some("*"))?;
 
-        let db = self.db.lock().unwrap();
+        let db = self.db.lock()
+            .map_err(|e| anyhow::anyhow!("Failed to acquire database lock: {}", e))?;
         let mut folders = Vec::new();
 
         for mailbox in mailboxes.iter() {
@@ -498,7 +499,8 @@ impl ImapWorker {
         folder: &Folder,
         notification_batch: &mut NotificationBatch,
     ) -> Result<FolderSyncResult> {
-        let db = self.db.lock().unwrap();
+        let db = self.db.lock()
+            .map_err(|e| anyhow::anyhow!("Failed to acquire database lock: {}", e))?;
 
         // Get message count from last SELECT
         let exists = session.select(&folder.path)?.exists;
@@ -545,7 +547,8 @@ impl ImapWorker {
             None => return self.sync_folder_full(session, folder, notification_batch),
         };
 
-        let db = self.db.lock().unwrap();
+        let db = self.db.lock()
+            .map_err(|e| anyhow::anyhow!("Failed to acquire database lock: {}", e))?;
 
         // Fetch messages with UID >= stored UIDNEXT
         let fetch_range = format!("{}:*", uid_next);
@@ -598,7 +601,8 @@ impl ImapWorker {
 
     /// Load stored sync state for a folder
     fn load_folder_sync_state(&self, folder_id: &str) -> Result<StoredFolderState> {
-        let db = self.db.lock().unwrap();
+        let db = self.db.lock()
+            .map_err(|e| anyhow::anyhow!("Failed to acquire database lock: {}", e))?;
         let folder = db::get_folder_by_id(db.conn(), folder_id)?;
 
         Ok(StoredFolderState {
@@ -609,7 +613,8 @@ impl ImapWorker {
 
     /// Save sync state for a folder
     fn save_folder_sync_state(&self, folder_id: &str, state: &FolderState) -> Result<()> {
-        let db = self.db.lock().unwrap();
+        let db = self.db.lock()
+            .map_err(|e| anyhow::anyhow!("Failed to acquire database lock: {}", e))?;
         db::update_folder_sync_state(
             db.conn(),
             folder_id,
@@ -646,7 +651,8 @@ impl ImapWorker {
 
     /// Clear all messages for a folder (used when UIDVALIDITY changes)
     fn clear_folder_messages(&self, folder_id: &str) -> Result<()> {
-        let db = self.db.lock().unwrap();
+        let db = self.db.lock()
+            .map_err(|e| anyhow::anyhow!("Failed to acquire database lock: {}", e))?;
         db.conn().execute(
             "DELETE FROM message_body WHERE id IN (SELECT id FROM message WHERE folderId = ?1)",
             [folder_id],
@@ -667,7 +673,8 @@ impl ImapWorker {
         };
 
         // Get all UIDs we have stored in the database
-        let db = self.db.lock().unwrap();
+        let db = self.db.lock()
+            .map_err(|e| anyhow::anyhow!("Failed to acquire database lock: {}", e))?;
         let local_uids = db::get_folder_message_uids(db.conn(), &self.account.id, &folder.id)?;
 
         // Find UIDs that exist locally but not on server
