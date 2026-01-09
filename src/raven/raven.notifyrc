@@ -4,6 +4,7 @@
 [Global]
 IconName=mail-unread
 Comment=Raven Mail Client
+Comment[ar]=عميل البريد
 Comment[ca]=Client de correu Raven
 Comment[ca@valencia]=Client de correu Raven
 Comment[es]=Cliente de correo Raven
@@ -20,7 +21,7 @@ Comment[tr]=Raven posta istemcisi
 Comment[uk]=Клієнт пошти «Ворон»
 Comment[zh_TW]=Raven 郵件用戶端
 Name=Raven
-Name[ar]=الغراف
+Name[ar]=الغراب
 Name[ca]=Raven
 Name[ca@valencia]=Raven
 Name[cs]=Raven
@@ -53,6 +54,7 @@ Name[zh_TW]=Raven
 
 [Event/newMail]
 Name=New Email
+Name[ar]=بريد إلكتروني جديد
 Name[ca]=Correu nou
 Name[ca@valencia]=Correu nou
 Name[es]=Nuevo mensaje
@@ -69,6 +71,7 @@ Name[tr]=Yeni E-Posta
 Name[uk]=Нове повідомлення ел.пошти
 Name[zh_TW]=新郵件
 Comment=A new email has arrived
+Comment[ar]=وصلك بريد إلكتروني جديد
 Comment[ca]=Ha arribat un correu electrònic nou
 Comment[ca@valencia]=Ha arribat un correu electrònic nou
 Comment[es]=Ha llegado un nuevo mensaje
