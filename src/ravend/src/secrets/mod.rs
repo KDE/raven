@@ -6,10 +6,9 @@
 //! This module provides secure password storage via the system's
 //! secret service (KWallet on KDE, GNOME Keyring on GNOME, etc.)
 
+use crate::constants::SERVICE_NAME;
 use keyring::Entry;
 use log::debug;
-
-const SERVICE_NAME: &str = "raven";
 
 /// Read a password from the secret store
 pub fn read_password(key: &str) -> Option<String> {

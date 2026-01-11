@@ -268,110 +268,6 @@ pub fn get_folder_message_uids(
     Ok(uids)
 }
 
-/// Get a message by header Message-ID (for detecting moves)
-///
-/// FUTURE USE: This function will be useful for:
-/// - Detecting when a message is moved between folders (same Message-ID, different folder)
-/// - Deduplicating messages across folders
-/// - Email threading improvements
-#[allow(dead_code)]
-pub fn get_message_by_header_id(
-    conn: &Connection,
-    account_id: &str,
-    header_message_id: &str,
-) -> Result<Option<Message>> {
-    let mut stmt = conn.prepare(
-        "SELECT id, accountId, data, folderId, threadId, headerMessageId,
-                subject, draft, unread, starred, date, remoteUID
-         FROM message WHERE accountId = ?1 AND headerMessageId = ?2"
-    ).with_context(|| format!("Failed to prepare query for message with header ID '{}'", header_message_id))?;
-
-    let message = stmt.query_row(params![account_id, header_message_id], |row| {
-        let date_str: String = row.get(10)?;
-        let date = DateTime::parse_from_rfc3339(&date_str)
-            .map(|dt| dt.with_timezone(&Utc))
-            .unwrap_or_else(|_| Utc::now());
-
-        let data_json: Option<String> = row.get(2)?;
-        let (snippet, is_plaintext) = data_json
-            .and_then(|json| MessageData::from_json_string(&json).ok())
-            .map(|data| (data.snippet, data.plaintext))
-            .unwrap_or_else(|| (String::new(), false));
-
-        Ok(Message {
-            id: row.get(0)?,
-            account_id: row.get(1)?,
-            folder_id: row.get(3)?,
-            thread_id: row.get(4)?,
-            header_message_id: row.get(5)?,
-            subject: row.get(6)?,
-            draft: row.get(7)?,
-            unread: row.get(8)?,
-            starred: row.get(9)?,
-            date,
-            remote_uid: row.get(11)?,
-            from_contacts: "[]".to_string(),
-            to_contacts: "[]".to_string(),
-            cc_contacts: "[]".to_string(),
-            bcc_contacts: "[]".to_string(),
-            reply_to_contacts: "[]".to_string(),
-            snippet,
-            is_plaintext,
-        })
-    }).optional()
-    .with_context(|| format!("Failed to query message with header ID '{}'", header_message_id))?;
-
-    Ok(message)
-}
-
-/// Update a message's folder (for when message is moved)
-///
-/// FUTURE USE: This function will be useful for:
-/// - Real-time move tracking (updating local DB when message is moved on server)
-/// - Preserving message continuity when messages are moved between folders
-#[allow(dead_code)]
-pub fn update_message_folder(
-    conn: &Connection,
-    message_id: &str,
-    new_folder_id: &str,
-    new_remote_uid: u32,
-) -> Result<()> {
-    // Generate new message ID based on new folder
-    let new_id = format!("{}:{}", new_folder_id, new_remote_uid);
-
-    conn.execute(
-        "UPDATE message SET id = ?2, folderId = ?3, remoteUID = ?4 WHERE id = ?1",
-        params![message_id, new_id, new_folder_id, new_remote_uid],
-    ).with_context(|| format!("Failed to update folder for message '{}'", message_id))?;
-
-    // Also update message_body ID if it exists
-    conn.execute(
-        "UPDATE message_body SET id = ?2 WHERE id = ?1",
-        params![message_id, new_id],
-    ).with_context(|| format!("Failed to update message_body ID for message '{}'", message_id))?;
-
-    Ok(())
-}
-
-/// Delete thread-folder association
-///
-/// FUTURE USE: This function will be useful for:
-/// - Cleaning up thread-folder associations when all messages in a thread are removed from a folder
-/// - Move tracking to maintain accurate folder associations
-#[allow(dead_code)]
-pub fn delete_thread_folder(
-    conn: &Connection,
-    account_id: &str,
-    thread_id: &str,
-    folder_id: &str,
-) -> Result<()> {
-    conn.execute(
-        "DELETE FROM thread_folder WHERE accountId = ?1 AND threadId = ?2 AND folderId = ?3",
-        params![account_id, thread_id, folder_id],
-    ).with_context(|| format!("Failed to delete thread-folder for thread '{}' folder '{}'", thread_id, folder_id))?;
-    Ok(())
-}
-
 // ============================================================================
 // Message body operations
 // ============================================================================
@@ -613,37 +509,6 @@ pub fn get_files_by_message(conn: &Connection, message_id: &str) -> Result<Vec<A
     Ok(files)
 }
 
-/// Get a file by its content ID (for inline image lookup)
-///
-/// FUTURE USE: This function will be useful for:
-/// - Rendering HTML emails with inline images (cid: URLs)
-/// - Resolving Content-ID references in multipart/related emails
-#[allow(dead_code)]
-pub fn get_file_by_content_id(conn: &Connection, message_id: &str, content_id: &str) -> Result<Option<Attachment>> {
-    let mut stmt = conn.prepare(
-        "SELECT id, accountId, messageId, fileName, partId, contentId, contentType, size, isInline, downloaded
-         FROM file WHERE messageId = ?1 AND contentId = ?2"
-    ).with_context(|| format!("Failed to prepare query for file with content ID '{}' for message '{}'", content_id, message_id))?;
-
-    let file = stmt.query_row(params![message_id, content_id], |row| {
-        Ok(Attachment {
-            id: row.get(0)?,
-            account_id: row.get(1)?,
-            message_id: row.get(2)?,
-            filename: row.get(3)?,
-            part_id: row.get(4)?,
-            content_id: row.get(5)?,
-            content_type: row.get(6)?,
-            size: row.get::<_, i64>(7)? as usize,
-            is_inline: row.get(8)?,
-            downloaded: row.get(9)?,
-        })
-    }).optional()
-    .with_context(|| format!("Failed to query file with content ID '{}' for message '{}'", content_id, message_id))?;
-
-    Ok(file)
-}
-
 /// Get a file by its ID
 pub fn get_file_by_id(conn: &Connection, file_id: &str) -> Result<Option<Attachment>> {
     let mut stmt = conn.prepare(
@@ -748,43 +613,6 @@ pub fn get_trash_folder_for_account(conn: &Connection, account_id: &str) -> Resu
     .with_context(|| format!("Failed to query trash folder for account '{}'", account_id))?;
 
     Ok(result)
-}
-
-/// Move a message to a different folder (updates folderId and generates new message ID)
-///
-/// FUTURE USE: This function will be useful for:
-/// - User-initiated message move operations (e.g., Move to Archive)
-/// - Drag-and-drop folder organization in the UI
-/// - Note: Currently we delete and re-sync for moves, but this could be optimized
-#[allow(dead_code)]
-pub fn move_message_to_folder(
-    conn: &Connection,
-    message_id: &str,
-    new_folder_id: &str,
-    new_remote_uid: u32,
-) -> Result<String> {
-    // Generate new message ID based on new folder
-    let new_id = format!("{}:{}", new_folder_id, new_remote_uid);
-
-    // Update message
-    conn.execute(
-        "UPDATE message SET id = ?2, folderId = ?3, remoteUID = ?4 WHERE id = ?1",
-        params![message_id, new_id, new_folder_id, new_remote_uid],
-    ).with_context(|| format!("Failed to move message '{}' to folder '{}'", message_id, new_folder_id))?;
-
-    // Update message_body ID if it exists
-    conn.execute(
-        "UPDATE message_body SET id = ?2 WHERE id = ?1",
-        params![message_id, new_id],
-    ).with_context(|| format!("Failed to update message_body ID for message '{}'", message_id))?;
-
-    // Update file references
-    conn.execute(
-        "UPDATE file SET messageId = ?2 WHERE messageId = ?1",
-        params![message_id, new_id],
-    ).with_context(|| format!("Failed to update file references for message '{}'", message_id))?;
-
-    Ok(new_id)
 }
 
 // ============================================================================

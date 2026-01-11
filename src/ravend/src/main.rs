@@ -4,6 +4,7 @@
 //! Raven mail daemon - background email sync service
 
 mod config;
+mod constants;
 mod db;
 mod dbus;
 mod imap;
@@ -16,6 +17,7 @@ mod tray;
 
 use anyhow::Result;
 use config::AccountManager;
+use constants::{POLL_INTERVAL_SECS, WORKER_NICE_VALUE};
 use db::Database;
 use dbus::{DBusNotifier, DbusInitError};
 use imap::ImapWorker;
@@ -28,12 +30,6 @@ use std::sync::mpsc::{self, Sender};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
-
-/// Polling interval for email sync when IDLE is not supported
-const POLL_INTERVAL_SECS: u64 = 300;
-
-/// Nice value for worker threads (higher = lower priority)
-const WORKER_NICE_VALUE: i32 = 10;
 
 struct WorkerHandle {
     email: String,

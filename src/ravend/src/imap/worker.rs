@@ -13,6 +13,7 @@ use super::parser::{
     decode_header, format_sender, get_snippet_from_message, parse_message_body_full,
     replace_cid_urls, serialize_addresses,
 };
+use crate::constants::{IDLE_CHECK_INTERVAL_SECS, IDLE_TIMEOUT_SECS, MAX_MESSAGES_PER_BATCH};
 use crate::db::{self, Database};
 use crate::dbus::DBusNotifier;
 use crate::secrets;
@@ -33,19 +34,6 @@ use std::sync::mpsc::Receiver;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use uuid::Uuid;
-
-// =============================================================================
-// Constants
-// =============================================================================
-
-/// Maximum messages to fetch per folder during sync
-const MAX_MESSAGES_PER_BATCH: u32 = 100;
-
-// How much time in between IMAP IDLE checks
-const IDLE_CHECK_INTERVAL_SECS: u64 = 5;
-
-/// IMAP IDLE timeout in seconds (RFC 2177 recommends max 29 minutes)
-const IDLE_TIMEOUT_SECS: u64 = 25 * 60;
 
 // =============================================================================
 // Types
