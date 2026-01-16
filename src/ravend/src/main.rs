@@ -163,19 +163,8 @@ async fn init_dbus_service(
 }
 
 async fn request_background_permission() {
-    if portal::is_sandboxed() {
-        info!("Running in sandboxed environment, requesting background permission...");
-    }
-
-    if let Some(result) = portal::request_background_permission().await {
-        if result.response == portal::PortalResponse::Success {
-            info!(
-                "Background portal: background={}, autostart={}",
-                result.background_granted, result.autostart_granted
-            );
-        } else {
-            debug!("Background permission not granted");
-        }
+    if let Some((bg, auto)) = portal::request_background_permission().await {
+        info!("Background portal: background={bg}, autostart={auto}");
     }
 }
 

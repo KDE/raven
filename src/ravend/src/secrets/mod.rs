@@ -1,16 +1,12 @@
 // Copyright 2025 Devin Lin <devin@kde.org>
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-//! Secure credential storage using the keyring crate
-//!
-//! This module provides secure password storage via the system's
-//! secret service (KWallet on KDE, GNOME Keyring on GNOME, etc.)
+//! Credential storage using the keyring crate using secretservice (ex. KWallet, GNOME Keyring)
 
 use crate::constants::SERVICE_NAME;
 use keyring::Entry;
 use log::debug;
 
-/// Read a password from the secret store
 pub fn read_password(key: &str) -> Option<String> {
     let entry = Entry::new(SERVICE_NAME, key).ok()?;
     match entry.get_password() {
@@ -29,7 +25,6 @@ pub fn read_password(key: &str) -> Option<String> {
     }
 }
 
-/// Write a password to the secret store
 pub fn write_password(key: &str, password: &str) -> bool {
     let entry = match Entry::new(SERVICE_NAME, key) {
         Ok(e) => e,
@@ -51,7 +46,6 @@ pub fn write_password(key: &str, password: &str) -> bool {
     }
 }
 
-/// Delete a password from the secret store
 pub fn delete_password(key: &str) -> bool {
     let entry = match Entry::new(SERVICE_NAME, key) {
         Ok(e) => e,
