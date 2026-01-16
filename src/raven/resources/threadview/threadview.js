@@ -88,150 +88,117 @@ function renderThread(messagesJson) {
     window.scrollTo(0, 0);
 }
 
+// Escape HTML to prevent XSS
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text || '';
+    return div.innerHTML;
+}
+
 // Create a message card element
 function createMessageCard(msg, index) {
+    const isLastMessage = index === currentMessages.length - 1;
     const card = document.createElement('div');
-    card.className = 'message-card collapsed';
+    card.className = isLastMessage ? 'message-card' : 'message-card collapsed';
     card.dataset.messageId = msg.id;
 
-    // Header (clickable to expand/collapse)
-    const header = createMessageHeader(msg);
-    header.onclick = function(e) {
-        // Don't toggle if clicking a link
-        if (e.target.tagName === 'A') return;
+    // Build recipients HTML
+    let recipientsHtml = '';
+    if (msg.to) {
+        recipientsHtml += `<div class="message-recipients-row">
+            <span class="recipients-label">To:</span>
+            <span class="recipients-value">${escapeHtml(msg.to)}</span>
+        </div>`;
+    }
+    if (msg.cc) {
+        recipientsHtml += `<div class="message-recipients-row">
+            <span class="recipients-label">CC:</span>
+            <span class="recipients-value">${escapeHtml(msg.cc)}</span>
+        </div>`;
+    }
+    if (msg.bcc) {
+        recipientsHtml += `<div class="message-recipients-row">
+            <span class="recipients-label">BCC:</span>
+            <span class="recipients-value">${escapeHtml(msg.bcc)}</span>
+        </div>`;
+    }
 
-        // Don't toggle if there's a text selection (user is selecting text)
+    // Build attachment bar HTML
+    let attachmentBarHtml = '';
+    if (msg.attachmentCount > 0) {
+        const attachmentItemsHtml = msg.attachments
+            .filter(att => !att.isInline)
+            .map(att => `<div class="attachment-item" data-file-id="${escapeHtml(att.id)}">
+                <div class="attachment-icon">&#128206;</div>
+                <div class="attachment-info">
+                    <span class="attachment-name">${escapeHtml(att.filename || 'Attachment')}</span>
+                    <span class="attachment-size">${escapeHtml(att.formattedSize || '')}</span>
+                </div>
+                <div class="attachment-actions">
+                    <button class="attachment-btn attachment-save-btn" title="Save attachment">&#128190;</button>
+                </div>
+            </div>`).join('');
+
+        attachmentBarHtml = `<div class="attachment-bar">
+            <div class="attachment-bar-header">Attachments (${msg.attachmentCount})</div>
+            <div class="attachment-list">${attachmentItemsHtml}</div>
+        </div>`;
+    }
+
+    card.innerHTML = `
+        <div class="message-header">
+            <div class="message-header-row">
+                <span class="collapse-indicator">&#9654;</span>
+                <span class="message-from">${escapeHtml(msg.from)}</span>
+                <span class="message-date">${escapeHtml(msg.dateFormatted)}</span>
+            </div>
+            <div class="message-snippet">${escapeHtml(msg.snippet)}</div>
+            <div class="message-recipients">${recipientsHtml}</div>
+        </div>
+        <div class="message-content">
+            ${msg.isPlaintext
+                ? `<pre class="message-plaintext">${escapeHtml(msg.content)}</pre>`
+                : '<iframe class="message-content-frame" sandbox="allow-same-origin" scrolling="no"></iframe>'}
+            ${attachmentBarHtml}
+        </div>`;
+
+    // Set iframe srcdoc for HTML content (can't be set via innerHTML)
+    if (!msg.isPlaintext) {
+        const iframe = card.querySelector('.message-content-frame');
+        iframe.srcdoc = createIframeContent(msg.content || '');
+        iframe.onload = function() {
+            resizeIframe(iframe);
+        };
+    }
+
+    // Set up header click handler
+    const header = card.querySelector('.message-header');
+    header.onclick = function(e) {
+        if (e.target.tagName === 'A') return;
         const selection = window.getSelection();
-        if (selection && selection.toString().length > 0) {
-            return;
-        }
+        if (selection && selection.toString().length > 0) return;
 
         card.classList.toggle('collapsed');
-        // Resize iframe when expanding
         if (!card.classList.contains('collapsed')) {
             const iframe = card.querySelector('.message-content-frame');
-            if (iframe) {
-                resizeIframe(iframe);
-            }
+            if (iframe) resizeIframe(iframe);
         }
     };
-    card.appendChild(header);
 
-    // Content wrapper
-    const content = document.createElement('div');
-    content.className = 'message-content';
-    content.appendChild(createMessageContent(msg));
-    card.appendChild(content);
-
-    // Attachment bar (only if there are non-inline attachments)
-    if (msg.attachmentCount > 0) {
-        content.appendChild(createAttachmentBar(msg));
-    }
-
-    // Auto-expand last message in thread
-    if (index === currentMessages.length - 1) {
-        card.classList.remove('collapsed');
-    }
+    // Set up attachment click handlers
+    card.querySelectorAll('.attachment-item').forEach(item => {
+        const fileId = item.dataset.fileId;
+        item.onclick = function() { openAttachment(fileId); };
+    });
+    card.querySelectorAll('.attachment-save-btn').forEach(btn => {
+        const fileId = btn.closest('.attachment-item').dataset.fileId;
+        btn.onclick = function(e) {
+            e.stopPropagation();
+            saveAttachment(fileId);
+        };
+    });
 
     return card;
-}
-
-// Create message header element
-function createMessageHeader(msg) {
-    const header = document.createElement('div');
-    header.className = 'message-header';
-
-    // Main row with from and date
-    const mainRow = document.createElement('div');
-    mainRow.className = 'message-header-row';
-
-    const collapseIndicator = document.createElement('span');
-    collapseIndicator.className = 'collapse-indicator';
-    collapseIndicator.innerHTML = '&#9654;'; // Right arrow
-    mainRow.appendChild(collapseIndicator);
-
-    const from = document.createElement('span');
-    from.className = 'message-from';
-    from.textContent = msg.from || '';
-    mainRow.appendChild(from);
-
-    const date = document.createElement('span');
-    date.className = 'message-date';
-    date.textContent = msg.dateFormatted || '';
-    mainRow.appendChild(date);
-
-    header.appendChild(mainRow);
-
-    // Snippet (shown when collapsed)
-    const snippet = document.createElement('div');
-    snippet.className = 'message-snippet';
-    snippet.textContent = msg.snippet || '';
-    header.appendChild(snippet);
-
-    // Recipients section
-    const recipients = document.createElement('div');
-    recipients.className = 'message-recipients';
-
-    // To
-    if (msg.to) {
-        recipients.appendChild(createRecipientsRow('To:', msg.to));
-    }
-
-    // CC
-    if (msg.cc) {
-        recipients.appendChild(createRecipientsRow('CC:', msg.cc));
-    }
-
-    // BCC
-    if (msg.bcc) {
-        recipients.appendChild(createRecipientsRow('BCC:', msg.bcc));
-    }
-
-    header.appendChild(recipients);
-
-    return header;
-}
-
-// Create a recipients row
-function createRecipientsRow(label, value) {
-    const row = document.createElement('div');
-    row.className = 'message-recipients-row';
-
-    const labelEl = document.createElement('span');
-    labelEl.className = 'recipients-label';
-    labelEl.textContent = label;
-    row.appendChild(labelEl);
-
-    const valueEl = document.createElement('span');
-    valueEl.className = 'recipients-value';
-    valueEl.textContent = value;
-    row.appendChild(valueEl);
-
-    return row;
-}
-
-// Create message content (iframe for HTML, pre for plaintext)
-function createMessageContent(msg) {
-    if (msg.isPlaintext) {
-        const pre = document.createElement('pre');
-        pre.className = 'message-plaintext';
-        pre.textContent = msg.content || '';
-        return pre;
-    }
-
-    // HTML content in sandboxed iframe
-    const iframe = document.createElement('iframe');
-    iframe.className = 'message-content-frame';
-    iframe.sandbox = 'allow-same-origin'; // No scripts allowed
-    iframe.scrolling = 'no'; // Disable scrollbars
-    iframe.srcdoc = createIframeContent(msg.content || '');
-
-    // Resize iframe to fit content after load
-    iframe.onload = function() {
-        resizeIframe(iframe);
-    };
-
-    return iframe;
 }
 
 // Create iframe content with styles
@@ -344,79 +311,6 @@ function interceptLinks(doc) {
             hideLinkTooltip();
         };
     });
-}
-
-// Create attachment bar element
-function createAttachmentBar(msg) {
-    const bar = document.createElement('div');
-    bar.className = 'attachment-bar';
-
-    const header = document.createElement('div');
-    header.className = 'attachment-bar-header';
-    header.textContent = 'Attachments (' + msg.attachmentCount + ')';
-    bar.appendChild(header);
-
-    const list = document.createElement('div');
-    list.className = 'attachment-list';
-
-    msg.attachments.forEach(att => {
-        // Only show non-inline attachments
-        if (!att.isInline) {
-            list.appendChild(createAttachmentItem(att));
-        }
-    });
-
-    bar.appendChild(list);
-    return bar;
-}
-
-// Create attachment item element
-function createAttachmentItem(att) {
-    const item = document.createElement('div');
-    item.className = 'attachment-item';
-    item.onclick = function() {
-        openAttachment(att.id);
-    };
-
-    // Icon placeholder (would need icon font or SVG)
-    const icon = document.createElement('div');
-    icon.className = 'attachment-icon';
-    icon.innerHTML = '&#128206;'; // Paperclip emoji as fallback
-    item.appendChild(icon);
-
-    // Info
-    const info = document.createElement('div');
-    info.className = 'attachment-info';
-
-    const name = document.createElement('span');
-    name.className = 'attachment-name';
-    name.textContent = att.filename || 'Attachment';
-    info.appendChild(name);
-
-    const size = document.createElement('span');
-    size.className = 'attachment-size';
-    size.textContent = att.formattedSize || '';
-    info.appendChild(size);
-
-    item.appendChild(info);
-
-    // Actions
-    const actions = document.createElement('div');
-    actions.className = 'attachment-actions';
-
-    const saveBtn = document.createElement('button');
-    saveBtn.className = 'attachment-btn';
-    saveBtn.title = 'Save attachment';
-    saveBtn.innerHTML = '&#128190;'; // Floppy disk emoji
-    saveBtn.onclick = function(e) {
-        e.stopPropagation();
-        saveAttachment(att.id);
-    };
-    actions.appendChild(saveBtn);
-
-    item.appendChild(actions);
-
-    return item;
 }
 
 // Open attachment
