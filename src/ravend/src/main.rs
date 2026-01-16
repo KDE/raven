@@ -66,8 +66,6 @@ async fn run_daemon() -> Result<()> {
     db.lock().unwrap().migrate()?;
     info!("Database initialized");
 
-    notifications::init();
-
     let (dbus_notifier, dbus_receiver) = DBusNotifier::new();
     let (reload_tx, mut reload_rx) = tokio::sync::mpsc::unbounded_channel();
     let (sync_trigger_tx, mut sync_trigger_rx) = tokio::sync::mpsc::unbounded_channel::<String>();

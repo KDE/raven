@@ -4,15 +4,10 @@
 //! Cross-platform desktop notifications using notify-rust
 
 use log::info;
-use notify_rust::{Notification, Urgency, Hint, Timeout};
+use notify_rust::{Notification, Urgency, Hint};
 use std::process::Command;
 
 const BATCH_THRESHOLD: usize = 5;
-
-/// Initialize the notification system
-pub fn init() {
-    info!("Notification system initialized");
-}
 
 fn send_notification(title: &str, body: &str, message_id: Option<&str>) {
     let result = Notification::new()
@@ -24,7 +19,6 @@ fn send_notification(title: &str, body: &str, message_id: Option<&str>) {
         .hint(Hint::Category("email".to_owned()))
         .urgency(Urgency::Normal)
         .hint(Hint::Resident(true))
-        .timeout(Timeout::Never)
         .show();
 
     match result {
