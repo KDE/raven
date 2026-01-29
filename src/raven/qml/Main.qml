@@ -86,10 +86,8 @@ Kirigami.ApplicationWindow {
         Kirigami.InlineMessage {
             id: daemonStatusBanner
             Layout.fillWidth: true
-            type: Raven.daemonStatus.connecting ? Kirigami.MessageType.Information : Kirigami.MessageType.Warning
-            text: Raven.daemonStatus.connecting
-                ? i18n("Connecting to email sync service...")
-                : i18n("Email sync service is not running. Some features may be unavailable.")
+            type: Kirigami.MessageType.Warning
+            text: i18n("Email sync service is not running. Some features may be unavailable.")
             visible: !Raven.daemonStatus.available
             showCloseButton: false
 
@@ -97,7 +95,6 @@ Kirigami.ApplicationWindow {
                 Kirigami.Action {
                     text: i18n("Retry")
                     icon.name: "view-refresh"
-                    visible: !Raven.daemonStatus.connecting
                     onTriggered: Raven.daemonStatus.activateDaemon()
                 }
             ]

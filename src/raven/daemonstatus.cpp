@@ -12,7 +12,6 @@
 DaemonStatus::DaemonStatus(QObject *parent)
     : QObject(parent)
 {
-    // Create service watcher for the daemon
     m_watcher = new QDBusServiceWatcher(
         DBUS_SERVICE,
         QDBusConnection::sessionBus(),
@@ -42,11 +41,6 @@ bool DaemonStatus::isAvailable() const
     return m_available;
 }
 
-bool DaemonStatus::isConnecting() const
-{
-    return m_connecting;
-}
-
 void DaemonStatus::activateDaemon()
 {
     if (m_available) {
@@ -54,15 +48,7 @@ void DaemonStatus::activateDaemon()
         return;
     }
 
-    if (m_connecting) {
-        qDebug() << "Already attempting to connect to daemon";
-        return;
-    }
-
     qDebug() << "Attempting to activate daemon via D-Bus...";
-
-    m_connecting = true;
-    Q_EMIT connectingChanged();
 
     // Request D-Bus to start the service
     // This triggers D-Bus activation via the .service file
@@ -71,14 +57,10 @@ void DaemonStatus::activateDaemon()
         QDBusReply<void> reply = iface->startService(DBUS_SERVICE);
         if (!reply.isValid()) {
             qWarning() << "Failed to start daemon service:" << reply.error().message();
-            m_connecting = false;
-            Q_EMIT connectingChanged();
         }
         // If successful, onServiceRegistered will be called when daemon starts
     } else {
         qWarning() << "D-Bus session bus interface not available";
-        m_connecting = false;
-        Q_EMIT connectingChanged();
     }
 }
 
@@ -87,12 +69,9 @@ void DaemonStatus::onServiceRegistered(const QString &serviceName)
     if (serviceName == DBUS_SERVICE) {
         qDebug() << "Daemon service registered on D-Bus";
 
-        m_connecting = false;
         m_available = true;
 
-        Q_EMIT connectingChanged();
         Q_EMIT availableChanged();
-        Q_EMIT daemonOnline();
     }
 }
 
@@ -104,7 +83,6 @@ void DaemonStatus::onServiceUnregistered(const QString &serviceName)
         m_available = false;
 
         Q_EMIT availableChanged();
-        Q_EMIT daemonOffline();
     }
 }
 
@@ -117,11 +95,6 @@ void DaemonStatus::checkCurrentStatus()
 
         if (m_available != wasAvailable) {
             Q_EMIT availableChanged();
-            if (m_available) {
-                Q_EMIT daemonOnline();
-            } else {
-                Q_EMIT daemonOffline();
-            }
         }
 
         qDebug() << "Daemon status check: available =" << m_available;
