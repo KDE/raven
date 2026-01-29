@@ -1,49 +1,19 @@
 // Copyright 2025 Devin Lin <devin@kde.org>
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-//! OAuth2 authentication module for email providers
-//!
-//! This module handles OAuth2 authentication flows, including:
-//! - Provider-agnostic token refresh
-//! - Token storage
-//!
-//! ## Supported Providers
-//!
-//! - Gmail (Google)
-//! - Outlook (Microsoft)
-//! - Yahoo
-//!
-//! Provider configurations are loaded from a shared JSON configuration file
-//! to avoid duplication between the Qt frontend and Rust backend.
-//!
-//! ## XOAUTH2 for IMAP/SMTP
-//!
-//! Email providers use XOAUTH2 authentication mechanism for IMAP/SMTP.
-//! The authentication string format is:
-//! ```text
-//! user={email}\x01auth=Bearer {access_token}\x01\x01
-//! ```
-
-mod gmail;
 mod providers;
 
-pub use gmail::RefreshedToken;
 pub use providers::{find_provider_by_id, find_provider_by_email};
 
 use anyhow::{Context, Result};
 use log::{debug, info};
 
-/// Refresh an OAuth2 access token using a refresh token
-///
-/// This function looks up the provider configuration and uses the appropriate
-/// token endpoint to refresh the access token.
-///
-/// # Arguments
-/// * `provider_id` - The OAuth provider ID (e.g., "gmail", "outlook", "yahoo")
-/// * `refresh_token` - The refresh token to use
-///
-/// # Returns
-/// A `RefreshedToken` containing the new access token and expiry
+#[derive(Debug)]
+pub struct RefreshedToken {
+    pub access_token: String,
+    pub expires_in: Option<u64>,
+}
+
 pub fn refresh_oauth2_token(
     provider_id: &str,
     refresh_token: &str,
