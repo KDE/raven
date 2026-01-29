@@ -30,13 +30,6 @@ void DBWatcher::onMessagesChanged(const QStringList &messageIds)
 {
     qDebug() << "DBWatcher: MessagesChanged D-Bus signal received for" << messageIds.size() << "messages";
     Q_EMIT specificMessagesChanged(messageIds);
-
-    // Note: We intentionally do NOT emit messagesChanged() here.
-    // MessagesChanged with specific IDs is for flag updates (read/unread, starred),
-    // which don't add or remove threads. The specificMessagesChanged signal
-    // triggers targeted updateMessages() calls which handle flag updates properly.
-    // Emitting messagesChanged() would trigger smartRefresh() which is unnecessary
-    // and can cause issues if the DB query races with pending transactions.
 }
 
 void DBWatcher::handleTableChange(const QString &tableName)
