@@ -136,9 +136,9 @@ Kirigami.Page {
         webChannel: webChannel
 
         settings.javascriptEnabled: true
-        settings.localContentCanAccessFileUrls: true
+        settings.localContentCanAccessFileUrls: root.folderRole !== "spam"
         settings.localContentCanAccessRemoteUrls: false
-        settings.autoLoadImages: true
+        settings.autoLoadImages: root.folderRole !== "spam"
         settings.pluginsEnabled: false
         settings.forceDarkMode: isDarkTheme()
 

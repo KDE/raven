@@ -76,7 +76,6 @@ void ThreadViewBridge::loadThread(const QString &threadId, const QString &accoun
         m_messageContents.append(mwb.bodyContent);
     }
 
-    // Emit the loaded signal with JSON data
     Q_EMIT threadLoaded(getMessagesJson());
 }
 
@@ -85,59 +84,7 @@ QString ThreadViewBridge::getMessagesJson() const
     QJsonArray messagesArray;
 
     for (int i = 0; i < m_messages.size(); ++i) {
-        Message *msg = m_messages.at(i);
-        QString content = m_messageContents.at(i);
-
-        QJsonObject msgObj;
-        msgObj[QStringLiteral("id")] = msg->id();
-        msgObj[QStringLiteral("subject")] = msg->subject();
-        msgObj[QStringLiteral("from")] = QStringLiteral("%1 <%2>").arg(msg->from()->name(), msg->from()->email());
-        msgObj[QStringLiteral("fromName")] = msg->from()->name();
-        msgObj[QStringLiteral("fromEmail")] = msg->from()->email();
-        msgObj[QStringLiteral("to")] = formatContacts(msg->to());
-        msgObj[QStringLiteral("cc")] = formatContacts(msg->cc());
-        msgObj[QStringLiteral("bcc")] = formatContacts(msg->bcc());
-        msgObj[QStringLiteral("date")] = msg->date().toString(Qt::ISODate);
-        msgObj[QStringLiteral("dateFormatted")] = QLocale().toString(msg->date(), QLocale::ShortFormat);
-        msgObj[QStringLiteral("isPlaintext")] = msg->plaintext();
-        msgObj[QStringLiteral("unread")] = msg->unread();
-        msgObj[QStringLiteral("starred")] = msg->starred();
-        msgObj[QStringLiteral("snippet")] = msg->snippet();
-
-        // Process content to replace cid: URLs with file: URLs
-        QString processedContent = msg->plaintext() ? content : processInlineImages(content, msg->id());
-        msgObj[QStringLiteral("content")] = processedContent;
-
-        // Get attachments for this message
-        QList<File*> files = File::fetchByMessage(m_db, msg->id(), nullptr);
-        QJsonArray attachmentsArray;
-        int nonInlineCount = 0;
-
-        for (File *file : files) {
-            QJsonObject fileObj;
-            fileObj[QStringLiteral("id")] = file->id();
-            fileObj[QStringLiteral("filename")] = file->fileName();
-            fileObj[QStringLiteral("contentType")] = file->contentType();
-            fileObj[QStringLiteral("size")] = file->size();
-            fileObj[QStringLiteral("formattedSize")] = file->formattedSize();
-            fileObj[QStringLiteral("iconName")] = file->iconName();
-            fileObj[QStringLiteral("isInline")] = file->isInline();
-            fileObj[QStringLiteral("downloaded")] = file->downloaded();
-            fileObj[QStringLiteral("filePath")] = file->filePath();
-
-            attachmentsArray.append(fileObj);
-
-            if (!file->isInline()) {
-                nonInlineCount++;
-            }
-
-            delete file;
-        }
-
-        msgObj[QStringLiteral("attachments")] = attachmentsArray;
-        msgObj[QStringLiteral("attachmentCount")] = nonInlineCount;
-
-        messagesArray.append(msgObj);
+        messagesArray.append(messageToJson(m_messages.at(i), m_messageContents.at(i)));
     }
 
     return QString::fromUtf8(QJsonDocument(messagesArray).toJson(QJsonDocument::Compact));
@@ -149,18 +96,7 @@ QString ThreadViewBridge::getAttachmentsJson(const QString &messageId) const
     QJsonArray attachmentsArray;
 
     for (File *file : files) {
-        QJsonObject fileObj;
-        fileObj[QStringLiteral("id")] = file->id();
-        fileObj[QStringLiteral("filename")] = file->fileName();
-        fileObj[QStringLiteral("contentType")] = file->contentType();
-        fileObj[QStringLiteral("size")] = file->size();
-        fileObj[QStringLiteral("formattedSize")] = file->formattedSize();
-        fileObj[QStringLiteral("iconName")] = file->iconName();
-        fileObj[QStringLiteral("isInline")] = file->isInline();
-        fileObj[QStringLiteral("downloaded")] = file->downloaded();
-        fileObj[QStringLiteral("filePath")] = file->filePath();
-
-        attachmentsArray.append(fileObj);
+        attachmentsArray.append(fileToJson(file));
         delete file;
     }
 
@@ -278,10 +214,62 @@ void ThreadViewBridge::openExternalUrl(const QString &url)
     QDesktopServices::openUrl(QUrl(url));
 }
 
+QJsonObject ThreadViewBridge::messageToJson(Message *msg, const QString &content) const
+{
+    QJsonObject obj;
+    obj[QStringLiteral("id")] = msg->id();
+    obj[QStringLiteral("subject")] = msg->subject();
+    obj[QStringLiteral("from")] = QStringLiteral("%1 <%2>").arg(msg->from()->name(), msg->from()->email());
+    obj[QStringLiteral("fromName")] = msg->from()->name();
+    obj[QStringLiteral("fromEmail")] = msg->from()->email();
+    obj[QStringLiteral("to")] = formatContacts(msg->to());
+    obj[QStringLiteral("cc")] = formatContacts(msg->cc());
+    obj[QStringLiteral("bcc")] = formatContacts(msg->bcc());
+    obj[QStringLiteral("date")] = msg->date().toString(Qt::ISODate);
+    obj[QStringLiteral("dateFormatted")] = QLocale().toString(msg->date(), QLocale::ShortFormat);
+    obj[QStringLiteral("isPlaintext")] = msg->plaintext();
+    obj[QStringLiteral("unread")] = msg->unread();
+    obj[QStringLiteral("starred")] = msg->starred();
+    obj[QStringLiteral("snippet")] = msg->snippet();
+
+    QString processedContent = msg->plaintext() ? content : processInlineImages(content, msg->id());
+    obj[QStringLiteral("content")] = processedContent;
+
+    QList<File*> files = File::fetchByMessage(m_db, msg->id(), nullptr);
+    QJsonArray attachmentsArray;
+    int nonInlineCount = 0;
+
+    for (File *file : files) {
+        attachmentsArray.append(fileToJson(file));
+        if (!file->isInline()) {
+            nonInlineCount++;
+        }
+        delete file;
+    }
+
+    obj[QStringLiteral("attachments")] = attachmentsArray;
+    obj[QStringLiteral("attachmentCount")] = nonInlineCount;
+
+    return obj;
+}
+
+QJsonObject ThreadViewBridge::fileToJson(File *file) const
+{
+    QJsonObject obj;
+    obj[QStringLiteral("id")] = file->id();
+    obj[QStringLiteral("filename")] = file->fileName();
+    obj[QStringLiteral("contentType")] = file->contentType();
+    obj[QStringLiteral("size")] = file->size();
+    obj[QStringLiteral("formattedSize")] = file->formattedSize();
+    obj[QStringLiteral("iconName")] = file->iconName();
+    obj[QStringLiteral("isInline")] = file->isInline();
+    obj[QStringLiteral("downloaded")] = file->downloaded();
+    obj[QStringLiteral("filePath")] = file->filePath();
+    return obj;
+}
+
 QString ThreadViewBridge::processInlineImages(const QString &html, const QString &messageId) const
 {
-    // Don't auto-load inline images for spam folders as a security measure
-    // This prevents tracking pixels and potentially malicious content
     if (isSpamFolder()) {
         return html;
     }
