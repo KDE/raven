@@ -16,20 +16,17 @@ For a full Akonadi based mail client, see [KMail](https://invent.kde.org/pim/kma
 * Issues: https://invent.kde.org/plasma-mobile/raven/issues
 * Development channel: https://matrix.to/#/#plasmamobile:matrix.org
 * Privacy policy: https://kde.org/privacypolicy-apps/
-* Promotional page: https://raven.espi.dev/
 
 ## Features
 * Fetching emails with IMAP (SSL/STARTTLS)
 * Viewing both plain text and HTML emails
-* View emails in a thread
-* IMAP IDLE for power-efficient push notifications
-* Incremental sync (only fetches new messages)
+* Incremental sync and IMAP IDLE waiting support
 * OAuth2 for Gmail/Outlook/Yahoo login
 * Conversation threading
 * Attachment viewing and downloading
-* Desktop notifications for new emails
+* Email notifications
 * System tray integration
-* Secure credential storage via Secret Service API
+* Account credential storage via SecretService
 
 ## Compiling
 
@@ -44,7 +41,7 @@ make
 
 ## Locations
 
-Data is stored to `~/.local/share/raven`.
+Data (mail db and downloaded attachments) is stored to `~/.local/share/raven`.
 
 Accounts and configs are stored in `~/.config/raven`.
 
@@ -56,19 +53,19 @@ The application consists of a standard Qt/QML frontend application [raven](/src/
 
 Mail data is stored in a SQLite database in `~/.local/share/raven`.
 
+#### Client app (`raven`)
+
+The client is a typical Kirigami application, that queries the SQLite database and requests actions to the daemon over DBus.
+
+The thread viewer page is a single QtWebEngine view for rendering HTML emails. It uses a single webview to save on resources when viewing long threads (as opposed to a webview per message). Communication with the rest of the app is done over QtWebChannel.
+
 ### Daemon (`ravend`)
 
 The daemon is a background service written in Rust that handles all email synchronization and IMAP operations.
 
-It runs one worker thread per account, each maintaining a persistent IMAP connection. Workers use IMAP IDLE to wait for new mail efficiently, falling back to polling when IDLE is not supported.
+It runs one worker thread per account, each maintaining a persistent IMAP connection. Workers use IMAP IDLE (if supported) to listen to new mail for syncing, falling back to polling when IDLE is not supported.
 
-The daemon is the single writer to the database - the frontend only reads from SQLite and requests operations (mark read, delete, etc.) via D-Bus. This ensures data consistency and allows the frontend to remain responsive while sync operations happen in the background.
-
-## Background
-
-This project was created as a stopgap solution until KDE PIM is ready for mobile. The daemon was rapidly developed with the help of an LLM.
-
-The backend architecture is heavily inspired by [Mailspring-Sync](https://github.com/Foundry376/Mailspring-Sync).
+The daemon is the single writer to the database - the frontend only reads from SQLite and requests operations (mark read, delete, etc.) via DBus.
 
 ## TODO
 * Mailbox search
