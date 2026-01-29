@@ -1,8 +1,6 @@
 // Copyright 2025 Devin Lin <devin@kde.org>
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-//! Data models for the Raven mail daemon
-
 mod account;
 mod file;
 mod folder;
