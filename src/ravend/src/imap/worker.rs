@@ -112,14 +112,8 @@ impl ImapWorker {
     // Main Sync Entry Point
     // =========================================================================
 
-    /// Run sync with IMAP IDLE support for power efficiency
-    ///
-    /// This method:
-    /// 1. Performs an initial full sync of all folders
-    /// 2. If IDLE is supported, waits for new mail using IDLE on INBOX
-    /// 3. If IDLE is not supported, falls back to polling at the specified interval
-    ///
-    /// The method returns after one sync cycle (either IDLE wakeup, poll interval, or sync trigger)
+    /// Run one sync cycle: sync all folders, then wait via IDLE or polling.
+    /// Returns after IDLE wakeup, poll timeout, or sync trigger.
     pub fn sync_with_idle(
         &mut self,
         shutdown_rx: &Receiver<()>,
@@ -881,14 +875,11 @@ impl ImapWorker {
         let mut cid_replacements = Vec::new();
         let account_files_dir = self.files_dir.join(&self.account.id);
 
-        // Ensure the account's files directory exists
-        if !parsed_attachments.is_empty() {
-            if let Err(e) = fs::create_dir_all(&account_files_dir) {
-                warn!(
-                    "[{}] Failed to create files directory: {}",
-                    self.account.email, e
-                );
-            }
+        if let Err(e) = fs::create_dir_all(&account_files_dir) {
+            warn!(
+                "[{}] Failed to create files directory: {}",
+                self.account.email, e
+            );
         }
 
         for parsed in parsed_attachments {

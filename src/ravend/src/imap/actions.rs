@@ -100,23 +100,7 @@ impl FlagAction {
 // IMAP Action Functions
 // ============================================================================
 
-/// Perform a flag action (mark read/unread, flag/unflag) on messages
-///
-/// This function handles:
-/// 1. Looking up message info from database
-/// 2. Grouping messages by account and folder for efficient IMAP operations
-/// 3. Connecting to IMAP and performing STORE commands
-/// 4. Updating local database with new flag states
-/// 5. Updating thread counts
-///
-/// # Arguments
-/// * `db` - Database connection
-/// * `config_dir` - Path to configuration directory
-/// * `message_ids` - List of message IDs to act on
-/// * `action` - The flag action to perform
-///
-/// # Returns
-/// ActionResult with lists of succeeded and failed message IDs
+/// Perform a flag action on messages via IMAP STORE, then update local DB and thread counts
 pub fn perform_flag_action(
     db: &Arc<Mutex<Database>>,
     message_ids: &[String],
@@ -267,20 +251,7 @@ pub fn perform_flag_action(
     result
 }
 
-/// Move messages to trash folder
-///
-/// This function handles:
-/// 1. Looking up message info and trash folder from database
-/// 2. Grouping messages by account and folder
-/// 3. Using IMAP MOVE command (or COPY+DELETE fallback)
-/// 4. Deleting messages from local database (they'll be re-synced from trash)
-///
-/// # Arguments
-/// * `db` - Database connection
-/// * `message_ids` - List of message IDs to move to trash
-///
-/// # Returns
-/// ActionResult with lists of succeeded and failed message IDs
+/// Move messages to trash via IMAP MOVE (or COPY+DELETE fallback), then remove from local DB
 pub fn move_to_trash(
     db: &Arc<Mutex<Database>>,
     message_ids: &[String],
@@ -456,16 +427,7 @@ pub fn move_to_trash(
     result
 }
 
-/// Fetch a specific attachment from IMAP server
-///
-/// # Arguments
-/// * `account` - Account to fetch from
-/// * `folder_path` - IMAP folder path
-/// * `uid` - Message UID
-/// * `file` - Attachment metadata
-///
-/// # Returns
-/// File path on success, error message on failure
+/// Fetch a specific attachment from IMAP and save to disk. Returns file path.
 pub fn fetch_attachment_from_imap(
     account: &Account,
     folder_path: &str,

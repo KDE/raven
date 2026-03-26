@@ -1,15 +1,7 @@
 // Copyright 2025 Devin Lin <devin@kde.org>
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-//! Unified IMAP connection handling
-//!
-//! This module provides a single codepath for connecting to IMAP servers,
-//! supporting both SSL and STARTTLS connections, as well as Plain and OAuth2
-//! authentication methods.
-//!
-//! Two main functions are provided:
-//! - `connect_and_authenticate`: Low-level function that takes credentials directly
-//! - `connect_with_secrets`: High-level function that retrieves credentials from secret store
+//! IMAP connection and authentication (SSL/STARTTLS, Plain/OAuth2)
 
 use crate::secrets::{self, imap_password_key, oauth2_access_token_key, oauth2_refresh_token_key};
 use crate::models::{Account, AuthenticationType, ConnectionType};
@@ -31,16 +23,7 @@ impl imap::Authenticator for OAuth2Authenticator {
     }
 }
 
-/// Connect to an IMAP server and authenticate
-///
-/// # Arguments
-/// * `account` - Account with connection details
-/// * `password` - Plain password (for Plain auth) or None
-/// * `access_token` - OAuth2 access token (for OAuth2 auth) or None
-///
-/// # Returns
-/// * `Ok(ImapSession)` - Authenticated IMAP session
-/// * `Err(String)` - Error message if connection or authentication failed
+/// Connect to an IMAP server and authenticate with the given credentials
 pub fn connect_and_authenticate(
     account: &Account,
     password: Option<&str>,
@@ -100,19 +83,7 @@ pub fn connect_and_authenticate(
     }
 }
 
-/// Connect to an IMAP server, retrieving credentials from secret store
-///
-/// This is a higher-level function that:
-/// 1. Retrieves credentials from secret store based on authentication type
-/// 2. Refreshes OAuth2 tokens if needed
-/// 3. Connects and authenticates using `connect_and_authenticate`
-///
-/// # Arguments
-/// * `account` - Account with connection details
-///
-/// # Returns
-/// * `Ok(ImapSession)` - Authenticated IMAP session
-/// * `Err(String)` - Error message if connection or authentication failed
+/// Connect to IMAP, retrieving credentials from the secret store (refreshes OAuth2 if needed)
 pub fn connect_with_secrets(account: &Account) -> Result<ImapSession, String> {
     // Get credentials based on authentication type
     let (access_token, password) = match account.imap_authentication_type {

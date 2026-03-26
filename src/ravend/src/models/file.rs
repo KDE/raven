@@ -44,11 +44,6 @@ impl Attachment {
         }
     }
 
-    #[allow(dead_code)]
-    pub fn should_download_immediately(&self) -> bool {
-        self.size < IMMEDIATE_DOWNLOAD_THRESHOLD
-    }
-
     /// Returns filename for disk storage: {message_id}_{sanitized_filename}
     pub fn disk_filename(&self) -> String {
         let msg_id_safe = self.message_id.replace(":", "_").replace("/", "_");

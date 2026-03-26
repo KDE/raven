@@ -72,27 +72,15 @@ impl RavenDaemonDBus {
 
 #[interface(name = "org.kde.raven.daemon")]
 impl RavenDaemonDBus {
-    /// Signal emitted when a database table is changed
-    ///
-    /// # Arguments
-    /// * `table_name` - Name of the table that changed (folder, label, message, or account)
+    /// Signal: a database table changed
     #[zbus(signal)]
     async fn table_changed(signal_ctxt: &zbus::SignalContext<'_>, table_name: &str) -> Result<()>;
 
-    /// Signal emitted when specific messages are updated (for UI refresh after actions)
-    ///
-    /// # Arguments
-    /// * `message_ids` - List of message IDs that were updated
+    /// Signal: specific messages were updated
     #[zbus(signal)]
     async fn messages_changed(signal_ctxt: &zbus::SignalContext<'_>, message_ids: Vec<String>) -> Result<()>;
 
     /// Delete an account and all its associated data
-    ///
-    /// # Arguments
-    /// * `account_id` - The ID of the account to delete
-    ///
-    /// # Returns
-    /// * `true` if the account was deleted successfully, `false` otherwise
     async fn delete_account(&self, account_id: &str) -> bool {
         info!("D-Bus: deleteAccount called for account: {}", account_id);
 
@@ -131,33 +119,21 @@ impl RavenDaemonDBus {
         true
     }
 
-    /// Trigger a sync for a specific account
-    ///
-    /// # Arguments
-    /// * `account_id` - The ID of the account to sync (empty string for all accounts)
+    /// Trigger a sync for a specific account (empty string for all)
     async fn trigger_sync(&self, account_id: &str) -> bool {
         info!("D-Bus: triggerSync called for account: {}", account_id);
         self.notifier.notify_sync_trigger(account_id.to_string());
         true
     }
 
-    /// Reload the accounts list from filesystem
-    ///
-    /// This triggers the daemon to reload all account configurations from disk
-    /// and start/stop workers as needed.
+    /// Reload account configurations from disk and start/stop workers as needed
     async fn reload_accounts(&self) -> bool {
         info!("D-Bus: reloadAccounts called");
         self.notifier.notify_account_reload();
         true
     }
 
-    /// Get the file path for an attachment if it has been downloaded
-    ///
-    /// # Arguments
-    /// * `file_id` - The ID of the attachment file
-    ///
-    /// # Returns
-    /// * The full file path if the attachment is downloaded, empty string otherwise
+    /// Returns the file path for a downloaded attachment, or empty string if not downloaded
     async fn get_attachment_path(&self, file_id: &str) -> String {
         debug!("D-Bus: getAttachmentPath called for file: {}", file_id);
 
@@ -208,13 +184,7 @@ impl RavenDaemonDBus {
         }
     }
 
-    /// Get all attachments for a message as a JSON array
-    ///
-    /// # Arguments
-    /// * `message_id` - The ID of the message
-    ///
-    /// # Returns
-    /// * JSON array of attachment objects with fields: id, filename, contentType, size, isInline, downloaded
+    /// Returns all attachments for a message as a JSON array
     async fn get_message_attachments(&self, message_id: &str) -> String {
         debug!("D-Bus: getMessageAttachments called for message: {}", message_id);
 
@@ -253,13 +223,7 @@ impl RavenDaemonDBus {
         serde_json::to_string(&json_array).unwrap_or_else(|_| "[]".to_string())
     }
 
-    /// Fetch an attachment from the server and save it to disk
-    ///
-    /// # Arguments
-    /// * `file_id` - The ID of the attachment file to fetch
-    ///
-    /// # Returns
-    /// * The full file path if successful, empty string on error
+    /// Fetch an attachment from IMAP and save it to disk. Returns file path or empty string on error.
     async fn fetch_attachment(&self, file_id: &str) -> String {
         info!("D-Bus: fetchAttachment called for file: {}", file_id);
 
@@ -368,13 +332,7 @@ impl RavenDaemonDBus {
     // Message Action Methods
     // ========================================================================
 
-    /// Mark messages as read
-    ///
-    /// # Arguments
-    /// * `message_ids` - List of message IDs to mark as read
-    ///
-    /// # Returns
-    /// * JSON string containing ActionResult with succeeded and failed lists
+    /// Mark messages as read. Returns JSON ActionResult.
     #[zbus(name = "MarkAsRead")]
     async fn mark_as_read(&self, message_ids: Vec<String>) -> String {
         info!("D-Bus: MarkAsRead called for {} messages", message_ids.len());
@@ -395,13 +353,7 @@ impl RavenDaemonDBus {
         result.to_json()
     }
 
-    /// Mark messages as unread
-    ///
-    /// # Arguments
-    /// * `message_ids` - List of message IDs to mark as unread
-    ///
-    /// # Returns
-    /// * JSON string containing ActionResult with succeeded and failed lists
+    /// Mark messages as unread. Returns JSON ActionResult.
     #[zbus(name = "MarkAsUnread")]
     async fn mark_as_unread(&self, message_ids: Vec<String>) -> String {
         info!("D-Bus: MarkAsUnread called for {} messages", message_ids.len());
@@ -422,14 +374,7 @@ impl RavenDaemonDBus {
         result.to_json()
     }
 
-    /// Set or unset the flagged (starred) status of messages
-    ///
-    /// # Arguments
-    /// * `message_ids` - List of message IDs to update
-    /// * `flagged` - true to flag, false to unflag
-    ///
-    /// # Returns
-    /// * JSON string containing ActionResult with succeeded and failed lists
+    /// Set or unset the flagged (starred) status. Returns JSON ActionResult.
     #[zbus(name = "SetFlagged")]
     async fn set_flagged(&self, message_ids: Vec<String>, flagged: bool) -> String {
         info!("D-Bus: SetFlagged({}) called for {} messages", flagged, message_ids.len());
@@ -451,13 +396,7 @@ impl RavenDaemonDBus {
         result.to_json()
     }
 
-    /// Move messages to trash
-    ///
-    /// # Arguments
-    /// * `message_ids` - List of message IDs to move to trash
-    ///
-    /// # Returns
-    /// * JSON string containing ActionResult with succeeded and failed lists
+    /// Move messages to trash. Returns JSON ActionResult.
     #[zbus(name = "MoveToTrash")]
     async fn move_to_trash(&self, message_ids: Vec<String>) -> String {
         info!("D-Bus: MoveToTrash called for {} messages", message_ids.len());
@@ -482,40 +421,21 @@ impl RavenDaemonDBus {
     // Password/Secret Storage Methods
     // ========================================================================
 
-    /// Read a password from the secure credential store
-    ///
-    /// # Arguments
-    /// * `key` - The key identifying the credential
-    ///
-    /// # Returns
-    /// * The password if found, empty string otherwise
+    /// Read a password from the credential store. Returns empty string if not found.
     #[zbus(name = "ReadPassword")]
     async fn read_password(&self, key: &str) -> String {
         debug!("D-Bus: ReadPassword called for key: {}", key);
         secrets::read_password(key).unwrap_or_default()
     }
 
-    /// Write a password to the secure credential store
-    ///
-    /// # Arguments
-    /// * `key` - The key identifying the credential
-    /// * `password` - The password to store
-    ///
-    /// # Returns
-    /// * `true` if the password was stored successfully, `false` otherwise
+    /// Write a password to the credential store
     #[zbus(name = "WritePassword")]
     async fn write_password(&self, key: &str, password: &str) -> bool {
         debug!("D-Bus: WritePassword called for key: {}", key);
         secrets::write_password(key, password)
     }
 
-    /// Delete a password from the secure credential store
-    ///
-    /// # Arguments
-    /// * `key` - The key identifying the credential to delete
-    ///
-    /// # Returns
-    /// * `true` if the password was deleted (or didn't exist), `false` on error
+    /// Delete a password from the credential store
     #[zbus(name = "DeletePassword")]
     async fn delete_password(&self, key: &str) -> bool {
         debug!("D-Bus: DeletePassword called for key: {}", key);
@@ -523,8 +443,7 @@ impl RavenDaemonDBus {
     }
 }
 
-/// D-Bus notifier for database changes
-/// Uses a channel to send notifications from worker threads to the async D-Bus task
+/// Sends database change notifications from worker threads to the D-Bus event loop
 #[derive(Clone)]
 pub struct DBusNotifier {
     sender: mpsc::UnboundedSender<NotificationEvent>,
@@ -612,13 +531,7 @@ impl From<zbus::Error> for DbusInitError {
     }
 }
 
-/// Initialize D-Bus and run the notification loop
-/// This should be spawned as an async task on the Tokio runtime
-/// Returns a receiver that gets AccountReload events
-///
-/// # Arguments
-/// * `init_tx` - Oneshot sender to signal initialization result (Ok or error)
-/// * `sync_trigger_tx` - Channel to send sync trigger requests (account_id)
+/// Initialize D-Bus interface and run the notification event loop
 pub async fn run_dbus_service(
     mut receiver: mpsc::UnboundedReceiver<NotificationEvent>,
     db: Arc<Mutex<Database>>,
