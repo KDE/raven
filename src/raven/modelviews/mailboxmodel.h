@@ -54,6 +54,9 @@ public:
 
     void load();
 
+    /// Returns the first inbox folder, or nullptr if none exists.
+    Folder *findInboxFolder() const;
+
     Q_INVOKABLE void toggleCollapse(int rowIndex);
 
     int rowCount(const QModelIndex &parent) const override;

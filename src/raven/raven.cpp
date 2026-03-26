@@ -39,6 +39,13 @@ Raven::Raven(QObject *parent)
 
     // Load initial data
     MailBoxModel::self()->load();
+
+    // Auto-select inbox on startup
+    Folder *inbox = MailBoxModel::self()->findInboxFolder();
+    if (inbox) {
+        setSelectedFolderName(QStringLiteral("Inbox"));
+        MailListModel::self()->loadFolder(inbox);
+    }
 }
 
 Raven *Raven::instance()

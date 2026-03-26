@@ -167,6 +167,16 @@ void MailBoxModel::load()
     endResetModel();
 }
 
+Folder *MailBoxModel::findInboxFolder() const
+{
+    for (const auto &entry : m_mailBoxes) {
+        if (entry.folder && entry.folder->role() == QStringLiteral("inbox")) {
+            return entry.folder;
+        }
+    }
+    return nullptr;
+}
+
 void MailBoxModel::toggleCollapse(int rowIndex)
 {
     if (rowIndex >= m_mailBoxes.count() || rowIndex < 0) {
