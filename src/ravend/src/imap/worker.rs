@@ -895,8 +895,8 @@ impl ImapWorker {
             // Convert ParsedAttachment to Attachment for database storage
             let mut attachment = parsed.to_attachment(&self.account.id, message_id);
 
-            // Skip saving inline attachments for spam folders
-            let should_save = if is_spam_folder || attachment.is_inline {
+            // Skip inline attachments in spam folders (security measure)
+            let should_save = if is_spam_folder && attachment.is_inline {
                 debug!(
                     "[{}] Skipping inline attachment '{}' in spam folder",
                     self.account.email, attachment.filename
