@@ -70,7 +70,13 @@ Kirigami.GlobalDrawer {
             contentWidth: availableWidth
             clip: true
 
-            contentItem: MailBoxList {}
+            contentItem: MailBoxList {
+                onFolderChosen: {
+                    if (root.modal) {
+                        root.close();
+                    }
+                }
+            }
         }
     }
 }
