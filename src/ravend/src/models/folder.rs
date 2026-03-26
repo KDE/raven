@@ -24,22 +24,24 @@ impl Default for FolderRole {
     }
 }
 
-impl FolderRole {
-    pub fn to_string(&self) -> String {
+impl std::fmt::Display for FolderRole {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Inbox => "inbox".to_string(),
-            Self::Sent => "sent".to_string(),
-            Self::Drafts => "drafts".to_string(),
-            Self::Trash => "trash".to_string(),
-            Self::Spam => "spam".to_string(),
-            Self::Archive => "archive".to_string(),
-            Self::All => "all".to_string(),
-            Self::Starred => "starred".to_string(),
-            Self::Important => "important".to_string(),
-            Self::Custom(name) => name.clone(),
+            Self::Inbox => write!(f, "inbox"),
+            Self::Sent => write!(f, "sent"),
+            Self::Drafts => write!(f, "drafts"),
+            Self::Trash => write!(f, "trash"),
+            Self::Spam => write!(f, "spam"),
+            Self::Archive => write!(f, "archive"),
+            Self::All => write!(f, "all"),
+            Self::Starred => write!(f, "starred"),
+            Self::Important => write!(f, "important"),
+            Self::Custom(name) => write!(f, "{}", name),
         }
     }
+}
 
+impl FolderRole {
     /// Detect folder role from IMAP path (handles Gmail, common names, and localized variants)
     pub fn detect_from_path(path: &str) -> Self {
         let lower_path = path.to_lowercase();
