@@ -262,9 +262,10 @@ pub fn move_to_trash(
 
     // Get message info from database and group by account
     // Also get trash folder info for each account
-    let (messages_by_account, trash_folders): (
+    let (messages_by_account, trash_folders, mut result): (
         HashMap<String, Vec<db::MessageActionInfo>>,
         HashMap<String, (String, String)>,  // account_id -> (trash_folder_id, trash_folder_path)
+        ActionResult,
     ) = {
         let db_guard = match db.lock() {
             Ok(db) => db,
@@ -279,6 +280,7 @@ pub fn move_to_trash(
 
         let mut grouped: HashMap<String, Vec<db::MessageActionInfo>> = HashMap::new();
         let mut trash_map: HashMap<String, (String, String)> = HashMap::new();
+        let mut early_failures = ActionResult::new();
 
         for id in message_ids {
             match db::get_message_info_by_id(db_guard.conn(), id) {
@@ -292,20 +294,18 @@ pub fn move_to_trash(
                     grouped.entry(info.account_id.clone()).or_default().push(info);
                 }
                 Ok(None) => {
-                    // Message not found - will be handled later
+                    early_failures.add_failure(id.clone(), "Message not found".to_string());
                 }
-                Err(_) => {
-                    // Database error - will be handled later
+                Err(e) => {
+                    early_failures.add_failure(id.clone(), format!("Database error: {}", e));
                 }
             }
         }
-        (grouped, trash_map)
+        (grouped, trash_map, early_failures)
     };
 
     // Get accounts from cached list
     let accounts = AccountManager::global().accounts();
-
-    let mut result = ActionResult::new();
 
     // Process each account
     for (account_id, messages) in messages_by_account {
