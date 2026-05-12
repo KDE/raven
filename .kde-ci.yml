@@ -16,4 +16,4 @@ Dependencies:
     'libraries/kirigami-addons': '@latest'
 
 Options:
-  require-passing-tests-on: ['Linux', 'FreeBSD', 'Windows']
+ require-passing-tests-on: ['@all']
