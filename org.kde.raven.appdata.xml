@@ -35,6 +35,7 @@
   <name xml:lang="sl">Mail</name>
   <name xml:lang="sv">E-post</name>
   <name xml:lang="tr">Posta</name>
+  <name xml:lang="ug">خەت</name>
   <name xml:lang="uk">Пошта</name>
   <name xml:lang="zh-TW">郵件</name>
   <summary>Send and receive email</summary>
@@ -67,6 +68,7 @@
   <summary xml:lang="sl">Pošiljaj in sprejemaj pošto</summary>
   <summary xml:lang="sv">Skicka och ta emot e-post</summary>
   <summary xml:lang="tr">E-posta gönderin ve alın</summary>
+  <summary xml:lang="ug">ئېلخەت يوللاپ ۋە قوبۇللايدۇ</summary>
   <summary xml:lang="uk">Надсилання та одержання пошти</summary>
   <summary xml:lang="zh-TW">傳送和接收文字電子郵件</summary>
   <metadata_license>CC0-1.0</metadata_license>
@@ -105,6 +107,7 @@
     <p xml:lang="sl">Odjemalec e-pošte na osnovi Akonadi.</p>
     <p xml:lang="sv">En e-postklient för Plasma, baserad på Akonadi.</p>
     <p xml:lang="tr">Akonadi tabanlı, Plasma için bir e-posta istemcisi.</p>
+    <p xml:lang="ug">Akonadi ئاساسىدىكى Plasma ئېلخەت خېرىدارى.</p>
     <p xml:lang="uk">Клієнт електронної пошти для Плазми, засновано на Akonadi.</p>
     <p xml:lang="zh-TW">一個 Plasma 用的電子郵件用戶端，基於 Akonadi。</p>
   </description>
