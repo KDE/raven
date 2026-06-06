@@ -51,7 +51,7 @@ Kirigami.ScrollablePage {
         Kirigami.PlaceholderMessage {
             anchors.centerIn: parent
             visible: mails.count === 0 && !mailboxSelected.visible
-            text: i18n("Mailbox is empty")
+            text: i18n("%1 is empty", Raven.selectedFolderName)
             icon.name: "mail-folder-inbox"
         }
 
