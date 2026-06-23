@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "mailboxmodel.h"
-#include "constants.h"
 #include "accountmodel.h"
-#include "utils.h"
+#include "constants.h"
 #include "dbmanager.h"
+#include "maillistmodel.h"
+#include "utils.h"
 
 #include <QDebug>
 #include <QSqlError>
@@ -138,6 +139,7 @@ QList<MailBoxEntry> MailBoxModel::initMailBoxes(const QList<Folder *> &folders)
 
     // third step: flatten tree into list
     QList<MailBoxEntry> list;
+
     flattenMailBoxTree(root, list);
 
     return list;
@@ -147,6 +149,15 @@ void MailBoxModel::load()
 {
     beginResetModel();
     qDebug() << "MailBoxModel::load() - reloading";
+
+    QString currentRole;
+    
+    if (MailListModel::self()) {
+        auto folder = MailListModel::self()->currentFolder();
+        if(folder) {
+            currentRole = folder->role();
+        }
+    }
 
     for (auto mailbox : m_mailBoxes) {
         if (mailbox.folder) {
@@ -164,7 +175,25 @@ void MailBoxModel::load()
     QList<Folder *> folders = Folder::fetchAll(m_db, this);
     m_mailBoxes = initMailBoxes(folders);
 
+
+    if(!currentRole.isEmpty()) {
+        Folder *currentFolder = findFolderByRole(currentRole);
+        if (currentFolder) {
+            MailListModel::self()->loadFolder(currentFolder);
+        }
+    }
+    
     endResetModel();
+}
+
+Folder *MailBoxModel::findFolderByRole(QString role) const
+{
+    for (const auto &entry : m_mailBoxes) {
+        if (entry.folder && entry.folder->role() == role) {
+            return entry.folder;
+        }
+    }
+    return nullptr;
 }
 
 Folder *MailBoxModel::findInboxFolder() const
@@ -192,7 +221,7 @@ void MailBoxModel::toggleCollapse(int rowIndex)
     }
 
     Q_EMIT dataChanged(index(rowIndex), index(rowIndex), {IsCollapsedRole});
-    Q_EMIT dataChanged(index(rowIndex), index(i-1), {VisibleRole});
+    Q_EMIT dataChanged(index(rowIndex), index(i - 1), {VisibleRole});
 }
 
 int MailBoxModel::rowCount(const QModelIndex &parent) const
@@ -209,18 +238,18 @@ QVariant MailBoxModel::data(const QModelIndex &index, int role) const
     }
 
     switch (role) {
-        case FolderRole:
-            return QVariant::fromValue(m_mailBoxes[index.row()].folder);
-        case NameRole:
-            return m_mailBoxes[index.row()].name;
-        case LevelRole:
-            return m_mailBoxes[index.row()].level;
-        case IsCollapsibleRole:
-            return m_mailBoxes[index.row()].isCollapsible;
-        case IsCollapsedRole:
-            return m_mailBoxes[index.row()].isCollapsed;
-        case VisibleRole:
-            return m_mailBoxes[index.row()].visible;
+    case FolderRole:
+        return QVariant::fromValue(m_mailBoxes[index.row()].folder);
+    case NameRole:
+        return m_mailBoxes[index.row()].name;
+    case LevelRole:
+        return m_mailBoxes[index.row()].level;
+    case IsCollapsibleRole:
+        return m_mailBoxes[index.row()].isCollapsible;
+    case IsCollapsedRole:
+        return m_mailBoxes[index.row()].isCollapsed;
+    case VisibleRole:
+        return m_mailBoxes[index.row()].visible;
     }
     return {};
 }
@@ -233,5 +262,10 @@ Qt::ItemFlags MailBoxModel::flags(const QModelIndex &index) const
 
 QHash<int, QByteArray> MailBoxModel::roleNames() const
 {
-    return {{NameRole, "name"}, {FolderRole, "folder"}, {LevelRole, "level"}, {IsCollapsibleRole, "isCollapsible"}, {IsCollapsedRole, "isCollapsed"}, {VisibleRole, "visible"}};
+    return {{NameRole, "name"},
+            {FolderRole, "folder"},
+            {LevelRole, "level"},
+            {IsCollapsibleRole, "isCollapsible"},
+            {IsCollapsedRole, "isCollapsed"},
+            {VisibleRole, "visible"}};
 }
