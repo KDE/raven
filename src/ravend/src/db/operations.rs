@@ -72,6 +72,15 @@ pub fn get_folder_by_id(conn: &Connection, folder_id: &str) -> Result<Option<Fol
     .with_context(|| format!("Failed to query folder '{}'", folder_id))
 }
 
+pub fn get_folders_ids(conn: &Connection) -> Result<Vec<String>> {
+    let mut stmt = conn.prepare(
+        "SELECT id FROM folder"
+    )?;
+
+    let ids = stmt.query_map([], |row| row.get(0))?.collect::<std::result::Result<Vec<_>, _>>()?;
+    return Ok(ids);
+}
+
 pub fn update_folder_sync_state(
     conn: &Connection,
     folder_id: &str,
@@ -185,6 +194,14 @@ pub fn delete_message_by_uid(conn: &Connection, account_id: &str, folder_id: &st
         return Ok(true);
     }
     Ok(false)
+}
+
+pub fn delete_folder_by_uid(conn: &Connection, folder_id: &str) -> Result<bool> {
+    
+    conn.execute("DELETE FROM folder WHERE id = ?1", [&folder_id])?;
+    conn.execute("DELETE FROM thread_folder WHERE folderId = ?1", [&folder_id])?;
+    return Ok(true);
+
 }
 
 pub fn get_folder_message_uids(conn: &Connection, account_id: &str, folder_id: &str) -> Result<Vec<u32>> {

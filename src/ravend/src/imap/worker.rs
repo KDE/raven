@@ -349,6 +349,8 @@ impl ImapWorker {
             .map_err(|e| anyhow::anyhow!("Failed to acquire database lock: {}", e))?;
         let mut folders = Vec::new();
 
+        let folders_ids = db::get_folders_ids(db.conn())?;
+
         for mailbox in mailboxes.iter() {
             let path = mailbox.name().to_string();
             let id = format!("{}:{}", self.account.id, path);
@@ -360,6 +362,17 @@ impl ImapWorker {
             }
 
             folders.push(folder);
+        }
+
+        for existing_folder_id in folders_ids.iter() {
+            if !folders.iter().any(|i| &i.id == existing_folder_id) {
+                if !db::delete_folder_by_uid(db.conn(), existing_folder_id)? {
+                    error!("Failed to delete folder: {}", existing_folder_id);
+                }
+                else {
+                    info!("Folder with id: {} is deleted", existing_folder_id);
+                }
+            }
         }
 
         drop(db);
