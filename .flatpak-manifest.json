@@ -43,6 +43,9 @@
         "/lib/*/include",
         "/share/cmake"
     ],
+    "cleanup-commands": [
+        "/app/cleanup-BaseApp.sh"
+    ],
     "modules": [
         "flatpak/corrosion.json",
         {
