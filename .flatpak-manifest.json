@@ -43,7 +43,6 @@
         "/lib/*/include",
         "/share/cmake"
     ],
-
     "modules": [
         "flatpak/corrosion.json",
         {
@@ -66,7 +65,6 @@
                 },
                 "flatpak/generated-sources.json"
             ]
-
         }
     ]
 }
