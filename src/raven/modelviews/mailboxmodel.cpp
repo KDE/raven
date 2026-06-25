@@ -150,12 +150,12 @@ void MailBoxModel::load()
     beginResetModel();
     qDebug() << "MailBoxModel::load() - reloading";
 
-    QString currentRole;
+    QString currentFolderId;
     
     if (MailListModel::self()) {
         auto folder = MailListModel::self()->currentFolder();
         if(folder) {
-            currentRole = folder->role();
+            currentFolderId = folder->id();
         }
     }
 
@@ -175,21 +175,26 @@ void MailBoxModel::load()
     QList<Folder *> folders = Folder::fetchAll(m_db, this);
     m_mailBoxes = initMailBoxes(folders);
 
+    if(!currentFolderId.isEmpty()) {
+        Folder *currentFolder = findFolderById(currentFolderId);
 
-    if(!currentRole.isEmpty()) {
-        Folder *currentFolder = findFolderByRole(currentRole);
         if (currentFolder) {
             MailListModel::self()->loadFolder(currentFolder);
         }
+        else {
+            Folder *inbox = findInboxFolder();
+            if(inbox) {
+                MailListModel::self()->loadFolder(inbox);
+            }
+        }
     }
-    
     endResetModel();
 }
 
-Folder *MailBoxModel::findFolderByRole(QString role) const
+Folder *MailBoxModel::findFolderById(QString id) const
 {
     for (const auto &entry : m_mailBoxes) {
-        if (entry.folder && entry.folder->role() == role) {
+        if (entry.folder && entry.folder->id() == id) {
             return entry.folder;
         }
     }

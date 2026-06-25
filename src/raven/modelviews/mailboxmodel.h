@@ -56,7 +56,7 @@ public:
 
     /// Returns the first inbox folder, or nullptr if none exists.
     Folder *findInboxFolder() const;
-    Folder *findFolderByRole(QString role) const;
+    Folder *findFolderById(QString id) const;
 
     Q_INVOKABLE void toggleCollapse(int rowIndex);
 
