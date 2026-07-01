@@ -9,6 +9,7 @@
 
 #include <QHash>
 #include <QMap>
+#include <KLocalizedString>
 
 static const QString MESSAGE_TABLE = QStringLiteral("message");
 static const QString THREAD_TABLE = QStringLiteral("thread");
@@ -87,3 +88,6 @@ static QMap<std::string, std::string> COMMON_FOLDER_NAMES = {
     {"draftbox", "drafts"},
     {"robocze", "drafts"},
 };
+
+static const QString EMPTY_MESSAGE_TEXT = i18n("This email has no content.");
+static const QString EMPTY_BODY_MESSAGE = QStringLiteral("<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><style>*{box-sizing:border-box;}body{margin-top:auto;height:auto;min-height:100vh;display:flex;justify-content:center;align-items:center;font-family:Arial,sans-serif;}.centered-text{color:#d3d3d3;text-align:center;user-select:none;}</style></head><body><div class=\"centered-text\">") + EMPTY_MESSAGE_TEXT + QStringLiteral("</div></body></html>");

@@ -22,6 +22,8 @@
 #include <QStandardPaths>
 #include <QUrl>
 #include <QWindow>
+#include <QTextDocument>
+#include <QRegularExpression>
 
 ThreadViewBridge::ThreadViewBridge(QObject *parent)
     : QObject(parent)
@@ -73,7 +75,18 @@ void ThreadViewBridge::loadThread(const QString &threadId, const QString &accoun
 
     for (const auto &mwb : messagesWithBody) {
         m_messages.append(mwb.message);
-        m_messageContents.append(mwb.bodyContent);
+        
+        QTextDocument msgBody;
+        msgBody.setHtml(mwb.bodyContent);
+
+        bool isEmptyMessageBody = msgBody.toPlainText().remove(QRegularExpression(QStringLiteral("\\s+"))).isEmpty();
+
+        if(isEmptyMessageBody) {
+            m_messageContents.append(EMPTY_BODY_MESSAGE);
+        }
+        else {
+            m_messageContents.append(mwb.bodyContent);
+        }
     }
 
     Q_EMIT threadLoaded(getMessagesJson());
