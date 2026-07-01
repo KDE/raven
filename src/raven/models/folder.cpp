@@ -172,3 +172,9 @@ QJsonObject &Folder::localStatus()
 {
     return m_localStatus;
 }
+
+QString Folder::name() const
+{
+    int lastSlash = path().lastIndexOf(QStringLiteral("/"));
+    return path().mid(lastSlash + 1);
+}

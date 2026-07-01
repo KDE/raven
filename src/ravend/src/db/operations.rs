@@ -72,12 +72,12 @@ pub fn get_folder_by_id(conn: &Connection, folder_id: &str) -> Result<Option<Fol
     .with_context(|| format!("Failed to query folder '{}'", folder_id))
 }
 
-pub fn get_folders_ids(conn: &Connection) -> Result<Vec<String>> {
+pub fn get_folders_ids(conn: &Connection, account_id: &str) -> Result<Vec<String>> {
     let mut stmt = conn.prepare(
-        "SELECT id FROM folder"
+        "SELECT id FROM folder WHERE accountId = ?1"
     )?;
 
-    let ids = stmt.query_map([], |row| row.get(0))?.collect::<std::result::Result<Vec<_>, _>>()?;
+    let ids = stmt.query_map(params![account_id], |row| row.get(0))?.collect::<std::result::Result<Vec<_>, _>>()?;
     return Ok(ids);
 }
 

@@ -349,7 +349,7 @@ impl ImapWorker {
             .map_err(|e| anyhow::anyhow!("Failed to acquire database lock: {}", e))?;
         let mut folders = Vec::new();
 
-        let folders_ids = db::get_folders_ids(db.conn())?;
+        let folders_ids = db::get_folders_ids(db.conn(), &self.account.id)?;
 
         for mailbox in mailboxes.iter() {
             let path = mailbox.name().to_string();

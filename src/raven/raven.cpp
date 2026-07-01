@@ -27,7 +27,10 @@ Raven::Raven(QObject *parent)
     dbWatcher->initWatcher();
 
     // Connect DBWatcher signals to reload models
-    QObject::connect(dbWatcher, &DBWatcher::foldersChanged, MailBoxModel::self(), &MailBoxModel::load);
+    QObject::connect(dbWatcher, &DBWatcher::foldersChanged, MailBoxModel::self(), [this]() {
+        MailBoxModel::self()->load();
+        this->setSelectedFolderName(MailListModel::self()->currentFolder()->name());
+    });
 
     // Targeted updates for specific message changes (e.g., read/unread, starred)
     QObject::connect(dbWatcher, &DBWatcher::specificMessagesChanged, MailListModel::self(), &MailListModel::updateMessages);

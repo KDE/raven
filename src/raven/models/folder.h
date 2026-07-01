@@ -55,6 +55,8 @@ public:
 
     QJsonObject &localStatus();
 
+    QString name() const;
+
 Q_SIGNALS:
     void pathChanged();
     void roleChanged();
