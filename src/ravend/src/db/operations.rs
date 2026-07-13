@@ -200,6 +200,7 @@ pub fn delete_folder_by_uid(conn: &Connection, folder_id: &str) -> Result<bool> 
     
     conn.execute("DELETE FROM folder WHERE id = ?1", [&folder_id])?;
     conn.execute("DELETE FROM thread_folder WHERE folderId = ?1", [&folder_id])?;
+    conn.execute("DELETE FROM message WHERE folderId = ?1", [&folder_id])?;
     return Ok(true);
 
 }

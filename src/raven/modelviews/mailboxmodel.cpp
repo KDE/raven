@@ -180,12 +180,10 @@ void MailBoxModel::load()
 
         if (currentFolder) {
             MailListModel::self()->loadFolder(currentFolder);
-        }
-        else {
+        } else {
             Folder *inbox = findInboxFolder();
-            if(inbox) {
-                MailListModel::self()->loadFolder(inbox);
-            }
+
+            MailListModel::self()->loadFolder(inbox);
         }
     }
     endResetModel();

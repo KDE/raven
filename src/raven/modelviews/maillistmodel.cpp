@@ -233,6 +233,12 @@ void MailListModel::loadFolder(Folder *folder)
         return;
     }
 
+    if(!m_currentFolder) {
+        m_threads.clear();
+        endResetModel();
+        return;
+    }
+
     m_threads = Thread::fetchByFolder(m_db, folder->id(), folder->accountId(), this, 100);
 
     auto currentDate = QDateTime::currentDateTime();
