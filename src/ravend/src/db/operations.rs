@@ -196,13 +196,18 @@ pub fn delete_message_by_uid(conn: &Connection, account_id: &str, folder_id: &st
     Ok(false)
 }
 
-pub fn delete_folder_by_uid(conn: &Connection, folder_id: &str) -> Result<bool> {
-    
-    conn.execute("DELETE FROM folder WHERE id = ?1", [&folder_id])?;
-    conn.execute("DELETE FROM thread_folder WHERE folderId = ?1", [&folder_id])?;
-    conn.execute("DELETE FROM message WHERE folderId = ?1", [&folder_id])?;
-    return Ok(true);
+pub fn delete_folder_by_uid(conn: &mut Connection, folder_id: &str) -> Result<bool> {
+    let tx = conn.transaction()?;
 
+    tx.execute("DELETE FROM message_body WHERE id IN (SELECT id FROM message WHERE folderId = ?1)", [&folder_id])?;
+    tx.execute("DELETE FROM file WHERE messageId IN (SELECT id FROM message WHERE folderId = ?1)", [&folder_id])?;
+    tx.execute("DELETE FROM message WHERE folderId = ?1", [&folder_id])?;
+    tx.execute("DELETE FROM thread_folder WHERE folderId = ?1", [&folder_id])?;
+    let deleted = tx.execute("DELETE FROM folder WHERE id = ?1", [&folder_id])?;
+
+    tx.commit()?;
+
+    Ok(deleted > 0)
 }
 
 pub fn get_folder_message_uids(conn: &Connection, account_id: &str, folder_id: &str) -> Result<Vec<u32>> {

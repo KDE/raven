@@ -345,7 +345,7 @@ impl ImapWorker {
     fn sync_folders(&self, session: &mut ImapSession) -> Result<Vec<Folder>> {
         let mailboxes = session.list(Some(""), Some("*"))?;
 
-        let db = self.db.lock()
+        let mut db = self.db.lock()
             .map_err(|e| anyhow::anyhow!("Failed to acquire database lock: {}", e))?;
         let mut folders = Vec::new();
 
@@ -366,7 +366,7 @@ impl ImapWorker {
 
         for existing_folder_id in folders_ids.iter() {
             if !folders.iter().any(|i| &i.id == existing_folder_id) {
-                if !db::delete_folder_by_uid(db.conn(), existing_folder_id)? {
+                if !db::delete_folder_by_uid(db.conn_mut(), existing_folder_id)? {
                     error!("Failed to delete folder: {}", existing_folder_id);
                 }
                 else {
