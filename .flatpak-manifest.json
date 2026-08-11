@@ -6,7 +6,9 @@
     "base": "io.qt.qtwebengine.BaseApp",
     "base-version": "6.11",
     "command": "raven",
-    "tags": ["nightly"],
+    "tags": [
+        "nightly"
+    ],
     "desktop-file-name-suffix": " (Nightly)",
     "finish-args": [
         "--share=ipc",
@@ -52,7 +54,9 @@
             "name": "raven",
             "buildsystem": "cmake-ninja",
             "builddir": true,
-            "config-opts": [ "" ],
+            "config-opts": [
+                ""
+            ],
             "build-options": {
                 "env": {
                     "CARGO_HOME": "/run/build/raven/cargo"
