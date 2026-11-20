@@ -35,6 +35,10 @@
   <name xml:lang="ru">Почта</name>
   <name xml:lang="sk">Pošta</name>
   <name xml:lang="sl">Mail</name>
+  <name xml:lang="sr">Пошта</name>
+  <name xml:lang="sr-Latn">Pošta</name>
+  <name xml:lang="sr-ijekavian">Пошта</name>
+  <name xml:lang="sr-ijekavianlatin">Pošta</name>
   <name xml:lang="sv">E-post</name>
   <name xml:lang="tr">Posta</name>
   <name xml:lang="ug">خەت</name>
@@ -70,6 +74,10 @@
   <summary xml:lang="ru">Отправка и получение электронной почты</summary>
   <summary xml:lang="sk">Prijať a odoslať mail</summary>
   <summary xml:lang="sl">Pošiljaj in sprejemaj pošto</summary>
+  <summary xml:lang="sr">Шаљите и примајте е‑пошту</summary>
+  <summary xml:lang="sr-Latn">Šaljite i primajte e‑poštu</summary>
+  <summary xml:lang="sr-ijekavian">Шаљите и примајте е‑пошту</summary>
+  <summary xml:lang="sr-ijekavianlatin">Šaljite i primajte e‑poštu</summary>
   <summary xml:lang="sv">Skicka och ta emot e-post</summary>
   <summary xml:lang="tr">E-posta gönderin ve alın</summary>
   <summary xml:lang="ug">ئېلخەت يوللاپ ۋە قوبۇللايدۇ</summary>
@@ -111,6 +119,10 @@
     <p xml:lang="ru">Почтовый клиент для Plasma на основе Akonadi.</p>
     <p xml:lang="sk">E-mailový klient pre Plasmu, založený na Akonadi.</p>
     <p xml:lang="sl">Odjemalec e-pošte na osnovi Akonadi.</p>
+    <p xml:lang="sr">Клијент е‑поште за Плазму, заснован на Аконадију.</p>
+    <p xml:lang="sr-Latn">Klijent e‑pošte za Plasmu, zasnovan na Akonadiju.</p>
+    <p xml:lang="sr-ijekavian">Клијент е‑поште за Плазму, заснован на Аконадију.</p>
+    <p xml:lang="sr-ijekavianlatin">Klijent e‑pošte za Plasmu, zasnovan na Akonadiju.</p>
     <p xml:lang="sv">En e-postklient för Plasma, baserad på Akonadi.</p>
     <p xml:lang="tr">Akonadi tabanlı, Plasma için bir e-posta istemcisi.</p>
     <p xml:lang="ug">Akonadi ئاساسىدىكى Plasma ئېلخەت خېرىدارى.</p>
